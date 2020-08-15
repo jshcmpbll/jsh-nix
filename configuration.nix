@@ -6,39 +6,41 @@
 
 {
   imports =
-    [ # Include the results of the hardware scan.
+    [ 
       ./hardware-configuration.nix
     ];
 
-  # Use the systemd-boot EFI boot loader.
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
+  boot = {
+    loader = {
+      systemd-boot.enable = true;
+      efi.canTouchEfiVariables = true;
+      grub = {
+        enable = true;
+        version = 2;
+        devices = [ "nodev" ];
+        useOSProber = true;
+	efiSupport = true;
+#	extraEntries = ''
+#          menuentry "Windows 10" {
+#            search --fs-uuid --no-floppy --set=root --fs-uuid 618c166c-f279-499f-a7f1-72e04d376689
+#            chainloader (hd5,1)/EFI/Microsoft/Boot/bootmgfw.efi
+#          }
+#        '';
+      };
+    };
+    supportedFilesystems = [ "zfs" ];
+  };
 
-  # networking.hostName = "nixos"; # Define your hostname.
+  networking = {
+    hostName = "jsh-server";
+    hostId = "a6bbe9e1";
+    useDHCP = false;
+    interfaces.enp4s0.useDHCP = true;
+  };
+
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
-  # The global useDHCP flag is deprecated, therefore explicitly set to false here.
-  # Per-interface useDHCP will be mandatory in the future, so this generated config
-  # replicates the default behaviour.
-  networking.useDHCP = false;
-  networking.interfaces.enp0s20u1.useDHCP = true;
-
-  # Configure network proxy if necessary
-  # networking.proxy.default = "http://user:password@proxy:port/";
-  # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
-
-  # Select internationalisation properties.
-  # i18n.defaultLocale = "en_US.UTF-8";
-  # console = {
-  #   font = "Lat2-Terminus16";
-  #   keyMap = "us";
-  # };
-
-  # Set your time zone.
-  # time.timeZone = "Europe/Amsterdam";
-
-  # List packages installed in system profile. To search, run:
-  # $ nix search wget
+  time.timeZone = "America/LosAngeles";
   
   nixpkgs.config.allowUnfree = true;
   environment.systemPackages = with pkgs; [
@@ -57,7 +59,7 @@
     zsh
     neofetch
     htop
-    gtk+3
+    gtk3
     lightdm
     lightdm_gtk_greeter
     git
@@ -73,7 +75,7 @@
     ncat
     python38Packages.grip
     zathura
-    linuxPackages.zfs
+    zfs
     zoom-us
     tree
     feh
@@ -91,14 +93,25 @@
     hddtemp
     google-cloud-sdk
     _1password
+    tmux
+    pavucontrol
+    xclip
+    os-prober
+    woeusb
+    cudatoolkit
+    x11vnc
+    glxinfo
+    youtube-dl
   ];
 
   environment.variables.EDITOR = "urxvt";
-
   # List services that you want to enable:
 
   # Enable the OpenSSH daemon.
-  services.openssh.enable = true;
+  services = {
+    openssh.enable = true;
+    # x11vnc.enable= true;
+  };
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
@@ -106,14 +119,14 @@
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;
 
-  # Enable CUPS to print documents.
-  # services.printing.enable = true;
 
   # Enable sound.
   sound.enable = true;
   hardware.pulseaudio.enable = true;
+  hardware.bluetooth.enable = true;
+  hardware.bluetooth.powerOnBoot = true;
 
-  # Enable the X11 windowing system.
+  # Enable the X11 windowing system and i3 gaps
   services.xserver = {
     enable = true;
     autorun = true;
@@ -126,8 +139,10 @@
       package = pkgs.i3-gaps;
     };
     layout = "us";
+    videoDrivers = [ "nvidia" ];
   };
 
+  hardware.opengl.driSupport32Bit = true;
 
   programs  = {
     zsh = {
@@ -140,14 +155,24 @@
       '';
 
       promptInit = ""; # Clear this to avoid a conflict with oh-my-zsh
+
+      ohMyZsh = {
+        enable = true;
+        plugins = ["git" "python" "man"];
+        theme = "/home/jsh/.dotfiles/jcampbell.zsh-theme";
+      };
     };
   };
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
-  # users.users.jane = {
-  #   isNormalUser = true;
-  #   extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
-  # };
+  users.users.jsh = {
+    isNormalUser = true;
+    extraGroups = [ "wheel" "sudo"]; # Enable ‘sudo’ for the user.
+  };
+
+  security.sudo.configFile = ''
+    jsh ALL=(ALL) NOPASSWD:ALL
+  '';
 
   # Read docs before changing -> (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "20.03"; # Did you read the comment?
