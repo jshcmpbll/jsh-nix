@@ -10,6 +10,8 @@
       ./hardware-configuration.nix
     ];
 
+  hardware.enableAllFirmware = true;
+
   boot = {
     loader = {
       systemd-boot.enable = true;
@@ -39,6 +41,11 @@
   };
 
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
+  ## Uncomment for wireless macbook
+  # networking.networkmanager.enable = false;
+  # networking.wireless.enable = true;
+
+  services.xserver.xkbOptions = "ctrl:swapcaps";
 
   time.timeZone = "America/LosAngeles";
   
