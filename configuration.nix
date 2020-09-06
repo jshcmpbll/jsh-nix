@@ -114,6 +114,7 @@ in
     youtube-dl
     unrar
     lsof
+    yubikey-manager
   ];
 
   environment.variables.EDITOR = "urxvt";
@@ -197,6 +198,59 @@ fi
 };
   
   
+### i3 status
+
+      configFile.i3status = {
+        target = "i3status.conf";
+        text = ''
+# i3status configuration file.
+# see "man i3status" for documentation.
+
+# It is important that this file is edited as UTF-8.
+# The following line should contain a sharp s:
+# ß
+# If the above line is not correctly displayed, fix your editor first!
+
+general {
+        colors = true
+        interval = 5
+        color_good = "#ffffff"
+        color_bad = "#586E75"
+        color_degraded = "#DC322F"
+}
+
+order += "cpu_usage"
+order += "disk /"
+order += "ethernet _first_"
+order += "memory"
+order += "tztime local"
+
+cpu_usage {
+        format = "   CPU %usage   "
+}
+
+disk "/" {
+        format = "   %avail   "
+        #format = "   ⛁ %avail   "
+}
+
+ethernet _first_ {
+        format_up = "   %ip   "
+        format_down = "   no lan   "
+}
+
+memory {
+        format = "   %used/%available   "
+        #threshold_degraded = "1G"
+        format_degraded = "MEMORY < %available"
+}
+
+tztime local {
+        format = "   %Y  %m  %d  %H:%M:%S   "
+        #format = " %d.%m. %H:%M "
+}
+'';
+};
 
 ### Xresources config
 
@@ -801,8 +855,8 @@ bindsym $mod+Return exec urxvt -e tmux
 
 # screenshot
 
-bindsym $mod+Shift+p exec i3-scrot -w
-bindsym $mod+p exec i3-scrot -d
+bindsym $mod+Shift+p exec scrot --focused
+bindsym $mod+p exec scrot
 
 # kill focused window
 bindsym $mod+q kill 
@@ -955,7 +1009,7 @@ bar {
       active_workspace #333333 #5f676a
 
   }
-        status_command i3status -c ~/.config/i3status/.i3status.conf
+        status_command i3status -c ~/.config/i3status.conf
         position top
         mode hide 
 
