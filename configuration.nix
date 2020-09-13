@@ -1,7 +1,3 @@
-# Edit this configuration file to define what should be installed on
-# your system.  Help is available in the configuration.nix(5) man page
-# and in the NixOS manual (accessible by running ‘nixos-help’).
-
 { config, pkgs, ... }:
 let
   home-manager = builtins.fetchGit {
@@ -49,7 +45,7 @@ in
 
   services.udev.packages = [ pkgs.libu2f-host ];
 
-  time.timeZone = "America/LosAngeles";
+  time.timeZone = "America/Los_Angeles";
   
   nixpkgs.config.allowUnfree = true;
   environment.systemPackages = with pkgs; [
@@ -96,7 +92,7 @@ in
     screen
     rsync
     restic
-    polybar 
+    polybarFull 
     ncurses
     ncdu
     jq
@@ -115,6 +111,13 @@ in
     unrar
     lsof
     yubikey-manager
+    digikam
+    restic
+    polybar
+    dolphin
+    sxiv
+    mpv
+    picom
   ];
 
   environment.variables.EDITOR = "urxvt";
@@ -123,6 +126,7 @@ in
   # Enable the OpenSSH daemon.
   services = {
     openssh.enable = true;
+    pcscd.enable = true;
     ##x11vnc.enable= true;
   };
 
@@ -172,6 +176,90 @@ in
 
     xdg = {
       enable = true;
+
+### alias
+
+      configFile.alias = {
+        target = "../.alias";
+        text = ''
+alias x="exit"
+alias celar="clear"
+alias c="clear"
+alias tf="terraform"
+alias kubeclt="kubectl"
+
+'';
+};
+
+### bash profile
+
+      configFile.bashprofile = {
+        target = "../.bashprofile";
+        text = ''
+parse_git_branch() {
+       git branch 2> /dev/null | sed -e \'/^[^*]/d\' -e \'s/* \(.*\)/(\1)/\'
+}
+export PS1=\"\w \"
+export CLICOLOR=1
+export export LSCOLORS=gxBxhxDxfxhxhxhxhxcxcx 
+source ~/.alias
+'';
+};
+
+### vimrc
+
+      configFile.vimrc = {
+        target = "../.vimrc";
+        text = ''
+syntax on
+set autoindent
+set expandtab
+set number
+set shiftwidth=2
+set softtabstop=2
+set bs=indent,eol,start
+set so=999
+set clipboard=unnamedplus
+
+filetype plugin indent on
+
+let g:terraform_fmt_on_save=1
+let g:terraform_align=1
+let g:netrw_dirhistmax = 0
+let g:vimtex_quickfix_mode=0
+set conceallevel=1
+'';
+};
+
+### install sf-mono
+
+      configFile.sf-mono = {
+        target = ".sf-mono/.setup";
+        text = ''
+$! /bin/sh
+
+if [ -d "~/.config/.sf-mono/sf-git" ]; then
+
+  exit 0
+
+else
+
+  git clone https://github.com/supercomputra/SF-Mono-Font.git ~/.config/.sf-mono/sf-git
+
+  if [ -d "~/.local/share/fonts" ]; then
+    ln -s  ~/.config/.sf-mono/sf-git/* ~/.local/share/fonts/
+  else
+    mkdir -p ~/.local/share/fonts
+    ln -s  ~/.config/.sf-mono/sf-git/* ~/.local/share/fonts/
+  fi
+
+  fc-cache
+
+  exit 0
+
+fi
+'';
+};
 
 ### brightness control
 
@@ -226,27 +314,27 @@ order += "memory"
 order += "tztime local"
 
 cpu_usage {
-        format = "   CPU %usage   "
+        format = "  CPU %usage   "
 }
 
 disk "/" {
-        format = "   %avail   "
-        #format = "   ⛁ %avail   "
+        format = "  %used/%total  "
+        #format = "  ⛁ %avail   "
 }
 
 ethernet _first_ {
-        format_up = "   %ip   "
-        format_down = "   no lan   "
+        format_up = "  %ip  "
+        format_down = "  no lan  "
 }
 
 memory {
-        format = "   %used/%available   "
+        format = "  %used/%total  "
         #threshold_degraded = "1G"
         format_degraded = "MEMORY < %available"
 }
 
 tztime local {
-        format = "   %Y  %m  %d  %H:%M:%S   "
+        format = "  %y-%m-%d  %I:%M:%S  "
         #format = " %d.%m. %H:%M "
 }
 '';
@@ -257,9 +345,7 @@ tztime local {
       configFile.xresources = {
         target = "../.Xresources";
         text = ''
-urxvt.font: xft:San Francisco Display:pixelsize=18,style=reular
-urxvt.boldFont: xft:San Francisco Display:pixelsize=18,style=bold
-urxvt.letterSpace: -3 
+urxvt.font: xft:SF Mono:size=18
 
 urxvt*transparent: true
 urxvt*shading: 15
@@ -327,7 +413,16 @@ URxvt.keysym.Shift-Control-Down:  \033[1;6B
 '';
 };
 
+### nixpkgs config
 
+      configFile.nixpkgs = {
+        target = "nixpkgs/config.nix";
+        text = ''
+{
+  allowUnfree = true;
+}
+'';
+};
 
 ### tmux config
 
@@ -516,7 +611,7 @@ set -g display-panes-active-colour colour245
 
     ### Text ###
 
-    font = San Francisco Display 20
+    font = SF Mono 20
 
     # The spacing between lines.  If the height is smaller than the
     # font height, it will get raised to the font height.
@@ -766,29 +861,197 @@ rofi.separator-style: none
 #rofi.lines: 0 
 
 rofi.hide-scrollbar: false 
-rofi.font: fira-code 15
+rofi.font: SF Mono 15
         '';
       };
+
+### polybar config
+
+      configFile.polybar = {
+        target = "polybar/config.ini";
+        text = ''
+[colors]
+background = "#0F1212"
+foreground = "#E3E3E3"
+gray = "#363636"
+accent = "#f07f7f"
+transparent = "#00000000"
+
+[bar/skybox]
+width = 100%
+height = 50
+radius-top = 7.0
+#click-middle = "/home/safin/dots/scripts/colormode/toggle"
+
+background = "#0F1212"
+foreground = "#E3E3E3"
+
+border-bottom-size = 0
+border-color = "#00000000"
+bottom = true
+
+padding-left = 2
+padding-right = 2
+
+# Handle transparency with compositor
+border-left-size = 60
+border-right-size = 60
+border-top-size = 16
+
+module-margin-left = 1
+module-margin-right = 1
+
+font-0 = "SF Mono:size=20"
+
+modules-left = filesystem cpu
+modules-center = i3
+modules-right = date
+
+wm-restack = i3
+override-redirect = false
+cursor-click = pointer
+enable-ipc = true
+
+[module/i3]
+type = internal/i3
+
+label-focused = %index%
+label-focused-foreground = "#E3E3E3"
+label-focused-padding = 1
+label-focused-margin = 0.5
+
+label-unfocused = %index%
+label-unfocused-foreground = "#363636"
+label-unfocused-padding = 1
+label-unfocused-margin = 0.5
+
+label-urgent = %index%
+label-urgent-font = 2
+label-urgent-foreground = "#f07f7f"
+label-urgent-padding = 1
+label-urgent-margin = 0.5
+
+[module/date]
+type = internal/date
+interval = 1.0
+time = %a %d, %I:%M %p
+
+label-foreground = "#E3E3E3"
+label = %time%
+
+[module/filesystem]
+type = internal/fs
+mount-0 = /
+
+label-mounted = %percentage_used%%
+label-mounted-foreground = "#E3E3E3"
+
+interval = 600
+fixed-values = true
+
+[module/cpu]
+type = internal/cpu
+interval = 5
+
+label = %percentage%%
+label-foreground = "#E3E3E3"
+
+[module/memory]
+type = internal/memory
+format = <label>
+
+label = %percentage_used%%
+label-foreground = "#E3E3E3"
+
+; vim:syntax=dosini
+'';
+};
+
+### polybar launch 
+
+      configFile.polybar-launch = {
+        target = "polybar/launch.sh";
+        text = ''
+ 
+#!/bin/bash
+
+# Terminate already running bar instances
+killall -q polybar
+
+# Wait until the processes have been shut down
+while pgrep -u $UID -x polybar >/dev/null; do sleep 1; done
+
+# Launch Polybar using default config location ~/.config/polybar/config
+polybar -rq -c ~/.config/polybar/config.ini skybox &
+
+echo "Polybar launched..."
+'';
+};
+
+### picom config
+
+      configFile.picom = {
+        target = "picom/picom.conf";
+        text = ''
+corner-radius = 10.0
+shadow-offset-x = -15;
+shadow-offset-y = -15;
+shadow-radius = 15;
+
+round-borders = 4
+
+shadow = true
+no-dock-shadow = false
+
+backend = "xrender"
+vsync = true
+
+log-level = "info"
+'';
+};
+
 
 ### i3 config
 
       configFile.i3 = {
         target = "i3/config";
         text = ''
-exec xrandr --output HDMI-0 --mode 2560x1440 --right-of DP-2 --primary
-exec xrandr --output DP-2 --mode 2560x1440 --left-of HDMI-0
+# Configure computer displays
+exec xrandr --output HDMI-0 --mode 3840x2160 --right-of DP-2 --primary
+exec xrandr --output DP-2 --mode 3840x2160 --left-of HDMI-0
 
-exec feh --bg-fill https://i.imgur.com/QoufAE6.jpg  
-exec setxkbmap -option ctrl:swapcaps
+# Picom Compositor
+exec_always picom --config ~/.config/picom/picom.conf
 
-exec pactl set-card-profile alsa_card.pci-0000_0b_00.1 output:hdmi-stereo-extra1
-exec pactl set-default-sink alsa_output.pci-0000_0b_00.1.hdmi-stereo-extra1
+# Polybar
+exec_always sh ~/.config/polybar/launch.sh
+
+# Feh background image
+exec_always feh --bg-fill https://i.imgur.com/QoufAE6.jpg  
+
+# Set caps to ctrl
+exec_always setxkbmap -option ctrl:swapcaps
+
+# Setup San Francisco font
+exec ~/.config/.sf-mono/.setup
+
+# Set audio to HDMI output
+exec pactl set-card-profile alsa_card.pci-0000_0b_00.1 output:hdmi-stereo
+exec pactl set-default-sink alsa_output.pci-0000_0b_00.1.hdmi-stereo
 
 
 #bindsym F5 exec pactl set-card-profile alsa_card.pci-0000_0b_00.1 output:hdmi-stereo-extra1 && set-default-sink alsa_output.pci-0000_0b_00.1.hdmi-stereo-extra1 
 bindsym F5 exec set-default-sink alsa_output.pci-0000_0b_00.1.hdmi-stereo-extra1 
 bindsym F6 exec pactl set-default-sink bluez_sink.38_18_4C_6C_7D_00.a2dp_sink
-bindsym F12 exec pactl set-sink-volume alsa_output.pci-0000_0b_00.1.hdmi-stereo-extra1 -10%
+
+# Control audio
+bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +10% && $refresh_i3status
+bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -10% && $refresh_i3status
+bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle && $refresh_i3status
+bindsym XF86AudioMicMute exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle && $refresh_i3status
+
+
+# Control screen brightness
 bindsym XF86MonBrightnessDown exec sh ~/.config/.brightness down
 bindsym XF86MonBrightnessUp exec sh ~/.config/.brightness up
 
@@ -814,12 +1077,12 @@ default_border none
 # Font for window titles. Will also be used by the bar unless a different font
 # is used in the bar {} block below.
 #font pango:monospace 20
-font pango:San Francisco Display 15
+font pango:SF Mono 15
 
 
 # This font is widely installed, provides lots of unicode glyphs, right-to-left
 # text rendering and scalability on retina/hidpi displays (thanks to pango).
-#font pango:DejaVu Sans Mono 8
+#font pango:SF Mono 8
 
 # The combination of xss-lock, nm-applet and pactl is a popular choice, so
 # they are included here as an example. Modify as you see fit.
@@ -834,10 +1097,6 @@ exec --no-startup-id nm-applet
 
 # Use pactl to adjust volume in PulseAudio.
 set $refresh_i3status killall -SIGUSR1 i3status
-bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +10% && $refresh_i3status
-bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -10% && $refresh_i3status
-bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle && $refresh_i3status
-bindsym XF86AudioMicMute exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle && $refresh_i3status
 
 # use these keys for focus, movement, and resize directions when reaching for
 # the arrows is not convenient
@@ -999,7 +1258,7 @@ bindsym $mod+r mode "resize"
 
 bar {
 
-  font pango: fira-code 20
+  font pango: SF Mono 20
 
   colors {
       background #000000
@@ -1021,15 +1280,9 @@ bar {
   };
 
 fonts.fonts = with pkgs; [
-  noto-fonts
-  noto-fonts-cjk
-  noto-fonts-emoji
-  liberation_ttf
-  fira-code
-  fira-code-symbols
-  mplus-outline-fonts
-  dina-font
-  proggyfonts
+  hermit
+  source-code-pro
+  terminus_font
 ];
 
 
