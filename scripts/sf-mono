@@ -1,0 +1,15 @@
+$! /bin/sh
+
+if [ -d "~/.config/.sf-mono/sf-git" ]; then
+  exit 0
+else
+  git clone https://github.com/supercomputra/SF-Mono-Font.git ~/.config/.sf-mono/sf-git
+  if [ -d "~/.local/share/fonts" ]; then
+    ln -s  ~/.config/.sf-mono/sf-git/* ~/.local/share/fonts/
+  else
+    mkdir -p ~/.local/share/fonts
+    ln -s  ~/.config/.sf-mono/sf-git/* ~/.local/share/fonts/
+  fi
+  fc-cache
+  exit 0
+fi
