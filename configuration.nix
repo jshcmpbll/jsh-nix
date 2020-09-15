@@ -119,6 +119,7 @@ in
     sxiv
     mpv
     picom
+    killall
   ];
 
   environment.variables = {
