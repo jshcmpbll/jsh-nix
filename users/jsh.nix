@@ -27,7 +27,7 @@
       configFile."i3/i3status.conf".source = /.jsh-nix/dots/i3/i3status.conf;
       configFile."i3/config".source = /.jsh-nix/dots/i3/config;
       configFile."../.Xresources".source = /.jsh-nix/dots/Xresources;
-      configFile."../.tmux.".source = /.jsh-nix/dots/tmux;
+      configFile."../.tmux.conf".source = /.jsh-nix/dots/tmux.conf;
       configFile."polybar/config.ini".source = /.jsh-nix/dots/polybar/config.ini;
       configFile."polybar/launch.sh".source = /.jsh-nix/dots/polybar/launch.sh;
       configFile."rofi/config".source = /.jsh-nix/dots/rofi/config;
