@@ -6,7 +6,7 @@ exec xrandr --output DP-2 --mode 3840x2160 --left-of HDMI-0
 exec picom --config ~/.config/picom/picom.conf
 
 # Polybar
-exec sh ~/.config/polybar/launch.sh
+exec_always sh ~/.config/polybar/launch.sh
 
 # Feh background image
 exec feh --bg-fill https://i.imgur.com/QoufAE6.jpg  
