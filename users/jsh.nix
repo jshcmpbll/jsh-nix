@@ -33,6 +33,7 @@
       configFile."rofi/config".source = /.jsh-nix/dots/rofi/config;
       configFile."nixpkgs/config.nix".source = /.jsh-nix/dots/nixpkgs/config.nix;
       configFile."picom/picom.conf".source = /.jsh-nix/dots/picom/picom.conf;
+      configFile."dunst/dunstrc".source = /.jsh-nix/dots/dunst/dunstrc;
 
 
 
