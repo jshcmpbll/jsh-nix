@@ -3,9 +3,11 @@
 {
   users.users.jsh = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "sudo" ];
+    extraGroups = [ "wheel" "sudo" "docker" ];
     shell = pkgs.zsh;
   };
+
+  virtualisation.docker.enable = true;
 
   security.sudo.configFile = ''
     jsh ALL=(ALL) NOPASSWD:ALL

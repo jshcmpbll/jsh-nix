@@ -69,11 +69,11 @@ in
     lightdm
     lightdm_gtk_greeter
     git
+    git-lfs
     oh-my-zsh
     rofi
     dunst
     ffmpeg
-    aspell
     gimp
     gnumake
     vlc
@@ -120,6 +120,11 @@ in
     mpv
     picom
     killall
+    vulnix
+    docker
+    aspell
+    blueman
+    wine
   ];
 
   environment.variables = {
