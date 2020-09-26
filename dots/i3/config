@@ -9,7 +9,8 @@ exec picom --config ~/.config/picom/picom.conf
 exec_always sh ~/.config/polybar/launch.sh
 
 # Feh background image
-exec feh --bg-fill https://i.imgur.com/QoufAE6.jpg  
+exec feh --bg-fill https://i.imgur.com/QoufAE6.jpg --bg-fill https://github.com/Unixado/dotfiles/blob/master/.config/wallpaper/wall.jpg?raw=true 
+
 
 # Set caps to ctrl
 exec setxkbmap -option ctrl:swapcaps
