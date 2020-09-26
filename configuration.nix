@@ -10,8 +10,9 @@ in
   imports =
     [ 
       /.jsh-nix/users/jsh.nix
-      ./hardware-configuration.nix
+      /.jsh-nix/hardware-configuration.nix
       "${home-manager}/nixos"
+      /.jsh-nix/x11vnc/service.nix
     ];
 
   hardware.enableAllFirmware = true;
@@ -106,7 +107,6 @@ in
     os-prober
     woeusb
     cudatoolkit
-    x11vnc
     glxinfo
     youtube-dl
     unrar
@@ -128,7 +128,7 @@ in
   ];
 
   environment.variables = {
-    EDITOR = "urxvt";
+    EDITOR = "${pkgs.vim}/bin/vim";
   };
 
   # List services that you want to enable:
@@ -136,7 +136,6 @@ in
   services = {
     openssh.enable = true;
     pcscd.enable = true;
-    ##x11vnc.enable= true;
   };
 
   # Open ports in the firewall.
@@ -165,6 +164,15 @@ in
     layout = "us";
     videoDrivers = [ "nvidia" ];
   };
+
+  services.x11vnc = {
+    enable = true;
+    autoStart = true;
+    auth = "/var/run/lightdm/root/:0";
+    shared = true;
+    password = "test";
+  };
+    
 
   hardware.opengl.driSupport32Bit = true;
 
