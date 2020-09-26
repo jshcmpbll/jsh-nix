@@ -10,7 +10,7 @@ in
   imports =
     [ 
       /.jsh-nix/users/jsh.nix
-      ./hardware-configuration.nix
+      /.jsh-nix/hardware-configuration.nix
       "${home-manager}/nixos"
     ];
 
