@@ -1,5 +1,5 @@
 urxvt.font: xft:SF Mono:size=18
-urxvt*transparent: true
+urxvt*transparent: false
 urxvt*shading: 15
 #!! black dark/light
 #*color0:                          #222D31
@@ -51,44 +51,39 @@ URxvt.keysym.Shift-Control-Up:    \033[1;6A
 URxvt.keysym.Control-Down:        \033[1;5B
 URxvt.keysym.Shift-Control-Down:  \033[1;6B
 
+! special
+*.foreground:   #E9E9E9
+*.background:   #0f1212
+*.cursorColor:  #E9E9E9
 
-#define nord0 #2E3440
-#define nord1 #3B4252
-#define nord2 #434C5E
-#define nord3 #4C566A
-#define nord4 #D8DEE9
-#define nord5 #E5E9F0
-#define nord6 #ECEFF4
-#define nord7 #8FBCBB
-#define nord8 #88C0D0
-#define nord9 #81A1C1
-#define nord10 #5E81AC
-#define nord11 #BF616A
-#define nord12 #D08770
-#define nord13 #EBCB8B
-#define nord14 #A3BE8C
-#define nord15 #B48EAD
+! black
+*.color0:       #0f1212
+*.color8:       #131717
 
-*.foreground:   nord4
-*.background:   nord0
-*.cursorColor:  nord4
-*fading: 35
-*fadeColor: nord3
+! red
+*.color1:       #f07f7f
+*.color9:       #ed9a9a
 
-*.color0: nord1
-*.color1: nord11
-*.color2: nord14
-*.color3: nord13
-*.color4: nord9
-*.color5: nord15
-*.color6: nord8
-*.color7: nord5
-*.color8: nord3
-*.color9: nord11
-*.color10: nord14
-*.color11: nord13
-*.color12: nord9
-*.color13: nord15
-*.color14: nord7
-*.color15: nord6
+! green
+*.color2:       #7ff088
+*.color10:      #9ef0a5
 
+! yellow
+*.color3:       #eef07f
+*.color11:      #e7e897
+
+! blue
+*.color4:       #7facf0
+*.color12:      #98b9eb
+
+! magenta
+*.color5:       #d67ff0
+*.color13:      #d196e3
+
+! cyan
+*.color6:       #7fe7f0
+*.color14:      #94dae0
+
+! white
+*.color7:       #E9E9E9
+*.color15:      #e3e3e3

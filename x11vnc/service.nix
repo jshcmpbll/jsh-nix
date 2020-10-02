@@ -49,10 +49,8 @@ in {
     flags = [
       "-forever"
       "-display :0"
-      "-desktop JSH"
       "-auth ${cfg.auth}"
-      "-password ${cfg.password}"
-      "-clip xinerama"
+      "-passwd ${cfg.password}"
       "-ncache"
       "-rfbport ${toString cfg.port}"
     ] ++ optional cfg.viewonly "-viewonly" ++ (if cfg.shared then ["-shared"] else ["-noshared"]);

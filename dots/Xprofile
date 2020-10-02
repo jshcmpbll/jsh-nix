@@ -1,0 +1,12 @@
+xrandr --output HDMI-0 --mode 3840x2160 --right-of DP-2 --primary
+xrandr --output DP-2 --mode 3840x2160 --right-of HDMI-0
+
+#echo $(date) >> ~/xpro
+#
+#bluetoothctl -- connect 68:FE:F7:6B:46:2D
+#
+#if [ $? == 1 ]
+#then
+#  sleep 5
+#  bluetoothctl -- connect 68:FE:F7:6B:46:2D
+#fi
