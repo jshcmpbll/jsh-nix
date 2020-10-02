@@ -1,20 +1,14 @@
 { config, pkgs, ... }:
-let
-  home-manager = builtins.fetchGit {
-    url = "https://github.com/rycee/home-manager.git";
-    rev = "8def3835111f0b16850736aa210ca542fcd02af6";
-    ref = "release-19.03";
-  };
-in
 {
   imports =
     [ 
       /.jsh-nix/users/jsh.nix
       /.jsh-nix/hardware-configuration.nix
-      "${home-manager}/nixos"
+      <home-manager/nixos>
       /.jsh-nix/x11vnc/service.nix
+      <nixpkgs/nixos/modules/services/hardware/sane_extra_backends/brscan4.nix>
     ];
-
+  nixpkgs.config.allowUnfree = true;
   hardware.enableAllFirmware = true;
 
   boot = {
@@ -49,7 +43,6 @@ in
 
   time.timeZone = "America/Los_Angeles";
   
-  nixpkgs.config.allowUnfree = true;
   environment.systemPackages = with pkgs; [
     wget
     vim
@@ -100,6 +93,8 @@ in
     jq
     hddtemp
     google-cloud-sdk
+    awscli
+    azure-cli
     _1password
     tmux
     pavucontrol
@@ -123,8 +118,22 @@ in
     vulnix
     docker
     aspell
+    aspellDicts.en
     blueman
     wine
+    lutris
+    vulkan-loader
+    vulkan-tools
+    simple-scan
+    sane-airscan
+    cava
+    redshift
+    steam
+    obs-studio
+    #obs-ndi
+    #ndi
+    pywal
+    yarn
   ];
 
   environment.variables = {
@@ -136,14 +145,29 @@ in
   services = {
     openssh.enable = true;
     pcscd.enable = true;
+    avahi.enable = true;
+    printing.enable = true;
+    blueman.enable = true;
+  };
+
+  # Scanning setup
+  hardware = {
+    sane = {
+      enable = true;
+      brscan4 = {
+        enable = true;
+        netDevices = {
+          home = { model = "MFC-L2710DW"; ip = "192.168.0.53"; };
+        };
+      };
+    };
   };
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
-  # networking.firewall.allowedUDPPorts = [ ... ];
+  networking.firewall.allowedUDPPorts = [ 500 4500 ];
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;
-
 
   # Enable sound.
   sound.enable = true;
@@ -168,15 +192,14 @@ in
   services.x11vnc = {
     enable = true;
     autoStart = true;
-    auth = "/var/run/lightdm/root/:0";
+    auth = "/home/jsh/.Xauthority";
     shared = true;
     password = "test";
   };
     
-
   hardware.opengl.driSupport32Bit = true;
+  hardware.opengl.driSupport = true;
 
-  # Define a user account. Don't forget to set a password with ‘passwd’.
 
 fonts.fonts = with pkgs; [
   hermit
