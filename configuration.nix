@@ -3,7 +3,7 @@
   imports =
     [ 
       /.jsh-nix/users/jsh.nix
-      /.jsh-nix/hardware-configuration.nix
+      ./hardware-configuration.nix
       <home-manager/nixos>
       /.jsh-nix/x11vnc/service.nix
       <nixpkgs/nixos/modules/services/hardware/sane_extra_backends/brscan4.nix>
@@ -29,7 +29,7 @@
     hostName = "jsh-server";
     hostId = "a6bbe9e1";
     useDHCP = false;
-    interfaces.enp4s0.useDHCP = true;
+    interfaces.enp5s0.useDHCP = true;
   };
 
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
@@ -189,14 +189,6 @@
     videoDrivers = [ "nvidia" ];
   };
 
-  services.x11vnc = {
-    enable = true;
-    autoStart = true;
-    auth = "/home/jsh/.Xauthority";
-    shared = true;
-    password = "test";
-  };
-    
   hardware.opengl.driSupport32Bit = true;
   hardware.opengl.driSupport = true;
 
