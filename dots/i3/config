@@ -20,7 +20,7 @@ exec feh --bg-fill https://github.com/Unixado/dotfiles/blob/master/.config/wallp
 exec setxkbmap -option ctrl:swapcaps
 
 # Setup San Francisco font
-exec ~/.config/.sf-mono/.setup
+exec sh ~/.config/.sf-mono/.setup
 
 # Set audio to HDMI output
 exec pactl set-card-profile alsa_card.pci-0000_0b_00.1 output:hdmi-stereo
