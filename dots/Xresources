@@ -1,6 +1,7 @@
-urxvt.font: xft:SF Mono:size=18
+urxvt.font: xft:SF Mono:size=16
 urxvt*transparent: false
 urxvt*shading: 15
+xft.dpi: 192
 #!! black dark/light
 #*color0:                          #222D31
 #*color8:                          #585858

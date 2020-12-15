@@ -1,9 +1,14 @@
 { config, pkgs, ... }:
+let
+  kubeMasterIP = "192.168.0.100";
+  kubeMasterHostname = "api.kube";
+  kubeMasterAPIServerPort = 443;
+in
 {
   imports =
     [ 
       /.jsh-nix/users/jsh.nix
-      ./hardware-configuration.nix
+      /etc/nixos/hardware-configuration.nix
       <home-manager/nixos>
       /.jsh-nix/x11vnc/service.nix
       <nixpkgs/nixos/modules/services/hardware/sane_extra_backends/brscan4.nix>
@@ -20,22 +25,32 @@
         devices = [ "nodev" ];
         useOSProber = true;
 	efiSupport = true;
+        extraEntries = ''
+menuentry "Windows 10" {
+  search --set=root --file /EFI/Microsoft/Boot/bootmgfw.efi
+  chainloader /EFI/Microsoft/Boot/bootmgfw.efi
+}
+''; 
       };
     };
     supportedFilesystems = [ "zfs" ];
   };
 
+  #virtualisation.virtualbox.host.enable = true;
+
   networking = {
     hostName = "jsh-server";
     hostId = "a6bbe9e1";
     useDHCP = false;
-    interfaces.enp5s0.useDHCP = true;
+    interfaces.enp4s0.useDHCP = true;
   };
 
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
   ## Uncomment for wireless macbook
   # networking.networkmanager.enable = false;
   # networking.wireless.enable = true;
+
+#####
 
   services.xserver.xkbOptions = "ctrl:swapcaps";
 
@@ -44,10 +59,10 @@
   time.timeZone = "America/Los_Angeles";
   
   environment.systemPackages = with pkgs; [
+    ntfs3g
     wget
     vim
     rxvt_unicode
-    qutebrowser
     chromium
     i3-gaps
     slack
@@ -56,6 +71,7 @@
     scrot
     tldr
     xfce.xfce4-power-manager
+    tlp
     zsh
     neofetch
     htop
@@ -93,7 +109,7 @@
     jq
     hddtemp
     google-cloud-sdk
-    awscli
+    awscli2
     azure-cli
     _1password
     tmux
@@ -110,18 +126,16 @@
     digikam
     restic
     polybar
-    dolphin
     sxiv
     mpv
     picom
     killall
     vulnix
-    docker
     aspell
     aspellDicts.en
     blueman
-    wine
-    lutris
+    #wine
+    #lutris
     vulkan-loader
     vulkan-tools
     simple-scan
@@ -132,8 +146,29 @@
     obs-studio
     #obs-ndi
     #ndi
+    linuxPackages.v4l2loopback
     pywal
     yarn
+    smartmontools
+    pciutils
+    xfce.thunar
+    kubectl
+    sshfs
+    lm_sensors
+    ofono-phonesim
+    teams
+    kompose
+    kubectl
+    kubernetes
+    kubernetes-helm
+    synergy
+    yq
+    yaml2json
+    yj
+    iperf3
+    usbutils
+    #minecraft
+    firefox
   ];
 
   environment.variables = {
@@ -165,15 +200,28 @@
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
-  networking.firewall.allowedUDPPorts = [ 500 4500 ];
+  # networking.firewall.allowedUDPPorts = [ 500 4500 ];
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;
+  networking.firewall.enable = false;
 
   # Enable sound.
   sound.enable = true;
-  hardware.pulseaudio.enable = true;
-  hardware.bluetooth.enable = true;
-  hardware.bluetooth.powerOnBoot = true;
+  hardware.pulseaudio = {
+    enable = true;
+    support32Bit = true;
+    package = pkgs.pulseaudioFull;
+    extraModules = [ pkgs.pulseaudio-modules-bt ];
+    extraConfig = "
+  load-module module-switch-on-connect
+";
+  };
+
+  # Bluetooth
+  hardware.bluetooth = {
+    enable = true;
+    powerOnBoot = true;
+  };
 
   # Enable the X11 windowing system and i3 gaps
   services.xserver = {
@@ -187,6 +235,12 @@
     };
     layout = "us";
     videoDrivers = [ "nvidia" ];
+    libinput = {
+      enable = true;
+      disableWhileTyping = true;
+      naturalScrolling = true;
+      tapping = false;
+    };
   };
 
   hardware.opengl.driSupport32Bit = true;
@@ -199,8 +253,25 @@ fonts.fonts = with pkgs; [
   terminus_font
 ];
 
+# Kubernetes
+
+  networking.extraHosts = "${kubeMasterIP} ${kubeMasterHostname}";
+
+  services.kubernetes = {
+    roles = ["master" "node"];
+    masterAddress = kubeMasterHostname;
+    easyCerts = true;
+    apiserver = {
+      securePort = kubeMasterAPIServerPort;
+      advertiseAddress = kubeMasterIP;
+    };
+
+    # use coredns
+    addons.dns.enable = true;
+
+  };
 
   # Read docs before changing -> (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system.stateVersion = "20.03"; # Did you read the comment?
+  system.stateVersion = "20.09"; # Did you read the comment?
 
 }
