@@ -1,5 +1,5 @@
-xrandr --output HDMI-0 --mode 3840x2160 --right-of DP-2 --primary
-xrandr --output DP-2 --mode 3840x2160 --right-of HDMI-0
+xrandr --output HDMI-0 --mode 3840x2160 --rate 60 --right-of DP-3 --primary
+xrandr --output DP-3 --mode 3840x2160 --rate 29.97 --left-of HDMI-0
 
 #echo $(date) >> ~/xpro
 #

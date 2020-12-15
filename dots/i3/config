@@ -1,6 +1,6 @@
 # Configure computer displays
-exec xrandr --output HDMI-0 --mode 3840x2160 --right-of DP-2 --primary
-exec xrandr --output DP-2 --mode 3840x2160 --left-of HDMI-0
+exec xrandr --output HDMI-0 --mode 3840x2160 --rate 60 --right-of DP-3 --primary
+exec xrandr --output DP-3 --mode 3840x2160 --rate 29.97 --left-of HDMI-0
 
 # Picom Compositor
 exec picom --config ~/.config/picom/picom.conf
@@ -9,7 +9,6 @@ exec picom --config ~/.config/picom/picom.conf
 exec_always sh ~/.config/polybar/launch.sh
 
 # Redshift
-
 exec redshift -l 33.88:-118.07
 
 # Feh background image
@@ -23,12 +22,12 @@ exec setxkbmap -option ctrl:swapcaps
 exec sh ~/.config/.sf-mono/.setup
 
 # Set audio to HDMI output
-exec pactl set-card-profile alsa_card.pci-0000_0b_00.1 output:hdmi-stereo
-exec pactl set-default-sink alsa_output.pci-0000_0b_00.1.hdmi-stereo
+# exec pactl set-card-profile alsa_card.pci-0000_0a_00.1 output:hdmi-stereo
+# exec pactl set-default-sink alsa_output.pci-0000_0a_00.1.hdmi-stereo
 
-#bindsym F5 exec pactl set-card-profile alsa_card.pci-0000_0b_00.1 output:hdmi-stereo-extra1 && set-default-sink alsa_output.pci-0000_0b_00.1.hdmi-stereo-extra1 
-bindsym F5 exec set-default-sink alsa_output.pci-0000_0b_00.1.hdmi-stereo-extra1 
-bindsym F6 exec pactl set-default-sink bluez_sink.38_18_4C_6C_7D_00.a2dp_sink
+#bindsym F5 exec pactl set-card-profile alsa_card.pci-0000_0a_00.1 output:hdmi-stereo-extra1 && set-default-sink alsa_output.pci-0000_0a_00.1.hdmi-stereo-extra1 
+# bindsym F5 exec set-default-sink alsa_output.pci-0000_0a_00.1.hdmi-stereo-extra1 
+# bindsym F6 exec pactl set-default-sink bluez_sink.38_18_4C_6C_7D_00.a2dp_sink
 
 # Control audio
 bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +10% && $refresh_i3status
@@ -46,7 +45,7 @@ gaps inner 20
 gaps outer 40
 default_border none
 
-font pango:SF Mono 15
+font pango:SF Mono 30
 # This font is widely installed, provides lots of unicode glyphs, right-to-left
 # text rendering and scalability on retina/hidpi displays (thanks to pango).
 #font pango:SF Mono 8

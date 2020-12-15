@@ -132,6 +132,16 @@ function open {
   	;;
   esac
 }
+''
++
+''
+function xc {
+  xclip -sel copy
+}
+
+function xp {
+  xclip -o -sel clip
+}
 '';
     };
 
