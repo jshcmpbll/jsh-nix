@@ -3,7 +3,7 @@
 {
   users.users.jsh = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "sudo" "docker" ];
+    extraGroups = [ "wheel" "sudo" "docker" "audio" ];
     shell = pkgs.zsh;
   };
 
