@@ -1,6 +1,6 @@
 # Configure computer displays
-exec xrandr --output HDMI-0 --mode 3840x2160 --rate 60 --right-of DP-3 --primary
-exec xrandr --output DP-3 --mode 3840x2160 --rate 29.97 --left-of HDMI-0
+exec xrandr --output HDMI-0 --mode 3840x2160 --right-of DP-2 --rate 60 --primary
+exec xrandr --output DP-2 --mode 3840x2160+0+0 --left-of HDMI-0 --rate 60
 
 # Picom Compositor
 exec picom --config ~/.config/picom/picom.conf
@@ -13,7 +13,7 @@ exec redshift -l 33.88:-118.07
 
 # Feh background image
 #exec feh --bg-fill https://i.imgur.com/QoufAE6.jpg --bg-fill https://github.com/Unixado/dotfiles/blob/master/.config/wallpaper/wall.jpg?raw=true 
-exec feh --bg-fill https://github.com/Unixado/dotfiles/blob/master/.config/wallpaper/wall.jpg?raw=true 
+exec feh --bg-fill /mnt/CSAN/Media/Pictures/backgrounds/Bison-BW-Looking-Left.JPG 
 
 # Set caps to ctrl
 exec setxkbmap -option ctrl:swapcaps
