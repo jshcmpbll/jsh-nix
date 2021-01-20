@@ -272,7 +272,9 @@ menuentry "Windows 10" {
     };
 
     prometheus = {
+
       enable = true;
+      globalConfig.scrape_interval = "1m";
       scrapeConfigs = [
         {
           job_name = "node";
@@ -281,10 +283,20 @@ menuentry "Windows 10" {
               targets = [ "192.168.0.104:9100" ];
               labels = { instance = "pool"; };
             }
+            {
+              targets = [ "192.168.0.74:9100" ];
+              labels = { instance = "chip"; };
+            }
           ];
         }
       ];
     };
+
+    grafana = {
+      enable = true;
+      addr = "0.0.0.0";
+      domain = "jsh-server.localhost";
+    }; 
   
     kubernetes = {
       roles = ["master" "node"];
