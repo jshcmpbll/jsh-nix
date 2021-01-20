@@ -51,6 +51,7 @@ menuentry "Windows 10" {
     hermit
     source-code-pro
     terminus_font
+    dejavu_fonts
   ];
 
 
