@@ -20,6 +20,7 @@ in
       grub = {
         enable = true;
         version = 2;
+        default = 0;
         devices = [ "nodev" ];
         useOSProber = true;
 	efiSupport = true;
@@ -60,8 +61,8 @@ menuentry "Windows 10" {
   networking = {
     hostName = "jsh-server";
     hostId = "a6bbe9e1";
-    useDHCP = false;
-    interfaces.enp6s0.useDHCP = true;
+    useDHCP = true;
+    interfaces.enp5s0.useDHCP = true;
     extraHosts = "${kubeMasterIP} ${kubeMasterHostname}";
     firewall = {
       enable = false;
