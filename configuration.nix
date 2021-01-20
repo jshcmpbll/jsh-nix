@@ -36,6 +36,11 @@ menuentry "Windows 10" {
 
 
   time.timeZone = "America/Los_Angeles";
+
+  location = {
+    latitude = 33.9;
+    longitude = -118.1;
+  };
   
   environment.variables = {
     EDITOR = "${pkgs.vim}/bin/vim";
@@ -236,6 +241,18 @@ menuentry "Windows 10" {
     blueman.enable = true;
 
     udev.packages = [ pkgs.libu2f-host ];
+
+    redshift = {
+      enable = true;
+      brightness = {
+        day = "1";
+        night = "0.8";
+      };
+      temperature = {
+        day = 5500;
+        night = 3500;
+      };
+    };
 
     plex = {
       enable = true;

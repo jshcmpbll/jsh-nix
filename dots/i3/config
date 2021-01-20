@@ -8,18 +8,16 @@ exec picom --config ~/.config/picom/picom.conf
 # Polybar
 exec_always sh ~/.config/polybar/launch.sh
 
-# Redshift
-exec redshift -l 33.88:-118.07
-
 # Feh background image
 #exec feh --bg-fill https://i.imgur.com/QoufAE6.jpg --bg-fill https://github.com/Unixado/dotfiles/blob/master/.config/wallpaper/wall.jpg?raw=true 
 exec feh --bg-fill /mnt/CSAN/Media/Pictures/backgrounds/Bison-BW-Looking-Left.JPG 
 
-# Set caps to ctrl
-exec setxkbmap -option ctrl:swapcaps
-
 # Setup San Francisco font
 exec sh ~/.config/.sf-mono/.setup
+
+# Start applications
+exec teams
+exec slack
 
 # Set audio to HDMI output
 # exec pactl set-card-profile alsa_card.pci-0000_0a_00.1 output:hdmi-stereo
