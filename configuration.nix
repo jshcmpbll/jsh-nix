@@ -20,6 +20,7 @@ in
       grub = {
         enable = true;
         version = 2;
+        default = 0;
         devices = [ "nodev" ];
         useOSProber = true;
 	efiSupport = true;
@@ -36,6 +37,11 @@ menuentry "Windows 10" {
 
 
   time.timeZone = "America/Los_Angeles";
+
+  location = {
+    latitude = 33.9;
+    longitude = -118.1;
+  };
   
   environment.variables = {
     EDITOR = "${pkgs.vim}/bin/vim";
@@ -45,6 +51,7 @@ menuentry "Windows 10" {
     hermit
     source-code-pro
     terminus_font
+    dejavu_fonts
   ];
 
 
@@ -55,8 +62,8 @@ menuentry "Windows 10" {
   networking = {
     hostName = "jsh-server";
     hostId = "a6bbe9e1";
-    useDHCP = false;
-    interfaces.enp6s0.useDHCP = true;
+    useDHCP = true;
+    interfaces.enp5s0.useDHCP = true;
     extraHosts = "${kubeMasterIP} ${kubeMasterHostname}";
     firewall = {
       enable = false;
@@ -148,7 +155,7 @@ menuentry "Windows 10" {
     aspell
     aspellDicts.en
     blueman
-    #wine
+    wine
     #lutris
     vulkan-loader
     vulkan-tools
@@ -187,6 +194,8 @@ menuentry "Windows 10" {
     tigervnc
     eagle
     prometheus
+    audacity
+    _1password-gui
   ];
 
 ### PACKAGES ###
@@ -237,6 +246,18 @@ menuentry "Windows 10" {
 
     udev.packages = [ pkgs.libu2f-host ];
 
+    redshift = {
+      enable = true;
+      brightness = {
+        day = "1";
+        night = "0.8";
+      };
+      temperature = {
+        day = 5500;
+        night = 3500;
+      };
+    };
+
     plex = {
       enable = true;
       user = "jsh";
@@ -251,7 +272,9 @@ menuentry "Windows 10" {
     };
 
     prometheus = {
+
       enable = true;
+      globalConfig.scrape_interval = "1m";
       scrapeConfigs = [
         {
           job_name = "node";
@@ -260,10 +283,20 @@ menuentry "Windows 10" {
               targets = [ "192.168.0.104:9100" ];
               labels = { instance = "pool"; };
             }
+            {
+              targets = [ "192.168.0.74:9100" ];
+              labels = { instance = "chip"; };
+            }
           ];
         }
       ];
     };
+
+    grafana = {
+      enable = true;
+      addr = "0.0.0.0";
+      domain = "jsh-server.localhost";
+    }; 
   
     kubernetes = {
       roles = ["master" "node"];
