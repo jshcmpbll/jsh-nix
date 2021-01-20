@@ -155,7 +155,7 @@ menuentry "Windows 10" {
     aspell
     aspellDicts.en
     blueman
-    #wine
+    wine
     #lutris
     vulkan-loader
     vulkan-tools
@@ -194,6 +194,8 @@ menuentry "Windows 10" {
     tigervnc
     eagle
     prometheus
+    audacity
+    _1password-gui
   ];
 
 ### PACKAGES ###
