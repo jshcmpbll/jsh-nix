@@ -332,6 +332,20 @@ menuentry "Windows 10" {
 
   };
 
+  systemd.services = {
+    x11vnc = {
+      enable = true;
+      path = [ pkgs.gawk pkgs.nettools ];
+      wantedBy = [ "multi-user.target" ];
+      requires = [ "graphical.target" ];
+      description = "VNC server";
+      serviceConfig = {
+        type = "simple";
+        ExecStart = "${pkgs.x11vnc}/bin/x11vnc -display :0 -auth /home/jsh/.Xauthority -forever";
+      };
+    };
+  };
+
 ### SERVICES ###
 
 
