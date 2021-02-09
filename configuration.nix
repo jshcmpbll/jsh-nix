@@ -91,7 +91,6 @@ menuentry "Windows 10" {
     unzip
     scrot
     tldr
-    xfce.xfce4-power-manager
     tlp
     zsh
     neofetch
@@ -196,6 +195,10 @@ menuentry "Windows 10" {
     prometheus
     audacity
     _1password-gui
+    foremost
+    samba
+    libheif
+    nixpkgs-fmt
   ];
 
 ### PACKAGES ###
@@ -234,13 +237,28 @@ menuentry "Windows 10" {
       xkbOptions = "ctrl:swapcaps";
     };
 
+    samba = {
+      enable = true;
+      syncPasswordsByPam = true;
+      shares.csan =
+        { path = "/mnt/CSAN";
+          "read only" = false;
+          "guest ok" = false;
+          writeable = true;
+          comment = "Campbell SAN";
+        };
+    };
+
     openssh.enable = true;
 
     pcscd.enable = true;
 
     avahi.enable = true;
 
-    printing.enable = true;
+    printing = {
+      enable = true;
+      drivers = [ pkgs.brlaser ];
+    }; 
 
     blueman.enable = true;
 
@@ -284,7 +302,7 @@ menuentry "Windows 10" {
               labels = { instance = "pool"; };
             }
             {
-              targets = [ "192.168.0.74:9100" ];
+              targets = [ "192.168.0.102:9100" ];
               labels = { instance = "chip"; };
             }
           ];

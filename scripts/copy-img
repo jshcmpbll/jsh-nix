@@ -1,0 +1,5 @@
+#! /usr/bin/env bash
+
+scrot --select /tmp/copy-img.png
+xclip -sel clip -t image/png /tmp/copy-img.png
+rm /tmp/copy-img.png
