@@ -302,7 +302,7 @@ menuentry "Windows 10" {
               labels = { instance = "pool"; };
             }
             {
-              targets = [ "192.168.0.74:9100" ];
+              targets = [ "192.168.0.102:9100" ];
               labels = { instance = "chip"; };
             }
           ];
