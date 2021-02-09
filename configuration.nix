@@ -237,13 +237,28 @@ menuentry "Windows 10" {
       xkbOptions = "ctrl:swapcaps";
     };
 
+    samba = {
+      enable = true;
+      syncPasswordsByPam = true;
+      shares.csan =
+        { path = "/mnt/CSAN";
+          "read only" = false;
+          "guest ok" = false;
+          writeable = true;
+          comment = "Campbell SAN";
+        };
+    };
+
     openssh.enable = true;
 
     pcscd.enable = true;
 
     avahi.enable = true;
 
-    printing.enable = true;
+    printing = {
+      enable = true;
+      drivers = [ pkgs.brlaser ];
+    }; 
 
     blueman.enable = true;
 
