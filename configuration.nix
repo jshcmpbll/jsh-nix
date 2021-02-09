@@ -195,6 +195,10 @@ menuentry "Windows 10" {
     prometheus
     audacity
     _1password-gui
+    foremost
+    samba
+    libheif
+    nixpkgs-fmt
   ];
 
 ### PACKAGES ###
