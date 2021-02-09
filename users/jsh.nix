@@ -166,6 +166,7 @@ function xp {
       # Scripts
       configFile.".sf-mono/.setup".source = /.jsh-nix/scripts/sf-mono;
       configFile.".brightness".source = /.jsh-nix/scripts/brightness;
+      configFile."screenshots/copy-img".source = /.jsh-nix/scripts/copy-img;
 
     };
   };
