@@ -91,7 +91,6 @@ menuentry "Windows 10" {
     unzip
     scrot
     tldr
-    xfce.xfce4-power-manager
     tlp
     zsh
     neofetch
