@@ -3,6 +3,14 @@ let
   kubeMasterIP = "192.168.0.100";
   kubeMasterHostname = "api.kube";
   kubeMasterAPIServerPort = 443;
+
+  nix-garage = builtins.fetchGit {
+    url = "https://github.com/nebulaworks/nix-garage";
+    ref = "master";
+  };
+  garage-overlay = import (nix-garage.outPath + "/overlay.nix");
+  nixpkgs = import <nixpkgs> { overlays = [ garage-overlay ]; };
+
 in
 {
   imports =
@@ -12,7 +20,14 @@ in
       <home-manager/nixos>
       <nixpkgs/nixos/modules/services/hardware/sane_extra_backends/brscan4.nix>
     ];
-  nixpkgs.config.allowUnfree = true;
+  nixpkgs.config = {
+    allowUnfree = true;
+    packageOverrides = pkgs: {
+      unstable = import <nixpkgs-unstable> {
+        config = config.nixpkgs.config;
+      };
+    };
+  };
 
   boot = {
     loader = {
@@ -113,7 +128,8 @@ menuentry "Windows 10" {
     python38Packages.grip
     zathura
     zfs
-    zoom-us
+    unstable.zoom-us
+    unstable.spotifyd
     tree
     feh
     file
@@ -199,6 +215,9 @@ menuentry "Windows 10" {
     samba
     libheif
     nixpkgs-fmt
+    okular
+    nixpkgs.codefresh
+    electrum
   ];
 
 ### PACKAGES ###
