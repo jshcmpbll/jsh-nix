@@ -2,30 +2,8 @@ urxvt.font: xft:SF Mono:size=16
 urxvt*transparent: false
 urxvt*shading: 15
 xft.dpi: 192
-#!! black dark/light
-#*color0:                          #222D31
-#*color8:                          #585858
-#!! red dark/light
-#*color1:                          #ab4642
-#*color9:                          #ab4642
-#!! green dark/light
-#*color2:                          #7E807E
-#*color10:                         #8D8F8D
-#!! yellow dark/light - numbes in vim
-#*color3:                          #7cafc2
-#*color11:                         #7cafc2
-#!! blue dark/light
-#*color4:                          #7cafc2
-#*color12:                         #7cafc2
-#!! magenta dark/light
-#*color5:                          #ba8baf
-#*color13:                         #ba8baf
-#!! cyan dark/light
-#*color6:                          #1ABB9B
-#*color14:                         #1ABB9B
-#!! white dark/light
-#*color7:                          #d8d8d8
-#*color15:                         #FFFFFF 
+
+
 Xcursor.theme: xcursor-breeze
 Xcursor.size:                     30
 URxvt.depth:                      32
@@ -33,8 +11,6 @@ URxvt.background:                 #131515
 URxvt*scrollBar:                  false
 URxvt*mouseWheelScrollPage:       false
 URxvt*cursorBlink:                true
-URxvt*background:                 black
-URxvt*foreground:                 grey
 URxvt*saveLines:                  5000
 ! Normal copy-paste keybindings without perls
 URxvt.iso14755:                   false
@@ -53,38 +29,38 @@ URxvt.keysym.Control-Down:        \033[1;5B
 URxvt.keysym.Shift-Control-Down:  \033[1;6B
 
 ! special
-*.foreground:   #E9E9E9
-*.background:   #0f1212
-*.cursorColor:  #E9E9E9
+*.foreground:   #ffffff
+*.background:   #000000
+*.cursorColor:  #ffffff
 
 ! black
-*.color0:       #0f1212
-*.color8:       #131717
+*.color0:       #393939
+*.color8:       #474747
 
 ! red
-*.color1:       #f07f7f
-*.color9:       #ed9a9a
+*.color1:       #ff9f95
+*.color9:       #ff8d80
 
 ! green
-*.color2:       #7ff088
-*.color10:      #9ef0a5
+*.color2:       #e2ffc7
+*.color10:      #dbffb3
 
 ! yellow
-*.color3:       #eef07f
-*.color11:      #e7e897
+*.color3:       #ffffb9
+*.color11:      #ffbe64
 
 ! blue
-*.color4:       #7facf0
-*.color12:      #98b9eb
+*.color4:       #a8ceea
+*.color12:      #7eb6ff
 
 ! magenta
-*.color5:       #d67ff0
-*.color13:      #d196e3
+*.color5:       #e2b5cc
+*.color13:      #e296ff
 
 ! cyan
-*.color6:       #7fe7f0
-*.color14:      #94dae0
+*.color6:       #c2efff
+*.color14:      #9ce9ff
 
 ! white
-*.color7:       #E9E9E9
-*.color15:      #e3e3e3
+*.color7:       #dddddd
+*.color15:      #dddddd
