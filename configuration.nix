@@ -217,7 +217,7 @@ menuentry "Windows 10" {
     nixpkgs-fmt
     okular
     nixpkgs.codefresh
-    electrum
+    unstable.electrum
   ];
 
 ### PACKAGES ###
