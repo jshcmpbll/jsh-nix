@@ -1,6 +1,5 @@
 { config, pkgs, ... }:
 let
-
   nix-garage = builtins.fetchGit {
     url = "https://github.com/nebulaworks/nix-garage";
     ref = "master";
@@ -12,7 +11,7 @@ let
 in
 {
   imports =
-    [ 
+    [
       /.jsh-nix/users/jsh.nix
       /etc/nixos/hardware-configuration.nix
       <home-manager/nixos>
@@ -36,13 +35,13 @@ in
         default = 0;
         devices = [ "nodev" ];
         useOSProber = true;
-	efiSupport = true;
+        efiSupport = true;
         extraEntries = ''
-menuentry "Windows 10" {
-  search --set=root --file /EFI/Microsoft/Boot/bootmgfw.efi
-  chainloader /EFI/Microsoft/Boot/bootmgfw.efi
-}
-''; 
+          menuentry "Windows 10" {
+            search --set=root --file /EFI/Microsoft/Boot/bootmgfw.efi
+            chainloader /EFI/Microsoft/Boot/bootmgfw.efi
+          }
+        '';
       };
     };
     supportedFilesystems = [ "zfs" ];
@@ -55,7 +54,7 @@ menuentry "Windows 10" {
     latitude = 33.9;
     longitude = -118.1;
   };
-  
+
   environment.variables = {
     EDITOR = "${pkgs.vim}/bin/vim";
   };
@@ -67,7 +66,7 @@ menuentry "Windows 10" {
     dejavu_fonts
   ];
 
-### NETWORKING ###
+  ### NETWORKING ###
 
   networking = {
 
@@ -82,18 +81,18 @@ menuentry "Windows 10" {
     };
     nat = {
       enable = true;
-      internalInterfaces = ["ve-+"];
+      internalInterfaces = [ "ve-+" ];
       externalInterface = "enp5s0";
     };
-      
+
   };
 
-### NETWORKING ###
+  ### NETWORKING ###
 
 
 
 
-### PACKAGES ###  
+  ### PACKAGES ###  
 
   environment.systemPackages = with pkgs; [
     ntfs3g
@@ -141,7 +140,7 @@ menuentry "Windows 10" {
     screen
     rsync
     restic
-    polybarFull 
+    polybarFull
     ncurses
     ncdu
     jq
@@ -252,12 +251,12 @@ menuentry "Windows 10" {
     php
   ];
 
-### PACKAGES ###
+  ### PACKAGES ###
 
 
 
 
-### SERVICES ###
+  ### SERVICES ###
   services = {
 
     xserver = {
@@ -292,7 +291,8 @@ menuentry "Windows 10" {
       enable = true;
       syncPasswordsByPam = true;
       shares.csan =
-        { path = "/mnt/CSAN";
+        {
+          path = "/mnt/CSAN";
           "read only" = false;
           "guest ok" = false;
           writeable = true;
@@ -314,7 +314,7 @@ menuentry "Windows 10" {
     printing = {
       enable = true;
       drivers = [ pkgs.brlaser ];
-    }; 
+    };
 
     blueman.enable = true;
 
@@ -361,12 +361,12 @@ menuentry "Windows 10" {
     };
   };
 
-### SERVICES ###
+  ### SERVICES ###
 
 
 
 
-### HARDWARE ###
+  ### HARDWARE ###
 
   hardware = {
 
@@ -405,7 +405,7 @@ menuentry "Windows 10" {
 
   };
 
-### HARDWARE ###
+  ### HARDWARE ###
 
 
 
