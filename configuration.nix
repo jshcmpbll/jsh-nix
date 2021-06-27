@@ -1,15 +1,13 @@
 { config, pkgs, ... }:
 let
-  kubeMasterIP = "192.168.0.100";
-  kubeMasterHostname = "api.kube";
-  kubeMasterAPIServerPort = 443;
 
   nix-garage = builtins.fetchGit {
     url = "https://github.com/nebulaworks/nix-garage";
     ref = "master";
   };
   garage-overlay = import (nix-garage.outPath + "/overlay.nix");
-  nixpkgs = import <nixpkgs> { overlays = [ garage-overlay ]; };
+  overlay = import <nixpkgs> { overlays = [ garage-overlay ]; };
+
 
 in
 {
@@ -69,22 +67,26 @@ menuentry "Windows 10" {
     dejavu_fonts
   ];
 
-
-
-
 ### NETWORKING ###
 
   networking = {
+
     hostName = "jsh-server";
     hostId = "a6bbe9e1";
     useDHCP = true;
     interfaces.enp5s0.useDHCP = true;
-    extraHosts = "${kubeMasterIP} ${kubeMasterHostname}";
+    #extraHosts = "${kubeMasterIP} ${kubeMasterHostname}";
     firewall = {
       enable = false;
       # allowedTCPPorts = [ ... ];
       # allowedUDPPorts = [ 500 4500 ];
     };
+    nat = {
+      enable = true;
+      internalInterfaces = ["ve-+"];
+      externalInterface = "enp5s0";
+    };
+      
   };
 
 ### NETWORKING ###
@@ -115,6 +117,7 @@ menuentry "Windows 10" {
     lightdm_gtk_greeter
     git
     git-lfs
+    unstable.github-cli
     oh-my-zsh
     rofi
     dunst
@@ -134,7 +137,7 @@ menuentry "Windows 10" {
     feh
     file
     fdupes
-    discord
+    unstable.discord
     silver-searcher
     screen
     rsync
@@ -146,7 +149,7 @@ menuentry "Windows 10" {
     hddtemp
     google-cloud-sdk
     awscli2
-    azure-cli
+    unstable.azure-cli
     _1password
     tmux
     pavucontrol
@@ -179,7 +182,7 @@ menuentry "Windows 10" {
     cava
     redshift
     steam
-    obs-studio
+    unstable.obs-studio
     #obs-ndi
     #ndi
     linuxPackages.v4l2loopback
@@ -192,7 +195,8 @@ menuentry "Windows 10" {
     sshfs
     lm_sensors
     ofono-phonesim
-    teams
+    unstable.teams
+    unstable.citrix_workspace_20_09_0
     kompose
     kubectl
     kubernetes
@@ -204,7 +208,11 @@ menuentry "Windows 10" {
     iperf3
     usbutils
     firefox
-    terraform
+    #unstable.terraform
+    #terraform_0_11
+    #terraform_0_12
+    #unstable.terraform_0_13
+    #terraform_0_15
     terraform-providers.google
     tigervnc
     eagle
@@ -216,8 +224,33 @@ menuentry "Windows 10" {
     libheif
     nixpkgs-fmt
     okular
-    nixpkgs.codefresh
-    unstable.electrum
+    overlay.codefresh
+    unstable.exodus
+    unstable.minecraft
+    unstable.guvcview
+    sshfs-fuse
+    dmidecode
+    protonvpn-cli
+    freecad
+    unstable.odafileconverter
+    unstable.fluxcd
+    unstable.argocd
+    exiftool
+    mediainfo
+    tesseract
+    pdfsandwich
+    gnupg
+    unstable.python37
+    unstable.python37Packages.pip
+    bind
+    nix-prefetch-git
+    libreoffice
+    mkdocs
+    unstable.joplin
+    wireshark-qt
+    wireshark-cli
+    nodePackages.prettier
+    php
   ];
 
 ### PACKAGES ###
@@ -268,7 +301,12 @@ menuentry "Windows 10" {
         };
     };
 
-    openssh.enable = true;
+    openssh = {
+      enable = true;
+      forwardX11 = true;
+      permitRootLogin = "no";
+      passwordAuthentication = false;
+    };
 
     pcscd.enable = true;
 
@@ -306,47 +344,6 @@ menuentry "Windows 10" {
         daily = 1;
         enable = true;
       };
-    };
-
-    prometheus = {
-
-      enable = true;
-      globalConfig.scrape_interval = "1m";
-      scrapeConfigs = [
-        {
-          job_name = "node";
-          static_configs = [
-            {
-              targets = [ "192.168.0.104:9100" ];
-              labels = { instance = "pool"; };
-            }
-            {
-              targets = [ "192.168.0.102:9100" ];
-              labels = { instance = "chip"; };
-            }
-          ];
-        }
-      ];
-    };
-
-    grafana = {
-      enable = true;
-      addr = "0.0.0.0";
-      domain = "jsh-server.localhost";
-    }; 
-  
-    kubernetes = {
-      roles = ["master" "node"];
-      masterAddress = kubeMasterHostname;
-      easyCerts = true;
-      apiserver = {
-        securePort = kubeMasterAPIServerPort;
-        advertiseAddress = kubeMasterIP;
-      };
-
-      # use coredns
-      addons.dns.enable = true;
-
     };
 
   };
