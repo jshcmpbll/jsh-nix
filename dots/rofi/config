@@ -17,4 +17,4 @@ rofi.line-padding: 10
 rofi.separator-style: none
 #rofi.lines: 0 
 rofi.hide-scrollbar: false 
-rofi.font: SF Mono 15
+rofi.font: SF Mono 24

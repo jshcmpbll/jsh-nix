@@ -1,4 +1,4 @@
-$! /bin/sh
+#! /usr/bin/env bash
 
 if [ -d "~/.config/.sf-mono/sf-git" ]; then
   exit 0

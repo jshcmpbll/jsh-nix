@@ -1,0 +1,2 @@
+#! /usr/bin/env bash
+wine "/home/jsh/.wine/drive_c/users/jsh/Local Settings/Application Data/Programs/Phase Five Systems/Jump Desktop/JumpClient.exe"
