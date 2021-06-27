@@ -1,6 +1,6 @@
 # Configure computer displays
-exec xrandr --output HDMI-0 --mode 3840x2160 --right-of DP-2 --rate 60 --primary
-exec xrandr --output DP-2 --mode 3840x2160+0+0 --left-of HDMI-0 --rate 60
+#exec xrandr --output HDMI-0 --mode 3840x2160 --right-of DP-2 --rate 60 --primary
+#exec xrandr --output DP-2 --mode 3840x2160+0+0 --left-of HDMI-0 --rate 60
 
 # Picom Compositor
 exec picom --config ~/.config/picom/picom.conf
@@ -13,14 +13,13 @@ exec dunst -conf $HOME/.config/dunst/dunstrc
 
 # Feh background image
 #exec feh --bg-fill https://i.imgur.com/QoufAE6.jpg --bg-fill https://github.com/Unixado/dotfiles/blob/master/.config/wallpaper/wall.jpg?raw=true 
-exec feh --bg-fill /mnt/CSAN/Media/Pictures/backgrounds/Bison-BW-Looking-Left.JPG 
+exec feh --bg-fill /mnt/CSAN/Media/Pictures/backgrounds/mcdonald-lake-glacier-national-park-5k-ba.jpg --no-xinerama
 
 # Setup San Francisco font
 exec sh ~/.config/.sf-mono/.setup
 
-# Start applications
-exec teams
-exec slack
+# Start slack
+exec --no-startup-id i3-msg 'workspace 9; exec slack'
 
 # Set audio to HDMI output
 # exec pactl set-card-profile alsa_card.pci-0000_0a_00.1 output:hdmi-stereo
@@ -43,10 +42,10 @@ bindsym XF86MonBrightnessUp exec sh ~/.config/.brightness up
 #bluetoothctl -- connect 38:18:4C:6C:7D:00 && pactl set-default-sink bluez_sink.38_18_4C_6C_7D_00.a2dp_sink
 
 gaps inner 20
-gaps outer 40
+gaps outer 20
 default_border none
 
-font pango:SF Mono 30
+font pango:SF Mono 26
 # This font is widely installed, provides lots of unicode glyphs, right-to-left
 # text rendering and scalability on retina/hidpi displays (thanks to pango).
 #font pango:SF Mono 8
