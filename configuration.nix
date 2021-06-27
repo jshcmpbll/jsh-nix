@@ -75,7 +75,6 @@ menuentry "Windows 10" {
     hostId = "a6bbe9e1";
     useDHCP = true;
     interfaces.enp5s0.useDHCP = true;
-    #extraHosts = "${kubeMasterIP} ${kubeMasterHostname}";
     firewall = {
       enable = false;
       # allowedTCPPorts = [ ... ];
