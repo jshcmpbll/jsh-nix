@@ -3,11 +3,9 @@
 {
   users.users.jsh = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "sudo" "docker" "audio" ];
+    extraGroups = [ "wheel" "sudo" "audio" ];
     shell = pkgs.zsh;
   };
-
-  virtualisation.docker.enable = true;
 
   security.sudo.configFile = ''
     jsh ALL=(ALL) NOPASSWD:ALL
@@ -123,10 +121,10 @@ function open {
   	sxiv "$1"
   	;;
   
-  *.pdf)
+  *.pdf | *.epub)
   	zathura "$1"
   	;;
-  
+
   *)
   	"${EDITOR:=nvim}" "$1"
   	;;
@@ -162,11 +160,13 @@ function xp {
       configFile."dunst/dunstrc".source = /.jsh-nix/dots/dunst/dunstrc;
       configFile."../.xprofile".source = /.jsh-nix/dots/Xprofile;
       configFile."zsh/jsh.zsh-theme".source = /.jsh-nix/dots/zsh/jsh.zsh-theme;
+      #configfile."../.aws/cli/alias".source = /.jsh-nix/dots/aws/cli/alias;
 
       # Scripts
       configFile.".sf-mono/.setup".source = /.jsh-nix/scripts/sf-mono;
       configFile.".brightness".source = /.jsh-nix/scripts/brightness;
       configFile."screenshots/copy-img".source = /.jsh-nix/scripts/copy-img;
+      configFile."../.jumpd".source = /.jsh-nix/scripts/jumpd;
 
     };
   };
