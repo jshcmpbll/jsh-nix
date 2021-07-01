@@ -37,7 +37,7 @@
         "celar" = "clear";
         "tf" = "terraform";
         "kubeclt" = "kubectl";
-        "edit" = "cd /.jsh-nix";
+        "edit" = "cd /home/jsh/git/jsh-nix";
       };
       initExtra = ''
 ZSH_THEME_GIT_PROMPT_PREFIX="%{$reset_color%}%{$fg[white]%}["
@@ -147,26 +147,26 @@ function xp {
       enable = true;
     
       # Dot Files
-      configFile."../.vimrc".source = /.jsh-nix/dots/vimrc;
-      configFile."i3/i3status.conf".source = /.jsh-nix/dots/i3/i3status.conf;
-      configFile."i3/config".source = /.jsh-nix/dots/i3/config;
-      configFile."../.Xresources".source = /.jsh-nix/dots/Xresources;
-      configFile."../.tmux.conf".source = /.jsh-nix/dots/tmux.conf;
-      configFile."polybar/config.ini".source = /.jsh-nix/dots/polybar/config.ini;
-      configFile."polybar/launch.sh".source = /.jsh-nix/dots/polybar/launch.sh;
-      configFile."rofi/config".source = /.jsh-nix/dots/rofi/config;
-      configFile."nixpkgs/config.nix".source = /.jsh-nix/dots/nixpkgs/config.nix;
-      configFile."picom/picom.conf".source = /.jsh-nix/dots/picom/picom.conf;
-      configFile."dunst/dunstrc".source = /.jsh-nix/dots/dunst/dunstrc;
-      configFile."../.xprofile".source = /.jsh-nix/dots/Xprofile;
-      configFile."zsh/jsh.zsh-theme".source = /.jsh-nix/dots/zsh/jsh.zsh-theme;
-      #configfile."../.aws/cli/alias".source = /.jsh-nix/dots/aws/cli/alias;
+      configFile."../.vimrc".source = /home/jsh/git/jsh-nix/dots/vimrc;
+      configFile."i3/i3status.conf".source = /home/jsh/git/jsh-nix/dots/i3/i3status.conf;
+      configFile."i3/config".source = /home/jsh/git/jsh-nix/dots/i3/config;
+      configFile."../.Xresources".source = /home/jsh/git/jsh-nix/dots/Xresources;
+      configFile."../.tmux.conf".source = /home/jsh/git/jsh-nix/dots/tmux.conf;
+      configFile."polybar/config.ini".source = /home/jsh/git/jsh-nix/dots/polybar/config.ini;
+      configFile."polybar/launch.sh".source = /home/jsh/git/jsh-nix/dots/polybar/launch.sh;
+      configFile."rofi/config".source = /home/jsh/git/jsh-nix/dots/rofi/config;
+      configFile."nixpkgs/config.nix".source = /home/jsh/git/jsh-nix/dots/nixpkgs/config.nix;
+      configFile."picom/picom.conf".source = /home/jsh/git/jsh-nix/dots/picom/picom.conf;
+      configFile."dunst/dunstrc".source = /home/jsh/git/jsh-nix/dots/dunst/dunstrc;
+      configFile."../.xprofile".source = /home/jsh/git/jsh-nix/dots/Xprofile;
+      configFile."zsh/jsh.zsh-theme".source = /home/jsh/git/jsh-nix/dots/zsh/jsh.zsh-theme;
+      #configfile."../.aws/cli/alias".source = /home/jsh/git/jsh-nix/dots/aws/cli/alias;
 
       # Scripts
-      configFile.".sf-mono/.setup".source = /.jsh-nix/scripts/sf-mono;
-      configFile.".brightness".source = /.jsh-nix/scripts/brightness;
-      configFile."screenshots/copy-img".source = /.jsh-nix/scripts/copy-img;
-      configFile."../.jumpd".source = /.jsh-nix/scripts/jumpd;
+      configFile.".sf-mono/.setup".source = /home/jsh/git/jsh-nix/scripts/sf-mono;
+      configFile.".brightness".source = /home/jsh/git/jsh-nix/scripts/brightness;
+      configFile."screenshots/copy-img".source = /home/jsh/git/jsh-nix/scripts/copy-img;
+      configFile."../.jumpd".source = /home/jsh/git/jsh-nix/scripts/jumpd;
 
     };
   };
