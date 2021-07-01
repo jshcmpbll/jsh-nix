@@ -12,7 +12,7 @@ in
 {
   imports =
     [
-      /.jsh-nix/users/jsh.nix
+      /home/jsh/git/jsh-nix/users/jsh.nix
       /etc/nixos/hardware-configuration.nix
       <home-manager/nixos>
       <nixpkgs/nixos/modules/services/hardware/sane_extra_backends/brscan4.nix>
