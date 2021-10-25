@@ -1,7 +1,7 @@
+Xft.dpi: 144
 urxvt.font: xft:SF Mono:size=16
 urxvt*transparent: false
 urxvt*shading: 15
-xft.dpi: 190
 
 
 Xcursor.theme: xcursor-breeze

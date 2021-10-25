@@ -6,7 +6,7 @@ let
   };
   garage-overlay = import (nix-garage.outPath + "/overlay.nix");
   overlay = import <nixpkgs> { overlays = [ garage-overlay ]; };
-
+  iconTheme = pkgs.luna-icons.out;
 
 in
 {
@@ -59,12 +59,38 @@ in
     EDITOR = "${pkgs.vim}/bin/vim";
   };
 
+  # QT4/5 global theme
+  environment.etc."xdg/Trolltech.conf" = {
+    text = ''
+      [Qt]
+      style=Breeze
+    '';
+    mode = "444";
+  };
+
+  # GTK3 global theme (widget and icon theme)
+  environment.etc."xdg/gtk-3.0/settings.ini" = {
+    text = ''
+      [Settings]
+      gtk-icon-theme-name=breeze
+      gtk-theme-name=Breeze-gtk
+    '';
+    mode = "444";
+  };
+
   fonts.fonts = with pkgs; [
     hermit
     source-code-pro
     terminus_font
     dejavu_fonts
   ];
+
+  virtualisation = {
+    docker.enable = true;
+    libvirtd = {
+      enable = true;
+    };
+  };
 
   ### NETWORKING ###
 
@@ -73,18 +99,12 @@ in
     hostName = "jsh-server";
     hostId = "a6bbe9e1";
     useDHCP = true;
-    interfaces.enp5s0.useDHCP = true;
+    nameservers = [ "1.1.1.1" "1.0.0.1" ];
     firewall = {
       enable = false;
       # allowedTCPPorts = [ ... ];
       # allowedUDPPorts = [ 500 4500 ];
     };
-    nat = {
-      enable = true;
-      internalInterfaces = [ "ve-+" ];
-      externalInterface = "enp5s0";
-    };
-
   };
 
   ### NETWORKING ###
@@ -95,160 +115,196 @@ in
   ### PACKAGES ###  
 
   environment.systemPackages = with pkgs; [
-    ntfs3g
-    wget
-    vim
-    rxvt_unicode
-    chromium
-    i3-gaps
-    slack
-    spotify
-    unzip
-    scrot
-    tldr
-    tlp
-    zsh
-    neofetch
-    htop
-    gtk3
-    lightdm
-    lightdm_gtk_greeter
-    git
-    git-lfs
-    unstable.github-cli
-    oh-my-zsh
-    rofi
-    dunst
-    ffmpeg
-    gimp
-    gnumake
-    vlc
-    which
-    nmap
-    ncat
-    python38Packages.grip
-    zathura
-    zfs
-    unstable.zoom-us
-    unstable.spotifyd
-    tree
-    feh
-    file
-    fdupes
-    unstable.discord
-    silver-searcher
-    screen
-    rsync
-    restic
-    polybarFull
-    ncurses
-    ncdu
-    jq
-    hddtemp
-    google-cloud-sdk
-    awscli2
-    unstable.azure-cli
     _1password
-    tmux
-    pavucontrol
-    xclip
-    os-prober
-    woeusb
-    cudatoolkit
-    glxinfo
-    youtube-dl
-    unrar
-    lsof
-    yubikey-manager
-    digikam
-    restic
-    polybar
-    sxiv
-    mpv
-    picom
-    killall
-    vulnix
+    _1password-gui
     aspell
     aspellDicts.en
+    audacity
+    awscli2
+    bc
+    bind
     blueman
-    wine
-    #lutris
-    vulkan-loader
-    vulkan-tools
-    simple-scan
-    sane-airscan
+    breeze-gtk
+    breeze-qt5
     cava
-    redshift
-    steam
-    unstable.obs-studio
-    #obs-ndi
-    #ndi
-    linuxPackages.v4l2loopback
-    pywal
-    yarn
-    smartmontools
-    pciutils
-    xfce.thunar
-    kubectl
-    sshfs
-    lm_sensors
-    ofono-phonesim
-    unstable.teams
-    unstable.citrix_workspace_20_09_0
+    chromium
+    cudatoolkit
+    darktable
+    digikam
+    dmg2img
+    dmidecode
+    dolphin
+    dunst
+    eagle
+    exiftool
+    fdupes
+    feh
+    ffmpeg
+    file
+    firefox
+    foremost
+    freecad
+    gimp
+    git
+    git-lfs
+    glxinfo
+    gnome3.adwaita-icon-theme
+    gnumake
+    gnupg
+    gnuplot
+    go
+    google-chrome
+    google-cloud-sdk
+    grub2
+    gtk3
+    hddtemp
+    hicolor_icon_theme
+    htop
+    i3-gaps
+    iconTheme
+    imagemagick
+    iperf3
+    jq
+    killall
     kompose
+    kubectl
     kubectl
     kubernetes
     kubernetes-helm
+    libheif
+    libimobiledevice
+    libreoffice
+    libvirt
+    lightdm
+    lightdm_gtk_greeter
+    linuxPackages.v4l2loopback
+    lm_sensors
+    lsof
+    #lutris
+    lyx
+    mediainfo
+    mkdocs
+    mpv
+    mupdf
+    ncat
+    ncdu
+    ncurses
+    #ndi
+    neofetch
+    nixpkgs-fmt
+    nix-prefetch-git
+    nload
+    nmap
+    nodePackages.prettier
+    ntfs3g
+    #obs-ndi
+    ofono-phonesim
+    oh-my-zsh
+    okular
+    olive-editor
+    os-prober
+    overlay.codefresh
+    pandoc
+    pavucontrol
+    pciutils
+    pdfsandwich
+    php
+    picom
+    polybar
+    polybarFull
+    prometheus
+    protonvpn-cli
+    python38Packages.azure-functions-devops-build
+    python38Packages.grip
+    pywal
+    qemu
+    qemu_kvm
+    qemu-utils
+    redshift
+    restic
+    restic
+    rofi
+    rpl
+    rsync
+    rxvt_unicode
+    samba
+    sane-airscan
+    screen
+    screenkey
+    scrot
+    silver-searcher
+    simple-scan
+    slack
+    smartmontools
+    spotify
+    sshfs
+    sshfs-fuse
+    steam
+    sxiv
     synergy
-    yq
-    yaml2json
-    yj
-    iperf3
-    usbutils
-    firefox
-    #unstable.terraform
+    telnet
     #terraform_0_11
     #terraform_0_12
-    #unstable.terraform_0_13
     #terraform_0_15
     terraform-providers.google
-    tigervnc
-    eagle
-    prometheus
-    audacity
-    _1password-gui
-    foremost
-    samba
-    libheif
-    nixpkgs-fmt
-    okular
-    overlay.codefresh
-    unstable.exodus
-    unstable.minecraft
-    unstable.guvcview
-    sshfs-fuse
-    dmidecode
-    protonvpn-cli
-    freecad
-    unstable.odafileconverter
-    unstable.fluxcd
-    unstable.argocd
-    exiftool
-    mediainfo
     tesseract
-    pdfsandwich
-    gnupg
+    texlive.combined.scheme-full
+    tigervnc
+    tldr
+    tlp
+    tmux
+    tree
+    unrar
+    unstable.argocd
+    unstable.azure-cli
+    unstable.azure-functions-core-tools
+    unstable.citrix_workspace_20_09_0
+    unstable.discord
+    unstable.exodus
+    unstable.fluxcd
+    unstable.github-cli
+    unstable.guvcview
+    unstable.joplin
+    unstable.minecraft
+    unstable.obs-studio
+    unstable.odafileconverter
     unstable.python37
     unstable.python37Packages.pip
-    bind
-    nix-prefetch-git
-    libreoffice
-    mkdocs
-    unstable.joplin
-    wireshark-qt
+    unstable.spotifyd
+    unstable.teams
+    #unstable.terraform
+    #unstable.terraform_0_13
+    unstable.tilp2
+    unstable.vlc
+    unstable.yuzu-mainline
+    unstable.zoom-us
+    unzip
+    usbmuxd
+    usbutils
+    vim
+    vulkan-loader
+    vulkan-tools
+    vulnix
+    wget
+    which
+    wine
     wireshark-cli
-    nodePackages.prettier
-    php
+    wireshark-qt
+    woeusb
+    xclip
+    xfce.thunar
+    xorg.xdpyinfo
+    yaml2json
+    yarn
+    yj
+    youtube-dl
+    yq
+    yubico-piv-tool
+    yubikey-manager
+    zathura
+    zfs
+    zsh
+    #LPA
   ];
 
   ### PACKAGES ###
@@ -269,7 +325,7 @@ in
       displayManager.lightdm = {
         enable = true;
         autoLogin.timeout = 10;
-        background = "/mnt/CSAN/Media/Pictures/backgrounds/Bison-BW-Looking-Left.JPG";
+        background = "/home/jsh/.i3_background";
       };
       displayManager.defaultSession = "none+i3";
       windowManager.i3 = {
@@ -287,18 +343,18 @@ in
       xkbOptions = "ctrl:swapcaps";
     };
 
-    samba = {
-      enable = true;
-      syncPasswordsByPam = true;
-      shares.csan =
-        {
-          path = "/mnt/CSAN";
-          "read only" = false;
-          "guest ok" = false;
-          writeable = true;
-          comment = "Campbell SAN";
-        };
-    };
+    #samba = {
+    #  enable = true;
+    #  syncPasswordsByPam = true;
+    #  shares.csan =
+    #    {
+    #      path = "/mnt/CSAN";
+    #      "read only" = false;
+    #      "guest ok" = false;
+    #      writeable = true;
+    #      comment = "Campbell SAN";
+    #    };
+    #};
 
     openssh = {
       enable = true;
@@ -345,6 +401,10 @@ in
       };
     };
 
+    usbmuxd = {
+      enable = true;
+    };
+
   };
 
   systemd.services = {
@@ -359,6 +419,11 @@ in
         ExecStart = "${pkgs.x11vnc}/bin/x11vnc -display :0 -auth /home/jsh/.Xauthority -forever";
       };
     };
+
+    ofono = {
+      enable = true;
+    };
+
   };
 
   ### SERVICES ###
@@ -396,6 +461,11 @@ in
     bluetooth = {
       enable = true;
       powerOnBoot = true;
+      config = {
+        General = {
+          Enable = "Source,Sink,Media,Socket";
+        };
+      };
     };
 
     opengl = {
