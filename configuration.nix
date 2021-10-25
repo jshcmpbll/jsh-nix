@@ -20,7 +20,7 @@ in
   nixpkgs.config = {
     allowUnfree = true;
     packageOverrides = pkgs: {
-      unstable = import <nixpkgs-unstable> {
+      latest = import <nixpkgs-unstable> {
         config = config.nixpkgs.config;
       };
     };
@@ -255,29 +255,29 @@ in
     tmux
     tree
     unrar
-    unstable.argocd
-    unstable.azure-cli
-    unstable.azure-functions-core-tools
-    unstable.citrix_workspace_20_09_0
-    unstable.discord
-    unstable.exodus
-    unstable.fluxcd
-    unstable.github-cli
-    unstable.guvcview
-    unstable.joplin
-    unstable.minecraft
-    unstable.obs-studio
-    unstable.odafileconverter
-    unstable.python37
-    unstable.python37Packages.pip
-    unstable.spotifyd
-    unstable.teams
-    #unstable.terraform
-    #unstable.terraform_0_13
-    unstable.tilp2
-    unstable.vlc
-    unstable.yuzu-mainline
-    unstable.zoom-us
+    latest.argocd
+    latest.azure-cli
+    latest.azure-functions-core-tools
+    latest.citrix_workspace_20_09_0
+    latest.discord
+    latest.exodus
+    latest.fluxcd
+    latest.github-cli
+    latest.guvcview
+    latest.joplin
+    latest.minecraft
+    latest.obs-studio
+    latest.odafileconverter
+    latest.python37
+    latest.python37Packages.pip
+    latest.spotifyd
+    latest.teams
+    #latest.terraform
+    #latest.terraform_0_13
+    latest.tilp2
+    latest.vlc
+    latest.yuzu-mainline
+    latest.zoom-us
     unzip
     usbmuxd
     usbutils
