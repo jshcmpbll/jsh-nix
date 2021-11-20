@@ -4,10 +4,10 @@ exec xrandr --output DP-2 --mode 2560x1440+0+0 --left-of HDMI-0 --rate 60
 exec xrdb -merge ~/.Xresources
 
 # Picom Compositor
-exec picom --config ~/.config/picom/picom.conf
+exec_always picom --config ~/.config/picom/picom.conf
 
 # Polybar
-exec sh ~/.config/polybar/launch.sh
+exec_always sh ~/.config/polybar/launch.sh
 
 # Dunst
 exec dunst -conf $HOME/.config/dunst/dunstrc 
