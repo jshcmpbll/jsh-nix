@@ -167,7 +167,7 @@
             if [ $CURRENT = $DEFAULT ] ; then
               git pull --rebase
             else
-              git checkout $DEFAULT; git pull --rebase; git checkout $CURRENT
+              git checkout $DEFAULT; git pull --rebase; git checkout $CURRENT; git rebase $DEFAULT; git rebase $DEFAULT; echo "Recommend running git push $CURRENT -f"
             fi
           }
         ''
