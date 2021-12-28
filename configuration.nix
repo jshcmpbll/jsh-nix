@@ -419,8 +419,11 @@ in
       description = "VNC server";
       serviceConfig = {
         type = "simple";
-        ExecStart = "${pkgs.x11vnc}/bin/x11vnc -display :0 -auth /home/jsh/.Xauthority -forever";
+        ExecStart = "${pkgs.x11vnc}/bin/x11vnc -display :0 -auth /var/run/lightdm/root/:0 -forever";
       };
+      reloadIfChanged = true;
+      restartIfChanged = true;
+      after = [ "display-manager.service" ];
     };
 
     ofono = {
