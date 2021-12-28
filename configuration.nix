@@ -133,7 +133,8 @@ in
     digikam
     dmg2img
     dmidecode
-    dolphin
+    docker-compose
+    latest.dolphin
     dunst
     eagle
     exiftool
@@ -197,7 +198,7 @@ in
     nmap
     nodePackages.prettier
     ntfs3g
-    #obs-ndi
+    obs-ndi
     ofono-phonesim
     oh-my-zsh
     okular
@@ -210,7 +211,6 @@ in
     pdfsandwich
     php
     picom
-    polybar
     polybarFull
     prometheus
     protonvpn-cli
@@ -278,6 +278,7 @@ in
     latest.vlc
     latest.yuzu-mainline
     latest.zoom-us
+    ranger
     unzip
     usbmuxd
     usbutils
@@ -304,6 +305,8 @@ in
     zathura
     zfs
     zsh
+    ccloud-cli
+    binutils
     #LPA
   ];
 
