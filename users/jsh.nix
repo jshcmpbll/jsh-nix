@@ -43,7 +43,6 @@
         oh-my-zsh = {
           enable = true;
           plugins = [
-            "git"
             "z"
           ];
         };
@@ -153,7 +152,9 @@
           function xc {
             xclip -sel copy
           }
-
+        ''
+        +
+        ''
           function xp {
             xclip -o -sel clip
           }
@@ -161,14 +162,20 @@
         +
         ''
           function gp {
-            git pull --rebase
+            CURRENT=$(git rev-parse --abbrev-ref HEAD)
+            DEFAULT=$(git remote show origin | grep 'HEAD branch' | cut -d' ' -f5)
+            if [ $CURRENT = $DEFAULT ] ; then
+              git pull --rebase
+            else
+              git checkout $DEFAULT; git pull --rebase; git checkout $CURRENT; git rebase $DEFAULT; git rebase $DEFAULT; echo "Recommend running git push $CURRENT -f"
+            fi
           }
         ''
         +
         ''
           function gc {
             git commit -m "$1"
-            }
+          }
         ''
         +
         ''
@@ -180,6 +187,14 @@
         ''
           function gs {
           git status
+          }
+        ''
+        +
+        ''
+          function gf {
+          git add .
+          git commit -m "f"
+          git rebase -i HEAD~$1
           }
         ''
         +
