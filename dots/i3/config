@@ -9,6 +9,10 @@ exec_always picom --config ~/.config/picom/picom.conf
 # Polybar
 exec_always sh ~/.config/polybar/launch.sh
 
+# xset
+exec_always xset -dpms
+exec_always xset s off
+
 # Dunst
 exec dunst -conf $HOME/.config/dunst/dunstrc 
 
