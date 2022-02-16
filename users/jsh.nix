@@ -37,8 +37,8 @@
         history = {
           extended = true;
           ignoreDups = true;
-          save = 10000;
-          size = 10000;
+          save = 1000000;
+          size = 1000000;
         };
         oh-my-zsh = {
           enable = true;
@@ -123,27 +123,40 @@
         ''
           function open {  
             case $1 in
-            *.mp3 | *.flac | *.wav)
+            *.[mM][pP]3 | *.[fF][lL][aA][cC] | *.[wW][aA][vV])
+            # mp3 flac wav
               mpv --no-video "$1"
               ;;
   
-            *.mp4 | *.mkv | *.webm)
+            *.[mM][pP]4 | *.[mM][kK][vV] | *.[wW][eE][bB][mM] | *.[mM][oO][vV])
+            # mp4 mkv webm mov
               mpv "$1"
               ;;
   
-            *.png | *.gif | *.jpg | *.jpe | *.jpeg)
+            *.[pP][nN][gG] | *.[gG][iI][fF] | *.[jJ][pP][gG] | *.[jJ][pP][eE] | *.[jJ][pP][eE][gG])
+            # png gif jpg jpe jpeg
               sxiv "$1"
               ;;
   
-            *.pdf | *.epub)
+            *.[pP][dD][fF] | *.[eE][pP][uU][bB])
+            # pdf epub
               zathura "$1"
               ;;
-            *.html)
-                  chromium "$1"
-                  ;;
+
+            *.[hH][tT][mM][lL])
+            # html
+              chromium "$1"
+              ;;
+
+            *[mM][dD])
+            # md
+              grip -b "$1"
+              ;;
+
             *)
               "${EDITOR:=nvim}" "$1"
               ;;
+
             esac
           }
         ''
@@ -167,7 +180,8 @@
             if [ $CURRENT = $DEFAULT ] ; then
               git pull --rebase
             else
-              git checkout $DEFAULT; git pull --rebase; git checkout $CURRENT; git rebase $DEFAULT; git rebase $DEFAULT; echo "Recommend running git push $CURRENT -f"
+              git checkout $DEFAULT; git pull --rebase; git checkout $CURRENT; git rebase $DEFAULT; git rebase $DEFAULT; echo "Recommend running: git push origin $CURRENT -f"
+              echo "git push origin $CURRENT -f" >> $HISTFILE
             fi
           }
         ''
@@ -201,6 +215,18 @@
         ''
           function geoloc {
           curl -s "https://geo.ipify.org/api/v1?apiKey=at_q1SwFLqdSx2d0BHZLP5RuxVJCqJeq&ipAddress=$1" | jq
+          }
+        ''
+        +
+        ''
+          function mm {
+            echo "See you soon love!"
+            while true; do
+              i3-msg workspace 9 -q
+              sleep $(( $RANDOM % 240 + 40 ))
+              i3-msg workspace 1 -q
+              sleep $(( $RANDOM % 240 + 40 ))
+            done
           }
         '';
       };

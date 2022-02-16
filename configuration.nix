@@ -7,7 +7,6 @@ let
   garage-overlay = import (nix-garage.outPath + "/overlay.nix");
   overlay = import <nixpkgs> { overlays = [ garage-overlay ]; };
   iconTheme = pkgs.luna-icons.out;
-
 in
 {
   imports =
@@ -115,8 +114,6 @@ in
   ### PACKAGES ###  
 
   environment.systemPackages = with pkgs; [
-    _1password
-    _1password-gui
     aspell
     aspellDicts.en
     audacity
@@ -198,7 +195,8 @@ in
     nmap
     nodePackages.prettier
     ntfs3g
-    obs-ndi
+    #obs-ndi
+    obs-studio
     ofono-phonesim
     oh-my-zsh
     okular
@@ -234,7 +232,7 @@ in
     scrot
     silver-searcher
     simple-scan
-    slack
+    latest.slack
     smartmontools
     spotify
     sshfs
@@ -246,6 +244,7 @@ in
     #terraform_0_11
     #terraform_0_12
     #terraform_0_15
+    terraform_0_13
     terraform-providers.google
     tesseract
     texlive.combined.scheme-full
@@ -255,6 +254,7 @@ in
     tmux
     tree
     unrar
+    vlc
     latest.argocd
     latest.azure-cli
     latest.azure-functions-core-tools
@@ -265,8 +265,7 @@ in
     latest.github-cli
     latest.guvcview
     latest.joplin
-    latest.minecraft
-    latest.obs-studio
+    minecraft
     latest.odafileconverter
     latest.python37
     latest.python37Packages.pip
@@ -274,10 +273,8 @@ in
     latest.teams
     #latest.terraform
     #latest.terraform_0_13
-    latest.tilp2
-    latest.vlc
     latest.yuzu-mainline
-    latest.zoom-us
+    zoom-us
     ranger
     unzip
     usbmuxd
@@ -305,10 +302,16 @@ in
     zathura
     zfs
     zsh
-    ccloud-cli
+    latest.ccloud-cli
     binutils
+    helmsman
+    terraform-docs
+    libimobiledevice
+    magic-wormhole
+    wormhole-william
     #LPA
   ];
+
 
   ### PACKAGES ###
 
