@@ -100,8 +100,8 @@ in
     useDHCP = true;
     nameservers = [ "1.1.1.1" "1.0.0.1" ];
     firewall = {
-      enable = false;
-      # allowedTCPPorts = [ ... ];
+      enable = true;
+      allowedTCPPorts = [ 5900 ];
       # allowedUDPPorts = [ 500 4500 ];
     };
   };
@@ -367,6 +367,7 @@ in
       forwardX11 = true;
       permitRootLogin = "no";
       passwordAuthentication = false;
+      openFirewall = true;
     };
 
     pcscd.enable = true;
@@ -394,10 +395,10 @@ in
       };
     };
 
-    plex = {
-      enable = true;
-      user = "jsh";
-    };
+    #plex = {
+    #  enable = true;
+    #  user = "jsh";
+    #};
 
     zfs = {
       autoScrub.enable = true;
@@ -408,6 +409,10 @@ in
     };
 
     usbmuxd = {
+      enable = true;
+    };
+
+    fail2ban = {
       enable = true;
     };
 
