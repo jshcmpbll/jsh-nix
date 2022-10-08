@@ -1,10 +1,13 @@
 # Configure computer displays
-exec xrandr --output HDMI-0 --mode 2560x1440 --right-of DP-2 --rate 60 --primary
-exec xrandr --output DP-2 --mode 2560x1440+0+0 --left-of HDMI-0 --rate 60
+#exec xrandr --output DP-0 --mode 2560x1440 --rate 144 --primary --right-of HDMI-0 --output HDMI-0 --mode 3840x2160 --scale-from 2560x1440 --rotate left --rate 60 --left-of DP-0 
+#exec xrandr --output HDMI-0 --mode 3840x2160 --scale-from 2560x1440 --rotate left --pos 0x0 --rate 60
+#exec xrandr --output DP-0 --mode 2560x1440 --pos 0x0 --rate 144 --primary
+#exec --no-startup-id nvidia-settings --assign CurrentMetaMode="DPY-1: 2560x1440 @2560x1440 +2160+2400 {ViewPortIn=2560x1440, ViewPortOut=2560x1440+0+0}, DPY-0: 3840x2160 @2160x3840 +0+0 {ViewPortIn=2160x3840, ViewPortOut=3840x2160+0+0, Rotation=90}"
 exec xrdb -merge ~/.Xresources
 
 # Picom Compositor
-exec_always picom --config ~/.config/picom/picom.conf
+#exec_always picom --config ~/.config/picom/picom.conf
+exec_always picom --config ~/git/jsh-nix/dots/picom/picom.conf
 
 # Polybar
 exec_always sh ~/.config/polybar/launch.sh
@@ -14,11 +17,11 @@ exec_always xset -dpms
 exec_always xset s off
 
 # Dunst
-exec dunst -conf $HOME/.config/dunst/dunstrc 
+exec --no-startup-id dunst -conf $HOME/.config/dunst/dunstrc 
 
 # Feh background image
 #exec feh --bg-fill https://i.imgur.com/QoufAE6.jpg --bg-fill https://github.com/Unixado/dotfiles/blob/master/.config/wallpaper/wall.jpg?raw=true 
-exec feh --bg-fill ~/.i3_background --no-xinerama
+exec --no-startup-id feh --bg-fill ~/.i3_background --no-xinerama
 
 # Setup San Francisco font
 exec sh ~/.config/.sf-mono/.setup
@@ -41,8 +44,8 @@ bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ to
 bindsym XF86AudioMicMute exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle && $refresh_i3status
 
 # Control screen brightness
-bindsym XF86MonBrightnessDown exec sh ~/.config/.brightness down
-bindsym XF86MonBrightnessUp exec sh ~/.config/.brightness up
+#bindsym XF86MonBrightnessDown exec sh ~/.config/.brightness down
+#bindsym XF86MonBrightnessUp exec sh ~/.config/.brightness up
 
 #bluetoothctl -- connect 38:18:4C:6C:7D:00 && pactl set-default-sink bluez_sink.38_18_4C_6C_7D_00.a2dp_sink
 

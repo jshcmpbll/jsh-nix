@@ -1,28 +1,44 @@
-{ config, pkgs, ... }:
+{ lib, config, pkgs, latest, ... }:
 let
-  nix-garage = builtins.fetchGit {
-    url = "https://github.com/nebulaworks/nix-garage";
-    ref = "master";
+  myFirefox = pkgs.wrapFirefox pkgs.firefox-esr-unwrapped {
+    cfg = { smarctcardSupport = true; };
+    nixExtensions = [
+      (pkgs.fetchFirefoxAddon {
+        name = "1password";
+        url = "https://addons.mozilla.org/firefox/downloads/file/3972472/1password_x_password_manager-2.3.7.xpi";
+        sha256 = "sha256:9aaee3215d05faa802d83c5a355405d1ba8659f502aacd32aa44c036d2d6d354";
+      })
+      (pkgs.fetchFirefoxAddon {
+        name = "ublock";
+        url = "https://addons.mozilla.org/firefox/downloads/file/3933192/ublock_origin-1.42.4-an+fx.xpi"; # Get this from about:addons
+        sha256 = "sha256:1kirlfp5x10rdkgzpj6drbpllryqs241fm8ivm0cns8jjrf36g5w";
+      })
+    ];
   };
-  garage-overlay = import (nix-garage.outPath + "/overlay.nix");
-  overlay = import <nixpkgs> { overlays = [ garage-overlay ]; };
-  iconTheme = pkgs.luna-icons.out;
 in
 {
-  imports =
-    [
-      /home/jsh/git/jsh-nix/users/jsh.nix
-      /etc/nixos/hardware-configuration.nix
-      <home-manager/nixos>
-      <nixpkgs/nixos/modules/services/hardware/sane_extra_backends/brscan4.nix>
-    ];
+  imports = [
+    ./hardware-configuration.nix
+    ./dots/zsh.nix
+    ./dots/vim.nix
+    (import ./lib/home-file.nix
+      [ { origin = ./dots/polybar/config.ini;
+          target = "/home/jsh/.config/polybar/config.ini";
+        }
+        { origin = ./dots/rofi/config.rasi;
+          target = "/home/jsh/.config/rofi/config.rasi";
+        }
+        { origin = ./dots/dunst/dunstrc;
+          target = "/home/jsh/.config/dunst/dunstrc";
+        }
+        { origin = ./dots/i3/config;
+          target = "/home/jsh/.config/i3/config";
+        }
+      ])
+  ];
   nixpkgs.config = {
     allowUnfree = true;
-    packageOverrides = pkgs: {
-      latest = import <nixpkgs-unstable> {
-        config = config.nixpkgs.config;
-      };
-    };
+    allowBroken = true;
   };
 
   boot = {
@@ -43,6 +59,12 @@ in
         '';
       };
     };
+    extraModulePackages = with config.boot.kernelPackages;
+      [ v4l2loopback.out ];
+    kernelModules = [ "v4l2loopback" ];
+    extraModprobeConfig = ''
+      options v4l2loopback video_nr=10 exclusive_caps=1 card_label="Camera"
+    '';
     supportedFilesystems = [ "zfs" ];
   };
 
@@ -52,29 +74,6 @@ in
   location = {
     latitude = 33.9;
     longitude = -118.1;
-  };
-
-  environment.variables = {
-    EDITOR = "${pkgs.vim}/bin/vim";
-  };
-
-  # QT4/5 global theme
-  environment.etc."xdg/Trolltech.conf" = {
-    text = ''
-      [Qt]
-      style=Breeze
-    '';
-    mode = "444";
-  };
-
-  # GTK3 global theme (widget and icon theme)
-  environment.etc."xdg/gtk-3.0/settings.ini" = {
-    text = ''
-      [Settings]
-      gtk-icon-theme-name=breeze
-      gtk-theme-name=Breeze-gtk
-    '';
-    mode = "444";
   };
 
   fonts.fonts = with pkgs; [
@@ -91,6 +90,11 @@ in
     };
   };
 
+  nix.extraOptions = ''
+    experimental-features = nix-command
+  '';
+
+
   ### NETWORKING ###
 
   networking = {
@@ -99,17 +103,27 @@ in
     hostId = "a6bbe9e1";
     useDHCP = true;
     nameservers = [ "1.1.1.1" "1.0.0.1" ];
+    interfaces.eth0.wakeOnLan.enable = true;
+    interfaces.eth1.wakeOnLan.enable = true;
+    #interfaces.*.wakeOnLan.enable = true;
     firewall = {
-      enable = true;
-      allowedTCPPorts = [ 5900 ];
-      # allowedUDPPorts = [ 500 4500 ];
+      enable = false;
     };
   };
+  #systemd.network.links."10-eth0" = {
+  #  matchConfig.PermanentMACAddress = "34:97:f6:32:70:9d";
+  #  linkConfig.Name = "eth0";
+  #};
+  #systemd.network.links."10-eth1" = {
+  #  matchConfig.PermanentMACAddress = "34:97:f6:31:ad:4d";
+  #  linkConfig.Name = "eth1";
+  #};
+  #systemd.network.links."10-eth3" = {
+  #  matchConfig.PermanentMACAddress = "ea:5f:02:a6:52:7d";
+  #  linkConfig.Name = "eth2";
+  #};
 
   ### NETWORKING ###
-
-
-
 
   ### PACKAGES ###  
 
@@ -142,7 +156,7 @@ in
     firefox
     foremost
     freecad
-    gimp
+    gimp-with-plugins
     git
     git-lfs
     glxinfo
@@ -156,16 +170,13 @@ in
     grub2
     gtk3
     hddtemp
-    hicolor_icon_theme
     htop
     i3-gaps
-    iconTheme
     imagemagick
     iperf3
     jq
     killall
     kompose
-    kubectl
     kubectl
     kubernetes
     kubernetes-helm
@@ -178,13 +189,13 @@ in
     linuxPackages.v4l2loopback
     lm_sensors
     lsof
-    #lutris
+    latest.lutris
     lyx
     mediainfo
     mkdocs
     mpv
     mupdf
-    ncat
+    nmap
     ncdu
     ncurses
     #ndi
@@ -200,9 +211,7 @@ in
     ofono-phonesim
     oh-my-zsh
     okular
-    olive-editor
     os-prober
-    overlay.codefresh
     pandoc
     pavucontrol
     pciutils
@@ -211,11 +220,13 @@ in
     picom
     polybarFull
     prometheus
-    protonvpn-cli
+    #protonvpn-cli
+    protonvpn-cli_2
+    #protonvpn-gui
     python38Packages.azure-functions-devops-build
     python38Packages.grip
     pywal
-    qemu
+    qemu_full
     qemu_kvm
     qemu-utils
     redshift
@@ -231,7 +242,7 @@ in
     screenkey
     scrot
     silver-searcher
-    simple-scan
+    latest.simple-scan
     latest.slack
     smartmontools
     spotify
@@ -240,7 +251,7 @@ in
     steam
     sxiv
     synergy
-    telnet
+    inetutils # telnet
     #terraform_0_11
     #terraform_0_12
     #terraform_0_15
@@ -258,13 +269,13 @@ in
     latest.argocd
     latest.azure-cli
     latest.azure-functions-core-tools
-    latest.citrix_workspace_20_09_0
+    latest.citrix_workspace
     latest.discord
-    latest.exodus
     latest.fluxcd
     latest.github-cli
     latest.guvcview
-    latest.joplin
+    joplin
+    latest.joplin-desktop
     minecraft
     latest.odafileconverter
     latest.python37
@@ -280,8 +291,8 @@ in
     usbmuxd
     usbutils
     vim
-    vulkan-loader
-    vulkan-tools
+    #vulkan-loader
+    #vulkan-tools
     vulnix
     wget
     which
@@ -295,7 +306,7 @@ in
     yaml2json
     yarn
     yj
-    youtube-dl
+    latest.youtube-dl
     yq
     yubico-piv-tool
     yubikey-manager
@@ -309,13 +320,41 @@ in
     libimobiledevice
     magic-wormhole
     wormhole-william
+    latest.nufraw
+    nixpkgs-review
+    at
+    latest.btop
+    lm_sensors
+    ansible
+    openconnect
+    stoken
+    nvtop
+    latest.davinci-resolve
+    latest.dolphin-emu
+    hdparm
+    latest.conftest
+    json2hcl
+    open-policy-agent
+    ocrmypdf
+    thunderbird
+    hugo
+    gimpPlugins.resynthesizer
+    wireguard-tools
+    libsForQt5.skanlite
+    obsidian
+    gthumb
     #LPA
   ];
 
 
   ### PACKAGES ###
 
+  ### PROGRAMS ###
 
+  programs.mosh.enable = true;
+
+
+  ### PROGRAMS ###
 
 
   ### SERVICES ###
@@ -324,6 +363,9 @@ in
     xserver = {
       enable = true;
       autorun = true;
+      displayManager.setupCommands = ''
+        /nix/store/rqikhbksyzdgaddq50nqrnlgg6c3gky9-nvidia-settings-515.48.07/bin/nvidia-settings --assign CurrentMetaMode="DPY-1: nvidia-auto-select @2560x1440 +2160+0 {ViewPortIn=2560x1440, ViewPortOut=2560x1440+0+0}, DPY-0: 3840x2160 @2160x3840 +0+0 {ViewPortIn=2160x3840, ViewPortOut=3840x2160+0+0, Rotation=90}"
+      '';
       displayManager.autoLogin = {
         enable = true;
         user = "jsh";
@@ -342,9 +384,11 @@ in
       videoDrivers = [ "nvidia" ];
       libinput = {
         enable = true;
-        disableWhileTyping = true;
-        naturalScrolling = true;
-        tapping = false;
+        touchpad = {
+          disableWhileTyping = true;
+          naturalScrolling = true;
+          tapping = false;
+        };
       };
       xkbOptions = "ctrl:swapcaps";
     };
@@ -367,7 +411,6 @@ in
       forwardX11 = true;
       permitRootLogin = "no";
       passwordAuthentication = false;
-      openFirewall = true;
     };
 
     pcscd.enable = true;
@@ -395,10 +438,10 @@ in
       };
     };
 
-    #plex = {
-    #  enable = true;
-    #  user = "jsh";
-    #};
+    plex = {
+      enable = true;
+      user = "jsh";
+    };
 
     zfs = {
       autoScrub.enable = true;
@@ -412,18 +455,43 @@ in
       enable = true;
     };
 
-    fail2ban = {
+    #fail2ban = {
+    #  enable = true;
+    #  maxretry = 5;
+    #  ignoreIP = [
+    #    "192.168.0.0/16"
+    #  ];
+    #};
+
+    atd = {
+      enable = true;
+      allowEveryone = true;
+    };
+
+    #cgminer = {
+    #  enable = true;
+    #  pools = [
+    #    {
+    #      password = "anything123";
+    #      url = "stratum+tcp://stratum.slushpool.com:3333";
+    #      username = "jshcmpbll.nix";
+    #    }
+    #  ];
+    #};
+
+    ofono = {
       enable = true;
     };
 
+
   };
+
+
 
   systemd.services = {
     x11vnc = {
       enable = true;
       path = [ pkgs.gawk pkgs.nettools ];
-      wantedBy = [ "multi-user.target" ];
-      requires = [ "graphical.target" ];
       description = "VNC server";
       serviceConfig = {
         type = "simple";
@@ -431,16 +499,27 @@ in
       };
       reloadIfChanged = true;
       restartIfChanged = true;
-      after = [ "display-manager.service" ];
+      after = [ "multi-user.target" ];
     };
 
-    ofono = {
-      enable = true;
-    };
 
   };
 
   ### SERVICES ###
+
+  ### CONFIG ###
+
+  users.users.jsh = {
+    isNormalUser = true;
+    extraGroups = [ "wheel" "sudo" "audio" "docker" ];
+    shell = pkgs.zsh;
+  };
+
+  security.sudo.configFile = ''
+    jsh ALL=(ALL) NOPASSWD:ALL
+  '';
+
+  ### CONFIG ###
 
 
 
@@ -468,14 +547,13 @@ in
       enable = true;
       support32Bit = true;
       package = pkgs.pulseaudioFull;
-      extraModules = [ pkgs.pulseaudio-modules-bt ];
       extraConfig = "load-module module-switch-on-connect";
     };
 
     bluetooth = {
       enable = true;
       powerOnBoot = true;
-      config = {
+      settings = {
         General = {
           Enable = "Source,Sink,Media,Socket";
         };
@@ -487,6 +565,12 @@ in
       driSupport = true;
     };
 
+    video = {
+      hidpi = {
+        enable = true;
+      };
+    };
+
   };
 
   ### HARDWARE ###
@@ -494,7 +578,10 @@ in
 
 
 
-  # Read docs before changing -> (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system.stateVersion = "20.09"; # Did you read the comment?
+  # Read docs before changing -> (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).S
+  # Before changing update channel sources
+  # sudo nix-channel --add https://github.com/nix-community/home-manager/archive/release-${system.stateVersion}.tar.gz home-manager
+  # sudo nix-channel --add https://nixos.org/channels/nixos-${system.stateVersion} nixos
+  system.stateVersion = "22.05"; # Did you read the comment?
 
 }

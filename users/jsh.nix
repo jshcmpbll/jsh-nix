@@ -52,6 +52,7 @@
           "tf" = "terraform";
           "kubeclt" = "kubectl";
           "edit" = "cd /home/jsh/git/jsh-nix";
+          "ufraw-batch" = "nufraw-batch";
         };
         initExtra = ''
           ZSH_THEME_GIT_PROMPT_PREFIX="%{$reset_color%}%{$fg[white]%}["
@@ -228,6 +229,18 @@
               sleep $(( $RANDOM % 240 + 40 ))
             done
           }
+        ''
+        +
+        ''
+          function wado {
+            ls -d $1 | entr sh -c "clear; date; $2"
+          };
+        ''
+        +
+        ''
+          function gsaml2aws {
+            docker run -it -v ~/.aws/credentials:/root/.aws/credentials gsaml2aws
+          };
         '';
       };
     };
@@ -243,7 +256,7 @@
       configFile."../.tmux.conf".source = /home/jsh/git/jsh-nix/dots/tmux.conf;
       configFile."polybar/config.ini".source = /home/jsh/git/jsh-nix/dots/polybar/config.ini;
       configFile."polybar/launch.sh".source = /home/jsh/git/jsh-nix/dots/polybar/launch.sh;
-      configFile."rofi/config".source = /home/jsh/git/jsh-nix/dots/rofi/config;
+      configFile."rofi/config.rasi".source = /home/jsh/git/jsh-nix/dots/rofi/config.rasi;
       configFile."nixpkgs/config.nix".source = /home/jsh/git/jsh-nix/dots/nixpkgs/config.nix;
       configFile."picom/picom.conf".source = /home/jsh/git/jsh-nix/dots/picom/picom.conf;
       configFile."dunst/dunstrc".source = /home/jsh/git/jsh-nix/dots/dunst/dunstrc;
