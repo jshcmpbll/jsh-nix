@@ -1,5 +1,6 @@
-{ ... }:
+{ pkgs, ... }:
 {
+  users.extraUsers.root.shell = pkgs.zsh;
   programs = {
     zsh = {
       enable = true;
@@ -10,7 +11,6 @@
         plugins = [
           "z"
           "1password"
-          "git"
           "ag"
           "branch"
           "aws"
@@ -25,7 +25,7 @@
         "kubeclt" = "kubectl";
         "edit" = "cd /home/jsh/git/jsh-nix/";
         "nixfmt" = "nixpkgs-fmt";
-        "osbuild" = "nix build .#nixosConfigurations.jsh-lenovo.config.system.build.toplevel --experimental-features 'nix-command flakes'";
+        "osbuild" = "nix build .#nixosConfigurations.$(hostname).config.system.build.toplevel";
         "osinstall" = "./result/bin/switch-to-configuration switch";
         "osup" = "osbuild;osinstall";
       };
@@ -219,3 +219,4 @@
 
   system.stateVersion = "22.05"; # Did you read the comment?
 }
+
