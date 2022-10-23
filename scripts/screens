@@ -1,0 +1,18 @@
+#! /usr/bin/env bash
+
+# Setting my different monitors to unique names becuase I cant find another way to determin the output name of a specific monitor
+export VIRT_MON=$(xrandr | grep -A1 "DisplayPort-[0-9] connected" | grep -B1 "3840x2160 " | head -n 1 | awk '{print $1}')
+export PRIM_MON=$(xrandr | grep -A1 "DisplayPort-[0-9] connected" | grep -B1 "2560x1440 " | head -n 1 | awk '{print $1}')
+
+xrandr | grep -q "DisplayPort-[0-9] connected"
+if [ $? -eq 0 ];
+then
+  xrandr --output $PRIM_MON --mode 2560x1440 --rate 74.97
+  xrandr --output $VIRT_MON --mode 3840x2160 --rate 30.00 --rotate left --left-of $PRIM_MON
+  xrandr --output eDP --off
+else
+  for MON in $(xrandr | grep "DisplayPort-[0-9] disconnected" | awk '{print $1}'); do
+    xrandr --output $MON --off
+  done
+  xrandr --output eDP --auto --primary
+fi
