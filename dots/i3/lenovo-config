@@ -1,7 +1,5 @@
 # Configure computer displays
-exec xrandr --output HDMI-0 --mode 2560x1440 --right-of DP-2 --rate 60 --primary
-exec xrandr --output DP-2 --mode 2560x1440+0+0 --left-of HDMI-0 --rate 60
-exec xrdb -merge ~/.Xresources
+exec_always sh ~/.config/screens
 
 # Picom Compositor
 exec_always picom --config ~/.config/picom/picom.conf
@@ -18,7 +16,7 @@ exec dunst -conf $HOME/.config/dunst/dunstrc
 
 # Feh background image
 #exec feh --bg-fill https://i.imgur.com/QoufAE6.jpg --bg-fill https://github.com/Unixado/dotfiles/blob/master/.config/wallpaper/wall.jpg?raw=true 
-exec feh --bg-fill ~/.i3_background --no-xinerama
+exec_always feh --bg-fill ~/.i3_background --no-xinerama
 
 # Setup San Francisco font
 exec sh ~/.config/.sf-mono/.setup
@@ -26,28 +24,20 @@ exec sh ~/.config/.sf-mono/.setup
 # Start slack
 exec --no-startup-id i3-msg 'workspace 9; exec slack'
 
-# Set audio to HDMI output
-# exec pactl set-card-profile alsa_card.pci-0000_0a_00.1 output:hdmi-stereo
-# exec pactl set-default-sink alsa_output.pci-0000_0a_00.1.hdmi-stereo
-
-#bindsym F5 exec pactl set-card-profile alsa_card.pci-0000_0a_00.1 output:hdmi-stereo-extra1 && set-default-sink alsa_output.pci-0000_0a_00.1.hdmi-stereo-extra1 
-# bindsym F5 exec set-default-sink alsa_output.pci-0000_0a_00.1.hdmi-stereo-extra1 
-# bindsym F6 exec pactl set-default-sink bluez_sink.38_18_4C_6C_7D_00.a2dp_sink
-
-# Control audio
-bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +10% && $refresh_i3status
-bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -10% && $refresh_i3status
-bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle && $refresh_i3status
-bindsym XF86AudioMicMute exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle && $refresh_i3status
+## Control audio
+#bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +10% && $refresh_i3status
+#bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -10% && $refresh_i3status
+#bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle && $refresh_i3status
+#bindsym XF86AudioMicMute exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle && $refresh_i3status
 
 # Control screen brightness
-bindsym XF86MonBrightnessDown exec sh ~/.config/.brightness down
-bindsym XF86MonBrightnessUp exec sh ~/.config/.brightness up
+#bindsym XF86MonBrightnessDown exec sh ~/git/jsh-nix/scripts/brightness down
+#bindsym XF86MonBrightnessUp exec sh ~/git/jsh-nix/scripts/brightness up
 
 #bluetoothctl -- connect 38:18:4C:6C:7D:00 && pactl set-default-sink bluez_sink.38_18_4C_6C_7D_00.a2dp_sink
 
-gaps inner 20
-gaps outer 20
+gaps inner 4
+gaps outer -5
 default_border none
 
 font pango:SF Mono 26
@@ -193,16 +183,18 @@ mode "resize" {
 bindsym $mod+r mode "resize"
 # Start i3bar to display a workspace bar (plus the system information i4status
 # finds out, if available)
+
 #bar {
-#  font pango: SF Mono 20
-#  colors {
-#      background #000000
-#      statusline #ffffff
-#      separator #ffffff
-#      focused_workspace #7cafc2 #7cafc2 #000000
-#      active_workspace #333333 #5f676a
-#  }
-#        status_command i3status -c ~/.config/i3/i3status.conf
-#        position top
-#        mode hide 
+#  font pango: SF Mono 8
+#  #colors {
+#  #    background #000000
+#  #    statusline #ffffff
+#  #    separator #ffffff
+#  #    focused_workspace #7cafc2 #7cafc2 #000000
+#  #    active_workspace #333333 #5f676a
+#  #}
+#  status_command echo "hi"
+#  status_command i3status
+#  position top
+#  #mode hide 
 #}

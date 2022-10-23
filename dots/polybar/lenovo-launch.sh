@@ -20,5 +20,6 @@ if type "xrandr"; then
     fi
   done
 else
-  polybar -rq -c ~/.config/polybar/config.ini right &
+#  polybar -rq -c ~/.config/polybar/config.ini right &
+  polybar -rq -c ~/.config/polybar/config.ini base &
 fi
