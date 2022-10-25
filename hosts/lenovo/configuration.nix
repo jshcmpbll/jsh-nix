@@ -50,6 +50,29 @@
     };
   };
 
+  hardware = {
+    enableAllFirmware = true;
+    enableRedistributableFirmware = true;
+    firmware = with pkgs; [ wireless-regdb alsa-firmware ];
+    opengl.driSupport = true;
+    opengl.driSupport32Bit = true;
+    pulseaudio = {
+      enable = true;
+      support32Bit = true;
+      package = pkgs.pulseaudioFull;
+      extraConfig = "load-module module-switch-on-connect";
+    };
+    bluetooth = {
+      enable = true;
+      powerOnBoot = true;
+      settings = {
+        General = {
+          Enable = "Source,Sink,Media,Socket";
+        };
+      };
+    };
+  };
+
   services = {
 
     xserver = {
