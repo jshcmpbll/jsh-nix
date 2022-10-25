@@ -26,7 +26,8 @@
       jsh-lenovo = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         modules = [
-          ./hosts/lenovo/configuration.nix
+         ./hosts/lenovo/configuration.nix
+         nixos-hardware.nixosModules.lenovo-thinkpad-t14-amd-gen3
         ];
         specialArgs = {
           latest = import nixpkgs-unstable {

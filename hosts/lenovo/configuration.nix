@@ -3,7 +3,6 @@
   imports = [
       ./hardware-configuration.nix
       ../generic-config.nix
-      ../../wifi.nix
       (import ../../lib/home-file.nix
         [ { origin = ../../dots/i3/lenovo-config;
             target = "/etc/i3/config";
@@ -30,6 +29,25 @@
       enable = false;
     };
     usePredictableInterfaceNames = true;
+    wireless = {
+      enable = true;
+      userControlled.enable = true;
+      allowAuxiliaryImperativeNetworks = true;
+      environmentFile = "/persist/wireless.env";
+      networks = {
+        "The LAN Before Time" = {
+          psk = "@PSK_HOME@";
+          priority = 1;
+        };
+        "iPhone-13-128" = {
+          psk = "@PSK_PHONE@";
+          priority = 2;
+        };
+        "HanaHaus Guest" = {
+          priority = 1;
+        };
+      };
+    };
   };
 
   services = {
