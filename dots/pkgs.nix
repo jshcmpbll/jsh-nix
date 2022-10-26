@@ -18,7 +18,7 @@ let
 in
 {
   imports = [
-    ./obs-vcam.nix
+    ./loopback-cam.nix
   ];
 
   nixpkgs.config = {

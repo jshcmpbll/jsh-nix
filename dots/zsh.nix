@@ -198,7 +198,6 @@
       +
       ''
         function mm {
-          echo "See you soon love!"
           while true; do
             i3-msg workspace 9 -q
             sleep $(( $RANDOM % 240 + 40 ))
@@ -209,8 +208,12 @@
       ''
       +
       ''
-        function gsaml2aws {
-          docker run -it -v ~/.aws/credentials:/root/.aws/credentials gsaml2aws
+        function teamscam {
+          case $1 in
+            /dev/video*)            export CAMERA=$1       ;;
+            *)                      export CAMERA=/dev/video2;;
+          esac
+          ffmpeg -f v4l2 -input_format mjpeg -i $CAMERA -vf scale=1280x720 -pix_fmt yuyv422 -r 59.95 -f v4l2 /dev/video10
         };
       '';
 
