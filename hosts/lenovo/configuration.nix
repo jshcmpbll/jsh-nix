@@ -19,6 +19,8 @@
         ])
   ];
 
+  boot.kernelModules = [ "kvm-amd" ];
+
   networking = {
 
     hostName = "jsh-lenovo";
