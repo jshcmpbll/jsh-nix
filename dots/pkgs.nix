@@ -244,6 +244,7 @@ in
     signal-desktop
     _1password
     arandr
+    winetricks 
     #LPA
   ];
 }
