@@ -4,7 +4,7 @@
   programs = {
     zsh = {
       enable = true;
-      enableCompletion = true;
+      enableCompletion = false;
       histSize = 1000000;
       ohMyZsh = {
         enable = true;
@@ -27,7 +27,6 @@
         "nixfmt" = "nixpkgs-fmt";
         "osbuild" = "nix build .#nixosConfigurations.$(hostname).config.system.build.toplevel";
         "osinstall" = "./result/bin/switch-to-configuration switch";
-        "osup" = "osbuild;osinstall";
       };
       shellInit = ''
         ZSH_THEME_GIT_PROMPT_PREFIX="%{$reset_color%}%{$fg[white]%}["
@@ -55,6 +54,14 @@
       ''
       +
       ''
+        function osup {
+          cd /home/jsh/git/jsh-nix
+          sudo nix build .#nixosConfigurations.$(hostname).config.system.build.toplevel
+          sudo ./result/bin/switch-to-configuration switch
+        }
+      ''
+      +
+      ''
         function gi {
           curl -L -s https://www.gitignore.io/api/$@ ;
         }
@@ -62,7 +69,7 @@
       +
       ''
         function extract {
-           if [ -z "$1" ]; then
+           if [[ -z "$1" ]]; then
               # display usage if no parameters given
               echo "Usage: extract <path/file_name>.<zip|rar|bz2|gz|tar|tbz2|tgz|Z|7z|xz|ex|tar.bz2|tar.gz|tar.xz>"
            else
@@ -151,7 +158,7 @@
         function gp {
           CURRENT=$(git rev-parse --abbrev-ref HEAD)
           DEFAULT=$(git remote show origin | grep 'HEAD branch' | cut -d' ' -f5)
-          if [ $CURRENT = $DEFAULT ] ; then
+          if [[ $CURRENT = $DEFAULT ]] ; then
             git pull --rebase
           else
             git checkout $DEFAULT; git pull --rebase; git checkout $CURRENT; git rebase $DEFAULT; git rebase $DEFAULT; echo "Recommend running: git push origin $CURRENT -f"
@@ -161,38 +168,22 @@
       ''
       +
       ''
-        function gc {
-          git commit -m "$1"
-        }
-      ''
-      +
-      ''
         function gr {
-        if [ $1 == 1 ]; then
-          git commit --amend
-        else
-          git rebase -i HEAD~$1
-        fi
-        }
-      ''
-      +
-      ''
-        function gs {
-        git status
-        }
-      ''
-      +
-      ''
-        function gf {
-        git add .
-        git commit -m "f"
-        git rebase -i HEAD~$1
+          DEFAULT=$(git remote show origin | grep 'HEAD branch' | cut -d' ' -f5)
+          COMMIT_COUNT=$(git rev-list --count $DEFAULT..HEAD)
+          if [[ $1 == 2 ]]; then
+            git commit --amend --no-edit
+          elif [[ $1 == "last" ]]; then
+            git rebase -i HEAD~$COMMIT_COUNT
+          else
+            git rebase -i HEAD~$1
+          fi
         }
       ''
       +
       ''
         function geoloc {
-        curl -s "https://geo.ipify.org/api/v1?apiKey=at_q1SwFLqdSx2d0BHZLP5RuxVJCqJeq&ipAddress=$1" | jq
+          curl -s "https://geo.ipify.org/api/v1?apiKey=at_q1SwFLqdSx2d0BHZLP5RuxVJCqJeq&ipAddress=$1" | jq
         }
       ''
       +
