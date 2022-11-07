@@ -46,6 +46,9 @@ in
         configurationLimit = 100;
       };
     };
+    initrd.verbose = false;
+    consoleLogLevel = 0;
+    kernelParams = [ "quiet" "udev.log_level=3" ];
   };
 
   time.timeZone = "America/Los_Angeles";
@@ -85,6 +88,7 @@ in
       displayManager.lightdm = {
         enable = true;
         autoLogin.timeout = 10;
+        background = "/home/jsh/.i3_background";
       };
       displayManager.defaultSession = "none+i3";
       windowManager.i3 = {
