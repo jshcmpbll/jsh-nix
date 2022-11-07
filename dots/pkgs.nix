@@ -104,8 +104,8 @@ in
     nmap
     nodePackages.prettier
     ntfs3g
-    #obs-ndi
-    obs-studio
+    latest.obs-studio-plugins.obs-ndi
+    latest.obs-studio
     ofono-phonesim
     oh-my-zsh
     okular
