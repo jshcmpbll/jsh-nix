@@ -155,10 +155,6 @@ in
     sxiv
     synergy
     inetutils # telnet
-    #terraform_0_11
-    #terraform_0_12
-    #terraform_0_15
-    terraform_0_13
     terraform-providers.google
     tesseract
     texlive.combined.scheme-full
@@ -250,6 +246,7 @@ in
     _1password
     arandr
     font-manager
+    latest.davinci-resolve
     #LPA
   ];
 }

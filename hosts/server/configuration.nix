@@ -73,6 +73,13 @@
 
   hardware = {
 
+    nvidia = {
+      open = false;
+      package = config.boot.kernelPackages.nvidiaPackages.beta;
+    };
+
+    opengl.enable = true;
+
     enableAllFirmware = true;
 
     sane = {
