@@ -1,20 +1,5 @@
 { lib, config, pkgs, latest, ... }:
 let
-  myFirefox = pkgs.wrapFirefox pkgs.firefox-esr-unwrapped {
-    cfg = { smarctcardSupport = true; };
-    nixExtensions = [
-      (pkgs.fetchFirefoxAddon {
-        name = "1password";
-        url = "https://addons.mozilla.org/firefox/downloads/file/3972472/1password_x_password_manager-2.3.7.xpi";
-        sha256 = "sha256:9aaee3215d05faa802d83c5a355405d1ba8659f502aacd32aa44c036d2d6d354";
-      })
-      (pkgs.fetchFirefoxAddon {
-        name = "ublock";
-        url = "https://addons.mozilla.org/firefox/downloads/file/3933192/ublock_origin-1.42.4-an+fx.xpi"; # Get this from about:addons
-        sha256 = "sha256:1kirlfp5x10rdkgzpj6drbpllryqs241fm8ivm0cns8jjrf36g5w";
-      })
-    ];
-  };
 in
 {
   imports = [
@@ -75,6 +60,22 @@ in
   nix.extraOptions = ''
     experimental-features = nix-command flakes
   '';
+
+  networking.wg-quick.interfaces = {
+    california = {
+      address = [ "10.2.0.2/32" ];
+      dns = [ "10.2.0.1" ];
+      privateKeyFile = "/persist/pvpn-california";
+      peers = [
+        {
+          publicKey = "+KcC9ty5zruebWG2sOxkm19y2+RIWMNzVvNYkXlEano=";
+          allowedIPs = [ "0.0.0.0/0" ];
+          endpoint = "45.152.182.130:51820";
+        }
+      ];
+      autostart = false; # Start by running `systemctl start wg-quick-${name}`
+    };
+  };
 
   ### SERVICES ###
   services = {
