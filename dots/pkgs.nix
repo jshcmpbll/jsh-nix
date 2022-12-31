@@ -5,13 +5,18 @@ let
     nixExtensions = [
       (pkgs.fetchFirefoxAddon {
         name = "1password";
-        url = "https://addons.mozilla.org/firefox/downloads/file/3972472/1password_x_password_manager-2.3.7.xpi";
-        sha256 = "sha256:9aaee3215d05faa802d83c5a355405d1ba8659f502aacd32aa44c036d2d6d354";
+        url = "https://addons.mozilla.org/firefox/downloads/file/4037440/1password_x_password_manager-2.5.0.xpi";
+        sha256 = "sha256:702a5cd8b63a326e1c4a839bdf075534d69074450db25fe9cddcd60186df02d6";
       })
       (pkgs.fetchFirefoxAddon {
         name = "ublock";
-        url = "https://addons.mozilla.org/firefox/downloads/file/3933192/ublock_origin-1.42.4-an+fx.xpi"; # Get this from about:addons
-        sha256 = "sha256:1kirlfp5x10rdkgzpj6drbpllryqs241fm8ivm0cns8jjrf36g5w";
+        url = "https://addons.mozilla.org/firefox/downloads/file/4028976/ublock_origin-1.45.2.xpi";
+        sha256 = "sha256-+xc4lcdsOwXxMsr4enFsdePbIb6GHq0bFLpqvH5xXos=";
+      })
+      (pkgs.fetchFirefoxAddon {
+        name = "MetaMask";
+        url = "https://addons.mozilla.org/firefox/downloads/file/4037096/ether_metamask-10.22.2.xpi";
+        sha256 = "sha256-G+MwJDOcsaxYSUXjahHJmkWnjLeQ0Wven8DU/lGeMzA=";
       })
     ];
   };
@@ -104,7 +109,7 @@ in
     nmap
     nodePackages.prettier
     ntfs3g
-    latest.obs-studio-plugins.obs-ndi
+    #latest.obs-studio-plugins.obs-ndi
     latest.obs-studio
     ofono-phonesim
     oh-my-zsh
@@ -244,6 +249,7 @@ in
     signal-desktop
     _1password
     arandr
+    font-manager
     #LPA
   ];
 }
