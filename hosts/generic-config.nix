@@ -62,7 +62,7 @@ in
   '';
 
   networking.wg-quick.interfaces = {
-    california = {
+    ca = {
       address = [ "10.2.0.2/32" ];
       dns = [ "10.2.0.1" ];
       privateKeyFile = "/persist/pvpn-california";
