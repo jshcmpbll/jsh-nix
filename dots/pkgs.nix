@@ -1,4 +1,4 @@
-{ lib, config, pkgs, latest, ... }:
+{ lib, config, pkgs, latest, scan, ... }:
 let
   myFirefox = pkgs.wrapFirefox pkgs.firefox-esr-unwrapped {
     cfg = { smarctcardSupport = true; };
@@ -145,7 +145,7 @@ in
     screenkey
     scrot
     silver-searcher
-    latest.simple-scan
+    scan.simple-scan
     latest.slack
     smartmontools
     spotify

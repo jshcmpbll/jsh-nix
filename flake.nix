@@ -3,9 +3,10 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-22.11";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
     nixos-hardware.url = "github:nixos/nixos-hardware";
+    nixpkgs-scan.url = "github:nixos/nixpkgs/bf3c55095633ed6d504b10e3612e30a9a72fcb6e";
   };
 
-  outputs = { self, nixpkgs, nixos-hardware, nixpkgs-unstable }: {
+  outputs = { self, nixpkgs, nixos-hardware, nixpkgs-unstable, nixpkgs-scan }: {
     nixosConfigurations = {
       jsh-server = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
@@ -19,6 +20,9 @@
               allowUnfree = true;
               allowBroken = true;
             };
+          };
+          scan = import nixpkgs-scan {
+            system = "x86_64-linux";
           };
           #inherit inputs;
         };
