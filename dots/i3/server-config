@@ -1,12 +1,9 @@
 # Configure computer displays
-#exec xrandr --output DP-0 --mode 2560x1440 --rate 144 --primary --right-of HDMI-0 --output HDMI-0 --mode 3840x2160 --scale-from 2560x1440 --rotate left --rate 60 --left-of DP-0 
-#exec xrandr --output HDMI-0 --mode 3840x2160 --scale-from 2560x1440 --rotate left --pos 0x0 --rate 60
-#exec xrandr --output DP-0 --mode 2560x1440 --pos 0x0 --rate 144 --primary
-exec --no-startup-id nvidia-settings --assign CurrentMetaMode="DP-0: nvidia-auto-select +2160+1382, DP-2: 3840x2160 +0+0 {rotation=left}"
+## open nvidia-settings, configure desired layout, select "Save X to configuration file" and find line with MetaMode config
+exec --no-startup-id nvidia-settings --assign CurrentMetaMode="DP-0: nvidia-auto-select +2160+1620, DP-2: 3840x2160 +0+0 {rotation=left}"
 exec xrdb -merge ~/.Xresources
 
 # Picom Compositor
-#exec_always picom --config ~/.config/picom/picom.conf
 exec_always picom --config ~/git/jsh-nix/dots/picom/picom.conf
 
 # Polybar
@@ -17,11 +14,10 @@ exec_always xset -dpms
 exec_always xset s off
 
 # Dunst
-exec --no-startup-id dunst -conf $HOME/.config/dunst/dunstrc 
+exec dunst -conf $HOME/.config/dunst/dunstrc 
 
 # Feh background image
-#exec feh --bg-fill https://i.imgur.com/QoufAE6.jpg --bg-fill https://github.com/Unixado/dotfiles/blob/master/.config/wallpaper/wall.jpg?raw=true 
-exec --no-startup-id feh --bg-fill ~/.i3_background --no-xinerama
+exec feh --bg-fill ~/.i3_background --no-xinerama
 
 # Setup San Francisco font
 exec sh ~/.config/.sf-mono/.setup
