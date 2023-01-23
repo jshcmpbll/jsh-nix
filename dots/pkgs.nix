@@ -247,6 +247,7 @@ in
     arandr
     font-manager
     latest.davinci-resolve
+    v4l-utils
     #LPA
   ];
 }
