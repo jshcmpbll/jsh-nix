@@ -49,8 +49,8 @@ bindsym XF86AudioMicMute exec --no-startup-id pactl set-source-mute @DEFAULT_SOU
 
 #bluetoothctl -- connect 38:18:4C:6C:7D:00 && pactl set-default-sink bluez_sink.38_18_4C_6C_7D_00.a2dp_sink
 
-gaps inner 20
-gaps outer 20
+gaps inner 5
+gaps outer 5
 default_border none
 
 font pango:SF Mono 26
