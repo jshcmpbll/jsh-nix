@@ -2,7 +2,7 @@
 #exec xrandr --output DP-0 --mode 2560x1440 --rate 144 --primary --right-of HDMI-0 --output HDMI-0 --mode 3840x2160 --scale-from 2560x1440 --rotate left --rate 60 --left-of DP-0 
 #exec xrandr --output HDMI-0 --mode 3840x2160 --scale-from 2560x1440 --rotate left --pos 0x0 --rate 60
 #exec xrandr --output DP-0 --mode 2560x1440 --pos 0x0 --rate 144 --primary
-#exec --no-startup-id nvidia-settings --assign CurrentMetaMode="DPY-1: 2560x1440 @2560x1440 +2160+2400 {ViewPortIn=2560x1440, ViewPortOut=2560x1440+0+0}, DPY-0: 3840x2160 @2160x3840 +0+0 {ViewPortIn=2160x3840, ViewPortOut=3840x2160+0+0, Rotation=90}"
+exec --no-startup-id nvidia-settings --assign CurrentMetaMode="DP-0: nvidia-auto-select +2160+1382, DP-2: 3840x2160 +0+0 {rotation=left}"
 exec xrdb -merge ~/.Xresources
 
 # Picom Compositor
