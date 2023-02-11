@@ -41,6 +41,21 @@
     firewall = {
       enable = false;
     };
+    wg-quick.interfaces = {
+      ca = {
+        address = [ "10.2.0.2/32" ];
+        dns = [ "10.2.0.1" ];
+        privateKeyFile = "/persist/pvpn-california";
+        peers = [
+          {
+            publicKey = "rRO6yJim++Ezz6scCLMaizI+taDjU1pzR2nfW6qKbW0=";
+            allowedIPs = [ "0.0.0.0/0" ];
+            endpoint = "185.230.126.146:51820";
+          }
+        ];
+        autostart = true; # Stop by running `systemctl start wg-quick-${name}`
+      };
+    };
   };
   #systemd.network.links."10-eth0" = {
   #  matchConfig.PermanentMACAddress = "34:97:f6:32:70:9d";
@@ -61,6 +76,10 @@
         /nix/store/rqikhbksyzdgaddq50nqrnlgg6c3gky9-nvidia-settings-515.48.07/bin/nvidia-settings --assign CurrentMetaMode="DPY-1: nvidia-auto-select @2560x1440 +2160+0 {ViewPortIn=2560x1440, ViewPortOut=2560x1440+0+0}, DPY-0: 3840x2160 @2160x3840 +0+0 {ViewPortIn=2160x3840, ViewPortOut=3840x2160+0+0, Rotation=90}"
       '';
       videoDrivers = [ "nvidia" ];
+      displayManager.autoLogin = {
+        enable = true;
+        user = "jsh";
+      };
     };
 
     plex = {
