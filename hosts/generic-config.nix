@@ -52,30 +52,12 @@ in
 
   virtualisation = {
     docker.enable = true;
-    libvirtd = {
-      enable = true;
-    };
+    libvirtd.enable = true;
   };
 
   nix.extraOptions = ''
     experimental-features = nix-command flakes
   '';
-
-  networking.wg-quick.interfaces = {
-    ca = {
-      address = [ "10.2.0.2/32" ];
-      dns = [ "10.2.0.1" ];
-      privateKeyFile = "/persist/pvpn-california";
-      peers = [
-        {
-          publicKey = "+KcC9ty5zruebWG2sOxkm19y2+RIWMNzVvNYkXlEano=";
-          allowedIPs = [ "0.0.0.0/0" ];
-          endpoint = "45.152.182.130:51820";
-        }
-      ];
-      autostart = true; # Stop by running `systemctl start wg-quick-${name}`
-    };
-  };
 
   ### SERVICES ###
   services = {
