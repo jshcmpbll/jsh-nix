@@ -248,6 +248,9 @@ in
     font-manager
     latest.davinci-resolve
     v4l-utils
+    libguestfs
+    ethtool
+    coldsnap
     #LPA
   ];
 }
