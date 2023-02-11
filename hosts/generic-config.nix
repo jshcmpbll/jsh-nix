@@ -9,13 +9,14 @@ in
     ../dots/zfs.nix
     ../users/jsh.nix
     (import ../lib/home-file.nix
-      [ { origin = ../dots/rofi/config.rasi;
-          target = "/home/jsh/.config/rofi/config.rasi";
-        }
-        { origin = ../dots/dunst/dunstrc;
+      [{
+        origin = ../dots/rofi/config.rasi;
+        target = "/home/jsh/.config/rofi/config.rasi";
+      }
+        {
+          origin = ../dots/dunst/dunstrc;
           target = "/home/jsh/.config/dunst/dunstrc";
-        }
-      ])
+        }])
   ];
 
   boot = {

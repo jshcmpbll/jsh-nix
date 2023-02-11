@@ -1,22 +1,25 @@
 { lib, config, pkgs, latest, ... }:
 {
   imports = [
-      ./hardware-configuration.nix
-      ../generic-config.nix
-      (import ../../lib/home-file.nix
-        [ { origin = ../../dots/i3/lenovo-config;
-            target = "/etc/i3/config";
-          }
-          { origin = ../../scripts/screens;
-            target = "/home/jsh/.config/screens";
-          }
-          { origin = ../../dots/polybar/lenovo-config.ini;
-            target = "/home/jsh/.config/polybar/config.ini";
-          }
-          { origin = ../../dots/polybar/lenovo-launch.sh;
-            target = "/home/jsh/.config/polybar/launch.sh";
-          }
-        ])
+    ./hardware-configuration.nix
+    ../generic-config.nix
+    (import ../../lib/home-file.nix
+      [{
+        origin = ../../dots/i3/lenovo-config;
+        target = "/etc/i3/config";
+      }
+        {
+          origin = ../../scripts/screens;
+          target = "/home/jsh/.config/screens";
+        }
+        {
+          origin = ../../dots/polybar/lenovo-config.ini;
+          target = "/home/jsh/.config/polybar/config.ini";
+        }
+        {
+          origin = ../../dots/polybar/lenovo-launch.sh;
+          target = "/home/jsh/.config/polybar/launch.sh";
+        }])
   ];
 
   boot.kernelModules = [ "kvm-amd" ];
@@ -97,7 +100,7 @@
     };
 
   };
-  
+
   services.fprintd.enable = true;
 
   security.pam.services = {
