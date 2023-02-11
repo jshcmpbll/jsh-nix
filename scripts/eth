@@ -1,2 +1,0 @@
-#! /usr/bin/env bash
-curl -s https://api-pub.bitfinex.com/v2/ticker/tETHUSD | awk -F"," "{print \"---  ETH: $\" \$7 \"  V:\"\$8}"
