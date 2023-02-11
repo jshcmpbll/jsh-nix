@@ -17,7 +17,7 @@ exec_always xset s off
 exec dunst -conf $HOME/.config/dunst/dunstrc 
 
 # Feh background image
-exec feh --bg-fill ~/.i3_background --no-xinerama
+exec_always sleep 5; feh --bg-fill ~/.i3_background --no-xinerama
 
 # Setup San Francisco font
 exec sh ~/.config/.sf-mono/.setup
