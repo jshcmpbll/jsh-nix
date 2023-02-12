@@ -126,8 +126,6 @@ in
     #protonvpn-cli
     protonvpn-cli_2
     #protonvpn-gui
-    python38Packages.azure-functions-devops-build
-    python38Packages.grip
     pywal
     qemu
     qemu_kvm
@@ -155,7 +153,6 @@ in
     sxiv
     synergy
     inetutils # telnet
-    terraform-providers.google
     tesseract
     texlive.combined.scheme-full
     tigervnc
@@ -177,12 +174,9 @@ in
     latest.joplin-desktop
     minecraft
     latest.odafileconverter
-    latest.python37
-    latest.python37Packages.pip
     latest.spotifyd
     latest.teams
-    #latest.terraform
-    #latest.terraform_0_13
+    latest.terraform
     latest.yuzu-mainline
     zoom-us
     ranger
@@ -227,7 +221,6 @@ in
     ansible
     openconnect
     stoken
-    nvtop
     latest.dolphin-emu
     hdparm
     latest.conftest
@@ -246,11 +239,11 @@ in
     _1password
     arandr
     font-manager
-    latest.davinci-resolve
     v4l-utils
     libguestfs
     ethtool
     coldsnap
+    ticker
     #LPA
   ];
 }
