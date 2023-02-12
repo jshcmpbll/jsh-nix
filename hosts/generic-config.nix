@@ -102,6 +102,7 @@ in
     pcscd.enable = true;
 
     avahi.enable = true;
+    avahi.nssmdns = true;
 
     printing = {
       enable = true;
@@ -157,6 +158,23 @@ in
   };
 
   ### SERVICES ###
+
+  ### HARDWARE ###
+  hardware = {
+
+    sane = {
+      enable = true;
+      brscan4 = {
+        enable = true;
+        netDevices = {
+          home = {
+            model = "MFC-L2710DW";
+            ip = "192.168.0.53";
+          };
+        };
+      };
+    };
+  };
 
   system.stateVersion = "22.05"; # Did you read the comment?
 }
