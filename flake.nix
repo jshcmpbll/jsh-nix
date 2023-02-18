@@ -41,6 +41,9 @@
               allowBroken = true;
             };
           };
+          scan = import nixpkgs-scan {
+            system = "x86_64-linux";
+          };
           #inherit inputs;
         };
       };
