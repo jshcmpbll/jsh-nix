@@ -51,6 +51,19 @@
         "HanaHaus Guest" = {
           priority = 1;
         };
+    wg-quick.interfaces = {
+      ca = {
+        address = [ "10.2.0.2/32" ];
+        dns = [ "10.2.0.1" ];
+        privateKeyFile = "/persist/pvpn-california";
+        peers = [
+          {
+            publicKey = "D2ljOyE4iCiNDTEXME6qcraH97JRAWXsOTGXCb/vklY=";
+            allowedIPs = [ "0.0.0.0/0" ];
+            endpoint = "91.219.212.194:51820";
+          }
+        ];
+        autostart = false; # Stop by running `systemctl start wg-quick-${name}`
       };
     };
   };
