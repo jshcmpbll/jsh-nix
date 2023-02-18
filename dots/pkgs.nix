@@ -244,6 +244,7 @@ in
     ethtool
     coldsnap
     ticker
+    ssm-session-manager-plugin
     #LPA
   ];
 }
