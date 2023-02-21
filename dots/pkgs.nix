@@ -132,7 +132,6 @@ in
     qemu-utils
     redshift
     restic
-    restic
     rofi
     rpl
     rsync
