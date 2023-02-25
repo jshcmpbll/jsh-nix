@@ -174,6 +174,19 @@ in
         };
       };
     };
+
+    bluetooth = {
+      enable = true;
+      powerOnBoot = true;
+      settings = {
+        General = {
+          Enable = "Source,Sink,Media,Socket";
+          # Set this so that I could connect to airpods
+          ControllerMode = "bredr";
+        };
+      };
+    };
+
   };
 
   system.stateVersion = "22.11"; # Did you read the comment?
