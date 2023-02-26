@@ -68,19 +68,30 @@ in
     experimental-features = nix-command flakes
   '';
 
+  nix.settings = {
+    trusted-users = [
+      "jsh"
+    ];
+    #trusted-substituters = [
+    #  "s3://nwi-nix-cache2?profile=nebulaworks&region=us-west-2"
+    #];
+    #substituters = [
+    #  "s3://nwi-nix-cache2?profile=nebulaworks&region=us-west-2"
+    #];
+    #trusted-public-keys = [
+    #  "nwi-nix-cache:50ocdfoVjjRt4utZ13VmoVk7TmTUXtZRSV3Q9XCEiEY="
+    #];
+  };
+
   ### SERVICES ###
   services = {
 
     xserver = {
       enable = true;
       autorun = true;
-      desktopManager.xfce = {
+      displayManager.gdm = {
         enable = true;
-      };
-      displayManager.lightdm = {
-        enable = true;
-        autoLogin.timeout = 10;
-        background = "/home/jsh/.i3_background";
+        autoLogin.delay = 10;
       };
       displayManager.defaultSession = "none+i3";
       windowManager.i3 = {
