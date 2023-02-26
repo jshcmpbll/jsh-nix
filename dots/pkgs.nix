@@ -174,7 +174,6 @@ in
     minecraft
     latest.odafileconverter
     latest.spotifyd
-    latest.teams
     latest.terraform
     latest.yuzu-mainline
     zoom-us
@@ -197,8 +196,8 @@ in
     yaml2json
     yarn
     yj
-    latest.youtube-dl
     yq
+    yt-dlp
     yubico-piv-tool
     yubikey-manager
     zathura
