@@ -4,10 +4,10 @@
     ./hardware-configuration.nix
     ../generic-config.nix
     (import ../../lib/home-file.nix
-      [{
-        origin = ../../dots/i3/server-config;
-        target = "/etc/i3/config";
-      }
+        [{
+          origin = ../../dots/i3/server-config;
+          target = "/etc/i3/config";
+        }
         {
           origin = ../../dots/polybar/server-config.ini;
           target = "/home/jsh/.config/polybar/config.ini";

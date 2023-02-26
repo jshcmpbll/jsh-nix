@@ -16,6 +16,14 @@ in
         {
           origin = ../dots/dunst/dunstrc;
           target = "/home/jsh/.config/dunst/dunstrc";
+        }
+        {
+          origin = ../dots/Xresources;
+          target = "/home/jsh/.Xresources";
+        }
+        {
+          origin = ../dots/font-size;
+          target = "/home/jsh/.urxvt/ext/font-size";
         }])
   ];
 

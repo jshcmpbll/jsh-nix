@@ -4,10 +4,10 @@
     ./hardware-configuration.nix
     ../generic-config.nix
     (import ../../lib/home-file.nix
-      [{
-        origin = ../../dots/i3/lenovo-config;
-        target = "/etc/i3/config";
-      }
+        [{
+          origin = ../../dots/i3/lenovo-config;
+          target = "/etc/i3/config";
+        }
         {
           origin = ../../scripts/screens;
           target = "/home/jsh/.config/screens";
