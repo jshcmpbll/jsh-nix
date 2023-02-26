@@ -103,34 +103,11 @@
 
     enableAllFirmware = true;
 
-    sane = {
-      enable = true;
-      brscan4 = {
-        enable = true;
-        netDevices = {
-          home = {
-            model = "MFC-L2710DW";
-            ip = "192.168.0.53";
-          };
-        };
-      };
-    };
-
     pulseaudio = {
       enable = true;
       support32Bit = true;
       package = pkgs.pulseaudioFull;
       extraConfig = "load-module module-switch-on-connect";
-    };
-
-    bluetooth = {
-      enable = true;
-      powerOnBoot = true;
-      settings = {
-        General = {
-          Enable = "Source,Sink,Media,Socket";
-        };
-      };
     };
 
     opengl = {
