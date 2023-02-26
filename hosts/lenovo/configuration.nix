@@ -63,7 +63,20 @@
             endpoint = "91.219.212.194:51820";
           }
         ];
-        autostart = false; # Stop by running `systemctl start wg-quick-${name}`
+        autostart = false; # Start by running `systemctl start wg-quick-${name}`
+      };
+      can = {
+        address = [ "10.2.0.2/32" ];
+        dns = [ "10.2.0.1" ];
+        privateKeyFile = "/persist/pvpn-canada";
+        peers = [
+          {
+            publicKey = "zDWVRqqIw7lVCmbMixLGhRuatpdKtD7bT63RtHhwVQA=";
+            allowedIPs = [ "0.0.0.0/0" ];
+            endpoint = "37.120.237.178:51820";
+          }
+        ];
+        autostart = false; # Start by running `systemctl start wg-quick-${name}`
       };
     };
   };
