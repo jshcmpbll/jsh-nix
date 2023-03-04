@@ -83,7 +83,8 @@ in
     #];
   };
 
-  ### SERVICES ###
+  programs.ssh.startAgent = true;
+
   services = {
 
     xserver = {
