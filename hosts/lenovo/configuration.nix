@@ -51,6 +51,8 @@
         "HanaHaus Guest" = {
           priority = 1;
         };
+      };
+    };
     wg-quick.interfaces = {
       ca = {
         address = [ "10.2.0.2/32" ];
