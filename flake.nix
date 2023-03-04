@@ -24,7 +24,6 @@
           scan = import nixpkgs-scan {
             system = "x86_64-linux";
           };
-          #inherit inputs;
         };
       };
       jsh-lenovo = nixpkgs.lib.nixosSystem {
@@ -44,7 +43,22 @@
           scan = import nixpkgs-scan {
             system = "x86_64-linux";
           };
-          #inherit inputs;
+        };
+      };
+      jsh-mm = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          ./hosts/mm/configuration.nix
+          nixos-hardware.nixosModules.common-cpu-intel-cpu-only
+        ];
+        specialArgs = {
+          latest = import nixpkgs-unstable {
+            system = "x86_64-linux";
+            config = {
+              allowUnfree = true;
+              allowBroken = true;
+            };
+          };
         };
       };
     };
