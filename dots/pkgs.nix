@@ -13,11 +13,11 @@ let
         url = "https://addons.mozilla.org/firefox/downloads/file/4028976/ublock_origin-1.45.2.xpi";
         sha256 = "sha256-+xc4lcdsOwXxMsr4enFsdePbIb6GHq0bFLpqvH5xXos=";
       })
-      (pkgs.fetchFirefoxAddon {
-        name = "MetaMask";
-        url = "https://addons.mozilla.org/firefox/downloads/file/4037096/ether_metamask-10.22.2.xpi";
-        sha256 = "sha256-G+MwJDOcsaxYSUXjahHJmkWnjLeQ0Wven8DU/lGeMzA=";
-      })
+      #(pkgs.fetchFirefoxAddon {
+      #  name = "MetaMask";
+      #  url = "https://addons.mozilla.org/firefox/downloads/file/4037096/ether_metamask-10.22.2.xpi";
+      #  sha256 = "sha256-G+MwJDOcsaxYSUXjahHJmkWnjLeQ0Wven8DU/lGeMzA=";
+      #})
     ];
   };
 in
@@ -109,8 +109,19 @@ in
     nmap
     nodePackages.prettier
     ntfs3g
-    #latest.obs-studio-plugins.obs-ndi
-    latest.obs-studio
+    (wrapOBS {
+      plugins = with obs-studio-plugins; [ wlrobs obs-gstreamer obs-move-transition ] ++ (lib.optionals config.nixpkgs.config.allowUnfree [ (obs-ndi.override {
+        ndi = ndi.overrideAttrs (attrs: rec {
+          src = fetchurl {
+            name = "${attrs.pname}-${attrs.version}.tar.gz";
+            url = "https://downloads.ndi.tv/SDK/NDI_SDK_Linux/Install_NDI_SDK_v5_Linux.tar.gz";
+            hash = "sha256-ANC+3Cxyc22CiD/A/WvBpUTnlYx+Rtt58yZjPUThUVM=";
+          };
+
+          unpackPhase = ''unpackFile ${src}; echo y | ./${attrs.installerName}.sh; sourceRoot="NDI SDK for Linux";'';
+        });
+      }) ]);
+    })
     ofono-phonesim
     oh-my-zsh
     okular
