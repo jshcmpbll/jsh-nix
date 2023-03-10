@@ -254,6 +254,7 @@ in
     coldsnap
     ticker
     ssm-session-manager-plugin
+    grip
     #LPA
   ];
 }
