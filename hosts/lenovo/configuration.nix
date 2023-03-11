@@ -130,6 +130,17 @@
 
     };
 
+    create_ap = {
+      enable = false;
+      settings = {
+        SSID = "The LAN Before Time";
+        PASSPHRASE = "@Campbell";
+        WIFI_IFACE = "wlp4s0f4u1";
+        #INTERNET_IFACE = "wlp2s0";
+        INTERNET_IFACE = "ca";
+      };
+    };
+
   };
 
   services.fprintd.enable = true;
