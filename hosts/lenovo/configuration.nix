@@ -36,6 +36,9 @@
     usePredictableInterfaceNames = true;
     wireless = {
       enable = true;
+      interfaces = [
+        "wlp2s0"
+      ];
       userControlled.enable = true;
       allowAuxiliaryImperativeNetworks = true;
       environmentFile = "/persist/wireless.env";
