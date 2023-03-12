@@ -143,7 +143,16 @@ in
     qemu-utils
     redshift
     restic
-    rofi
+    (rofi.overrideAttrs (old: {
+      version = "1.5.4";
+      src = pkgs.fetchFromGitHub {
+        owner = "davatorium";
+        repo = "rofi";
+        rev = "1.5.4";
+        fetchSubmodules = true;
+        sha256 = "sha256-Vm7n7b1FKPRvtXhEx+zukbgzI/nYC/n+VdR7cZ9jb+U=";
+      };
+    }))
     rpl
     rsync
     rxvt_unicode
