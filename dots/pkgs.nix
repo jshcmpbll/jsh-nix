@@ -264,6 +264,7 @@ in
     ticker
     ssm-session-manager-plugin
     grip
+    latest.nix
     ssh-agents
     #LPA
   ];
