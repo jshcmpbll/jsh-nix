@@ -22,6 +22,10 @@ in
           target = "/home/jsh/.Xresources";
         }
         {
+          origin = ../dots/ssh-config;
+          target = "/home/jsh/.ssh/config";
+        }
+        {
           origin = ../dots/font-size;
           target = "/home/jsh/.urxvt/ext/font-size";
         }])

@@ -1,0 +1,21 @@
+Host mm
+  Hostname 192.168.0.106
+  Port 22
+  User jsh
+
+Host pool
+  Hostname 192.168.0.104
+  Port 22
+  User campbell
+
+Host pool-wire
+  Hostname 192.168.0.105
+  User campbell
+
+Host tmate
+  Hostname sfo2.tmate.io
+  User jsh/video
+
+# SSM
+host i-* mi-*
+    ProxyCommand sh -c "aws ssm start-session --target %h --document-name AWS-StartSSHSession --parameters 'portNumber=%p'"
