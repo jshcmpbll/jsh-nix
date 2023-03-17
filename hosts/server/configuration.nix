@@ -99,8 +99,6 @@
       package = config.boot.kernelPackages.nvidiaPackages.beta;
     };
 
-    opengl.enable = true;
-
     enableAllFirmware = true;
 
     pulseaudio = {
@@ -111,6 +109,7 @@
     };
 
     opengl = {
+      enable = true;
       driSupport32Bit = true;
       driSupport = true;
     };
