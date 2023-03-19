@@ -10,7 +10,6 @@
         enable = true;
         plugins = [
           "z"
-          "1password"
           "ag"
           "branch"
           "aws"
