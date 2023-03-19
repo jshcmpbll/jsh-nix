@@ -31,9 +31,9 @@
         privateKeyFile = "/persist/pvpn-canada";
         peers = [
           {
-            publicKey = "5YxjJV/w2nIQHnh80py03qkUIWafadRqrnG72NzfMkE=";
+            publicKey = "28hrybwV/NiiMXvl1ynBvDvEvs1m8ABUzyvkQ7+ST3I=";
             allowedIPs = [ "0.0.0.0/0" ];
-            endpoint = "37.120.205.82:51820";
+            endpoint = "146.70.198.34:51820";
           }
         ];
       };
