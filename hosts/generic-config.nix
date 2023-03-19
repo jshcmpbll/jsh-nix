@@ -26,8 +26,16 @@ in
           target = "/home/jsh/.ssh/config";
         }
         {
+          origin = ../dots/tmux.conf;
+          target = "/home/jsh/.tmux.conf";
+        }
+        {
           origin = ../dots/font-size;
           target = "/home/jsh/.urxvt/ext/font-size";
+        }
+        {
+          origin = ../scripts/sf-mono;
+          target = "/home/jsh/.config/.sf-mono/.setup";
         }])
   ];
 
