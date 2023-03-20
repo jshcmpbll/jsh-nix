@@ -50,9 +50,9 @@
         privateKeyFile = "/persist/pvpn-california";
         peers = [
           {
-            publicKey = "rRO6yJim++Ezz6scCLMaizI+taDjU1pzR2nfW6qKbW0=";
+            publicKey = "4v/dB/ha+PGL0jihNVlVj81NGAFh6VndO9s4giDZEUw=";
             allowedIPs = [ "0.0.0.0/0" ];
-            endpoint = "185.230.126.146:51820";
+            endpoint = "185.230.126.18:51820";
           }
         ];
         autostart = true; # Stop by running `systemctl start wg-quick-${name}`
