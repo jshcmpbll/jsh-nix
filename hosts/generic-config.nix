@@ -71,11 +71,6 @@ in
     dejavu_fonts
   ];
 
-  virtualisation = {
-    docker.enable = true;
-    libvirtd.enable = true;
-  };
-
   nix.extraOptions = ''
     experimental-features = nix-command flakes
   '';
