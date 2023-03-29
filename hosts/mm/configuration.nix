@@ -44,13 +44,6 @@
 
   security.polkit.enable = true;
 
-  virtualisation = {
-    docker.enable = true;
-    libvirtd = {
-      enable = true;
-    };
-  };
-
   environment.systemPackages = with pkgs; [
     edgetpu-compiler
     git
@@ -60,30 +53,33 @@
     experimental-features = nix-command flakes
   '';
 
-  virtualisation.oci-containers = {
-    backend = "docker";
-    containers = {
-      frigate = {
-        image = "blakeblackshear/frigate:stable-amd64";
-        autoStart = true;
-        volumes = [
-          "/home/jsh/frigate/storage:/media/frigate"
-          "/home/jsh/frigate/config.yaml:/config/config.yml:ro"
-          "/etc/localtime:/etc/localtime:ro"
-        ];
-        ports = [
-          "5000:5000"
-          "1935:1935"
-        ];
-        environment = {
-          FRIGATE_RTSP_PASSWORD = "password";
+  virtualisation ={
+    podman.enable = true;
+    oci-containers = {
+      backend = "podman";
+      containers = {
+        frigate = {
+          image = "blakeblackshear/frigate:stable-amd64";
+          autoStart = true;
+          volumes = [
+            "/home/jsh/frigate/storage:/media/frigate"
+            "/home/jsh/frigate/config.yaml:/config/config.yml:ro"
+            "/etc/localtime:/etc/localtime:ro"
+          ];
+          ports = [
+            "5000:5000"
+            "1935:1935"
+          ];
+          environment = {
+            FRIGATE_RTSP_PASSWORD = "password";
+          };
+          extraOptions = [
+            "--mount=type=tmpfs,target=/tmp/cache,tmpfs-size=1000000000"
+            "--device=/dev/bus/usb:/dev/bus/usb"
+            "--device=/dev/dri/renderD128"
+            "--shm-size=64m"
+          ];
         };
-        extraOptions = [
-          "--mount=type=tmpfs,target=/tmp/cache,tmpfs-size=1000000000"
-          "--device=/dev/bus/usb:/dev/bus/usb"
-          "--device=/dev/dri/renderD128"
-          "--shm-size=64m"
-        ];
       };
     };
   };
