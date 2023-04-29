@@ -3,7 +3,7 @@
 {
   users.users.jsh = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "sudo" "audio" ];
+    extraGroups = [ "wheel" "sudo" "audio" "pulse-access" ];
     shell = pkgs.zsh;
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIB29bu0cfW5fIIISVOycKIfEpfAekl9BDfAvea62QgfL"
