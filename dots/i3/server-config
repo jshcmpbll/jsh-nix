@@ -205,3 +205,17 @@ bindsym $mod+r mode "resize"
 #        position top
 #        mode hide 
 #}
+
+# Thank you! https://bewilderedoctothorpe.net/2022/03/30/i3wm-zoom-screen-sharing/
+
+# Set Zoom notification window to floating with no focus
+for_window [title="^zoom\s?$"] floating enable
+no_focus [title="^zoom\s?$"]
+
+# For meetings that you have joined via a link
+for_window [title="^join\?action=join.*$"] floating enable
+no_focus [title="^join\?action=join.*$"]
+
+# Alternatively if the popups are annoying you...
+# for_window [title="^zoom\s?$"] kill
+# for_window [title="^join\?action=join.*$"] kill
