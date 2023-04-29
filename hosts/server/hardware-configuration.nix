@@ -37,6 +37,22 @@
     { device = "csan";
       fsType = "zfs";
     };
+  fileSystems."/home/jsh/Pictures" =
+    { device = "csan/media/pictures";
+      fsType = "zfs";
+    };
+  fileSystems."/home/jsh/Videos" =
+    { device = "csan/media/videos";
+      fsType = "zfs";
+    };
+  fileSystems."/home/jsh/Movies" =
+    { device = "csan/media/movies";
+      fsType = "zfs";
+    };
+  fileSystems."/home/jsh/TV" =
+    { device = "csan/media/tv";
+      fsType = "zfs";
+    };
 
   swapDevices = [ ];
 
