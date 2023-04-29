@@ -26,6 +26,8 @@
         "nixfmt" = "nixpkgs-fmt";
         "osbuild" = "nix build .#nixosConfigurations.$(hostname).config.system.build.toplevel";
         "osinstall" = "./result/bin/switch-to-configuration switch";
+        "tvfb" = "filebot -r -rename * -non-strict --format /home/jsh/TV/\"{n.space('_')}-{y}/{s00e00}-{t.space('_')}\"";
+        "moviefb" = "filebot -rename * -non-strict --format \"{n.space('_')}-{y}\"";
       };
       shellInit = ''
         ZSH_THEME_GIT_PROMPT_PREFIX="%{$reset_color%}%{$fg[white]%}["
