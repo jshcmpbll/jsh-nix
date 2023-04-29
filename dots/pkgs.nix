@@ -266,6 +266,9 @@ in
     grip
     latest.nix
     ssh-agents
+    filebot
+    gnome.nautilus
+    gnome.sushi
     #LPA
   ];
 }
