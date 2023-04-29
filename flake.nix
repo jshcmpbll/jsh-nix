@@ -61,6 +61,22 @@
           };
         };
       };
+      pool = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          ./hosts/pool/configuration.nix
+          nixos-hardware.nixosModules.common-cpu-intel-cpu-only
+        ];
+        specialArgs = {
+          latest = import nixpkgs-unstable {
+            system = "x86_64-linux";
+            config = {
+              allowUnfree = true;
+              allowBroken = true;
+            };
+          };
+        };
+      };
     };
   };
 }
