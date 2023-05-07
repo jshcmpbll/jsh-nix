@@ -51,7 +51,16 @@
           psk = "@PSK_PHONE@";
           priority = 2;
         };
-        "HanaHaus Guest" = {
+        "aainflight.com" = {
+          authProtocols = [
+            "NONE"
+            "WPA-PSK"
+            "WPA-EAP"
+            "SAE"
+            "FT-PSK"
+            "FT-EAP"
+            "FT-SAE"
+          ];
           priority = 1;
         };
       };
