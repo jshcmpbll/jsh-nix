@@ -102,6 +102,7 @@
       package = pkgs.pulseaudioFull;
       extraConfig = "load-module module-switch-on-connect";
     };
+    bluetooth.package = pkgs.bluezFull;
   };
 
   services = {
