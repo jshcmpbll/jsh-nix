@@ -269,6 +269,8 @@ in
     filebot
     gnome.nautilus
     gnome.sushi
+    mtr
+    ssh-agents
     #LPA
   ];
 }
