@@ -76,9 +76,9 @@
         privateKeyFile = "/persist/pvpn-canada";
         peers = [
           {
-            publicKey = "zDWVRqqIw7lVCmbMixLGhRuatpdKtD7bT63RtHhwVQA=";
+            publicKey = "28hrybwV/NiiMXvl1ynBvDvEvs1m8ABUzyvkQ7+ST3I=";
             allowedIPs = [ "0.0.0.0/0" ];
-            endpoint = "37.120.237.178:51820";
+            endpoint = "146.70.198.34:51820";
           }
         ];
         autostart = false; # Start by running `systemctl start wg-quick-${name}`
