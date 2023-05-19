@@ -56,7 +56,7 @@
             endpoint = "185.230.126.18:51820";
           }
         ];
-        autostart = true; # Stop by running `systemctl start wg-quick-${name}`
+        autostart = false; # Stop by running `systemctl start wg-quick-${name}`
       };
     };
   };
