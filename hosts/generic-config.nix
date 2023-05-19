@@ -100,6 +100,8 @@ in
       displayManager.gdm = {
         enable = true;
         autoLogin.delay = 10;
+        autoSuspend = false;
+        wayland = false;
       };
       displayManager.defaultSession = "none+i3";
       windowManager.i3 = {
