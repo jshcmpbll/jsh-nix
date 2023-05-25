@@ -263,7 +263,7 @@ in
     coldsnap
     ticker
     ssm-session-manager-plugin
-    grip
+    python310Packages.grip
     latest.nix
     ssh-agents
     filebot
