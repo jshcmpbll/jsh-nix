@@ -110,6 +110,7 @@
     xserver = {
       videoDrivers = [ "amdgpu" ];
     };
+    tailscale.enable = true;
 
     acpid = {
       enable = true;
