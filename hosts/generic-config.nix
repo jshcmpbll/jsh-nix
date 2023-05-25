@@ -3,7 +3,7 @@ let
 in
 {
   imports = [
-    ../dots/zsh.nix
+    ../dots/shells.nix
     ../dots/vim.nix
     ../dots/pkgs.nix
     ../dots/zfs.nix
