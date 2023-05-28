@@ -16,6 +16,16 @@ Host tmate
   Hostname sfo2.tmate.io
   User jsh/video
 
+Match originalhost jsh exec "nc -vz 192.168.0.101 22 2>/dev/null"
+  Port 22
+  User jsh
+  HostName 192.168.0.101
+
+Host jsh
+  Port 22
+  User jsh
+  HostName 100.69.255.77
+
 # SSM
 host i-* mi-*
     ProxyCommand sh -c "aws ssm start-session --target %h --document-name AWS-StartSSHSession --parameters 'portNumber=%p'"
