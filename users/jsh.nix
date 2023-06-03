@@ -3,7 +3,7 @@
 {
   users.users.jsh = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "sudo" "audio" "pulse-access" ];
+    extraGroups = [ "wheel" "sudo" "audio" "pulse-access" "docker" ];
     shell = pkgs.zsh;
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIB29bu0cfW5fIIISVOycKIfEpfAekl9BDfAvea62QgfL"
@@ -12,8 +12,4 @@
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDXVBd7IcaNgtZrAPFiQKQAkTt0uFzbxYBl0qIAHSBlz"
     ];
   };
-
-  security.sudo.configFile = ''
-    jsh ALL=(ALL) NOPASSWD:ALL
-  '';
 }
