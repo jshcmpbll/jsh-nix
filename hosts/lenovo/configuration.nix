@@ -116,27 +116,27 @@
       enable = true;
       handlers.brightnessup = {
         event = "video/brightnessup*";
-        action = "bld=/sys/class/backlight/*/brightness; echo $(($(cat $bld)+51)) | tee $bld";
+        action = "bld=/sys/class/backlight/*/brightness; echo $(($(cat $bld)+5)) | tee $bld";
       };
       handlers.brightnessdown = {
         event = "video/brightnessdown*";
-        action = "bld=/sys/class/backlight/*/brightness; echo $(($(cat $bld)-51)) | tee $bld";
+        action = "bld=/sys/class/backlight/*/brightness; echo $(($(cat $bld)-5)) | tee $bld";
       };
       handlers.volumeup = {
         event = "button/volumeup*";
-        action = "pactl set-sink-volume @DEFAULT_SINK@ +10%";
+        action = "/run/wrappers/bin/su jsh -c '/run/current-system/sw/bin/pactl --server=/run/user/1000/pulse/native set-sink-volume @DEFAULT_SINK@ +10%'";
       };
       handlers.volumedown = {
         event = "button/volumedown*";
-        action = "pactl set-sink-volume @DEFAULT_SINK@ -10%";
+        action = "/run/wrappers/bin/su jsh -c '/run/current-system/sw/bin/pactl --server=/run/user/1000/pulse/native set-sink-volume @DEFAULT_SINK@ -10%'";
       };
       handlers.volumemute = {
         event = "button/mute*";
-        action = "pactl set-sink-mute @DEFAULT_SINK@ toggle";
+        action = "/run/wrappers/bin/su jsh -c '/run/current-system/sw/bin/pactl --server=/run/user/1000/pulse/native set-sink-mute @DEFAULT_SINK@ toggle'";
       };
       handlers.micmute = {
         event = "button/f20*";
-        action = "pactl set-source-mute @DEFAULT_SOURCE@ toggle";
+        action = "/run/wrappers/bin/su jsh -c '/run/current-system/sw/bin/pactl set-source-mute @DEFAULT_SOURCE@ toggle'";
       };
 
     };
