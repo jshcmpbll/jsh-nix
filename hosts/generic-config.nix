@@ -116,6 +116,8 @@ in
           disableWhileTyping = true;
           naturalScrolling = true;
           tapping = false;
+          accelSpeed = "10";
+          accelProfile = "flat";
         };
       };
       xkbOptions = "ctrl:swapcaps";
