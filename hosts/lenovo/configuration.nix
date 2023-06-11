@@ -1,6 +1,7 @@
 { lib, config, pkgs, latest, ... }:
 {
   imports = [
+    ../../dots/vnc.nix
     ./hardware-configuration.nix
     ../generic-config.nix
     (import ../../lib/home-file.nix
