@@ -22,7 +22,7 @@ in
           target = "/home/jsh/.Xresources";
         }
         {
-          origin = ../dots/ssh-config;
+          origin = /persist/ssh-config;
           target = "/home/jsh/.ssh/config";
         }
         {
