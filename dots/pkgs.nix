@@ -271,6 +271,7 @@ in
     gnome.sushi
     mtr
     ssh-agents
+    wpa_supplicant
     #LPA
   ];
 }
