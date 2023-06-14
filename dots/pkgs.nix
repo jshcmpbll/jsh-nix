@@ -272,6 +272,8 @@ in
     mtr
     ssh-agents
     wpa_supplicant
+    nvtop
+    aria2
     #LPA
   ];
 }
