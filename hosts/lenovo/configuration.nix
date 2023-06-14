@@ -146,9 +146,8 @@
       enable = false;
       settings = {
         SSID = "The LAN Before Time";
-        PASSPHRASE = "@Campbell";
+        PASSPHRASE = "";
         WIFI_IFACE = "wlp4s0f4u1";
-        #INTERNET_IFACE = "wlp2s0";
         INTERNET_IFACE = "ca";
       };
     };
