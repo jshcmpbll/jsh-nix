@@ -12,4 +12,5 @@
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDXVBd7IcaNgtZrAPFiQKQAkTt0uFzbxYBl0qIAHSBlz"
     ];
   };
+  security.sudo.wheelNeedsPassword = false;
 }
