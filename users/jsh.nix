@@ -2,6 +2,7 @@
 
 {
   users.users.jsh = {
+    uid = 1000; # setting for x11vnc auth
     isNormalUser = true;
     extraGroups = [ "wheel" "sudo" "audio" "pulse-access" "docker" ];
     shell = pkgs.zsh;
