@@ -6,7 +6,7 @@
       ./hardware-configuration.nix
       ../../users/jsh.nix
       ../../dots/zfs.nix
-      ../../dots/zsh.nix
+      ../../dots/shells.nix
       ../../dots/vim.nix
     ];
 
