@@ -16,7 +16,7 @@ let
     ''
       function osup {
         cd /home/jsh/git/jsh-nix
-        sudo nix build .#nixosConfigurations.$(hostname).config.system.build.toplevel
+        sudo nix build .#nixosConfigurations.$(hostname).config.system.build.toplevel --impure
         sudo ./result/bin/switch-to-configuration switch
       }
     ''
