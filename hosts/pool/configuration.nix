@@ -68,7 +68,6 @@
   hardware = {
     pulseaudio = {
       enable = true;
-      systemWide = true;
       support32Bit = true;
       package = pkgs.pulseaudioFull;
     };
