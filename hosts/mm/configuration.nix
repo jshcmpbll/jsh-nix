@@ -127,6 +127,7 @@
     #  enable = true;
     #  user = "jsh";
     #};
+    tailscale.enable = true;
   };
 
   system.stateVersion = "22.11"; # Did you read the comment?
