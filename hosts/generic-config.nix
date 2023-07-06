@@ -44,7 +44,6 @@ in
       efi.canTouchEfiVariables = true;
       grub = {
         enable = true;
-        version = 2;
         default = 0;
         devices = [ "nodev" ];
         useOSProber = true;
@@ -125,9 +124,11 @@ in
 
     openssh = {
       enable = true;
-      forwardX11 = true;
-      permitRootLogin = "no";
-      passwordAuthentication = false;
+      settings = {
+        X11Forwarding = true;
+        PermitRootLogin = "no";
+        PasswordAuthentication = false;
+      };
     };
 
     pcscd.enable = true;
@@ -220,5 +221,5 @@ in
 
   };
 
-  system.stateVersion = "22.11"; # Did you read the comment?
+  system.stateVersion = "23.05"; # Did you read the comment?
 }

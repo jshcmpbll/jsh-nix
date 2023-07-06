@@ -223,7 +223,6 @@ in
     zathura
     zfs
     zsh
-    latest.ccloud-cli
     binutils
     helmsman
     terraform-docs

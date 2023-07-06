@@ -114,13 +114,6 @@
       driSupport32Bit = true;
       driSupport = true;
     };
-
-    video = {
-      hidpi = {
-        enable = true;
-      };
-    };
-
   };
 
   ### HARDWARE ###
