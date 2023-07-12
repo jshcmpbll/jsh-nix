@@ -273,6 +273,7 @@ in
     wpa_supplicant
     nvtop
     aria2
+    pdftk
     #LPA
   ];
 }
