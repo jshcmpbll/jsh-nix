@@ -1,6 +1,6 @@
 # Configure computer displays
 ## open nvidia-settings, configure desired layout, select "Save X to configuration file" and find line with MetaMode config
-exec_always --no-startup-id nvidia-settings --assign CurrentMetaMode="DP-0: nvidia-auto-select +2160+1620, HDMI-0: 3840x2160 +0+0 {rotation=left}"
+exec_always --no-startup-id nvidia-settings --assign CurrentMetaMode="DP-0: nvidia-auto-select +2160+1420, HDMI-0: 3840x2160 +0+0 {rotation=left}"
 exec xrdb -merge ~/.Xresources
 
 # Picom Compositor
