@@ -8,51 +8,62 @@
   boot.initrd.availableKernelModules = [ "nvme" "xhci_pci" "ahci" "usbhid" "usb_storage" "sd_mod" ];
   boot.kernelModules = [ "kvm-amd" ];
 
-  fileSystems."/" =
-    { device = "zroot/local/root";
-      fsType = "zfs";
-    };
-
-  fileSystems."/boot" =
-    { device = "/dev/disk/by-uuid/B2B7-803A";
-      fsType = "vfat";
-    };
-
-  fileSystems."/nix" =
-    { device = "zroot/local/nix";
-      fsType = "zfs";
-    };
-
-  fileSystems."/home" =
-    { device = "zroot/safe/home";
-      fsType = "zfs";
-    };
-
-  fileSystems."/persist" =
-    { device = "zroot/safe/persist";
-      fsType = "zfs";
-    };
-
-  fileSystems."/mnt/CSAN" =
-    { device = "csan";
-      fsType = "zfs";
-    };
-  fileSystems."/home/jsh/Pictures" =
-    { device = "csan/media/pictures";
-      fsType = "zfs";
-    };
-  fileSystems."/home/jsh/Videos" =
-    { device = "csan/media/videos";
-      fsType = "zfs";
-    };
-  fileSystems."/home/jsh/Movies" =
-    { device = "csan/media/movies";
-      fsType = "zfs";
-    };
-  fileSystems."/home/jsh/TV" =
-    { device = "csan/media/tv";
-      fsType = "zfs";
-    };
+  fileSystems."/" = {
+    device = "zroot/local/root";
+    fsType = "zfs";
+  };
+  fileSystems."/boot" = {
+    device = "/dev/disk/by-uuid/B2B7-803A";
+    fsType = "vfat";
+  };
+  fileSystems."/nix" = {
+    device = "zroot/local/nix";
+    fsType = "zfs";
+  };
+  fileSystems."/home" = {
+    device = "zroot/safe/home";
+    fsType = "zfs";
+  };
+  fileSystems."/persist" = {
+    device = "zroot/safe/persist";
+    fsType = "zfs";
+  };
+  fileSystems."/mnt/CSAN" = {
+    device = "csan";
+    fsType = "zfs";
+  };
+  fileSystems."/home/jsh/Pictures" = {
+    device = "csan/media/pictures";
+    fsType = "zfs";
+  };
+  fileSystems."/home/jsh/Videos" = {
+    device = "csan/media/videos";
+    fsType = "zfs";
+  };
+  fileSystems."/home/jsh/Movies" = {
+    device = "csan/media/movies";
+    fsType = "zfs";
+  };
+  fileSystems."/home/jsh/TV" = {
+    device = "csan/media/tv";
+    fsType = "zfs";
+  };
+  fileSystems."/home/jsh/Audio" = {
+    device = "csan/media/audio";
+    fsType = "zfs";
+  };
+  fileSystems."/home/jsh/Media/Books" = {
+    device = "csan/media/books";
+    fsType = "zfs";
+  };
+  fileSystems."/home/jsh/Media/Fonts" = {
+    device = "csan/media/fonts";
+    fsType = "zfs";
+  };
+  fileSystems."/home/jsh/Media/ISO" = {
+    device = "csan/media/iso";
+    fsType = "zfs";
+  };
 
   swapDevices = [ ];
 
