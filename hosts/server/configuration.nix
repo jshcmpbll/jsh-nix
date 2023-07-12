@@ -84,11 +84,6 @@
         user = "jsh";
       };
     };
-
-    plex = {
-      enable = true;
-      user = "jsh";
-    };
   };
 
   ### HARDWARE ###

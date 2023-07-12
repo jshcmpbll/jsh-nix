@@ -38,6 +38,16 @@
       fsType = "zfs";
     };
 
+  fileSystems."/sigma/media/tv" =
+    { device = "sigma/media/tv";
+      fsType = "zfs";
+    };
+
+  fileSystems."/sigma/media/movies" =
+    { device = "sigma/media/movies";
+      fsType = "zfs";
+    };
+
   swapDevices = [ ];
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking

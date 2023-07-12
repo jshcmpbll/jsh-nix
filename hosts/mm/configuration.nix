@@ -53,6 +53,8 @@
     experimental-features = nix-command flakes
   '';
 
+  nixpkgs.config.allowUnfree = true;
+
   virtualisation ={
     podman.enable = true;
     oci-containers = {
@@ -126,11 +128,10 @@
     };
     sonarr.enable = true;
     radarr.enable = true;
-    #plex = {
-    #  enable = true;
-    #  user = "jsh";
-    #};
-    tailscale.enable = true;
+    plex = {
+      enable = true;
+      user = "jsh";
+    };
   };
 
   system.stateVersion = "23.05"; # Did you read the comment?
