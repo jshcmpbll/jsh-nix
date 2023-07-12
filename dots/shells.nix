@@ -167,6 +167,26 @@ let
         esac
         ffmpeg -f v4l2 -input_format mjpeg -i $CAMERA -vf scale=1280x720 -pix_fmt yuyv422 -r 59.95 -f v4l2 /dev/video10
       };
+    ''
+    +
+    ''
+      function pdfocr {
+        FN=$(basename -s .pdf $1)
+        ocrmypdf $1 --image-dpi 1200 -d -c $FN-ocr.pdf
+        mv $1 /tmp/
+        echo "Original file '$1' was moved to /tmp"
+        mv $FN-ocr.pdf $1
+      };
+    ''
+    +
+    ''
+      function replacespaces {
+        for file in *' '*
+        do
+          mv -- "$file" "''${file// /_}"
+
+        done
+      };
     '';
 in
 {
