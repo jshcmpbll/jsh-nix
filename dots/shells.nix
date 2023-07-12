@@ -172,9 +172,13 @@ in
 {
   users.extraUsers.root.shell = pkgs.zsh;
   programs = {
+    bash = {
+      shellAliases = aliases;
+      shellInit = functions;
+    };
     zsh = {
       enable = true;
-      enableCompletion = false;
+      enableCompletion = true;
       histSize = 1000000;
       ohMyZsh = {
         enable = true;
