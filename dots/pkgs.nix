@@ -274,6 +274,7 @@ in
     nvtop
     aria2
     pdftk
+    kcalc
     #LPA
   ];
 }
