@@ -13,6 +13,11 @@ let
         url = "https://addons.mozilla.org/firefox/downloads/file/4028976/ublock_origin-1.45.2.xpi";
         sha256 = "sha256-+xc4lcdsOwXxMsr4enFsdePbIb6GHq0bFLpqvH5xXos=";
       })
+      (pkgs.fetchFirefoxAddon {
+        name = "custom_user_agent_revived";
+        url = "https://addons.mozilla.org/firefox/downloads/file/3648268/custom_user_agent_revived-0.2.1.xpi";
+        sha256 = "sha256-yOrXRXT8qjz4AI1Rw6r+ISogMRk0/OpMo0rEVJwT+J4=";
+      })
       #(pkgs.fetchFirefoxAddon {
       #  name = "MetaMask";
       #  url = "https://addons.mozilla.org/firefox/downloads/file/4037096/ether_metamask-10.22.2.xpi";
