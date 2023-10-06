@@ -1,9 +1,10 @@
 { lib, config, pkgs, latest, ... }:
 {
   imports = [
-    ../../dots/vnc.nix
+    ../../dots/docker.nix
     ./hardware-configuration.nix
     ../generic-config.nix
+    ../../dots/vnc.nix
     (import ../../lib/home-file.nix
         [{
           origin = ../../dots/i3/lenovo-config;
@@ -35,6 +36,7 @@
       enable = false;
     };
     usePredictableInterfaceNames = true;
+    interfaces.wlp2s0.macAddress = "04:7b:cb:29:41:33"; # seems to require reboot after change
     wireless = {
       enable = true;
       interfaces = [
