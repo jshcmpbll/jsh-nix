@@ -187,6 +187,12 @@ let
 
         done
       };
+    ''
+    +
+    ''
+      function dotless {
+        awk -F'.' '{printf("%u\n", $1 * 256^3 + $2 * 256^2 + $3 * 256 + $4)}'
+      };
     '';
 in
 {
