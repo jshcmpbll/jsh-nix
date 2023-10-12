@@ -280,6 +280,7 @@ in
     aria2
     pdftk
     kcalc
+    latest.beeper
     #LPA
   ];
 }
