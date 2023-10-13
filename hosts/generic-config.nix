@@ -36,6 +36,10 @@ in
         {
           origin = ../scripts/sf-mono;
           target = "/home/jsh/.config/.sf-mono/.setup";
+        }
+        {
+          origin = ../dots/zathurarc;
+          target = "/home/jsh/.config/zathura/zathurarc";
         }])
   ];
 
