@@ -14,6 +14,8 @@
       #  opt = [];
       #};
       vimrcConfig.customRC = ''
+        set list
+        set lcs+=space:·
         syntax on
         set autoindent
         set expandtab
