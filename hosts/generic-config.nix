@@ -72,6 +72,9 @@ in
     source-code-pro
     terminus_font
     dejavu_fonts
+    helvetica-neue-lt-std
+    garamond-libre
+    lato
   ];
 
   nix.extraOptions = ''
