@@ -152,17 +152,17 @@ in
 
     udev.packages = [ pkgs.libu2f-host ];
 
-    #redshift = {
-    #  enable = true;
-    #  #brightness = {
-    #  #  day = "1";
-    #  #  night = "0.8";
-    #  #};
-    #  temperature = {
-    #    day = 5500;
-    #    night = 3500;
-    #  };
-    #};
+    redshift = {
+      enable = true;
+      brightness = {
+        day = "1";
+        night = "0.8";
+      };
+      temperature = {
+        day = 5500;
+        night = 3500;
+      };
+    };
 
     usbmuxd = {
       enable = true;
