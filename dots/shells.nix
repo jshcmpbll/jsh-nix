@@ -11,6 +11,7 @@ let
     "osinstall" = "./result/bin/switch-to-configuration switch";
     "tvfb" = "filebot -r -rename * -non-strict --format /home/jsh/TV/\"{n.space('_')}-{y}/{s00e00}-{t.space('_')}\"";
     "moviefb" = "filebot -rename * -non-strict --format \"{n.space('_')}-{y}\"";
+    "cwd" = "pwd | xclip -sel copy";
   };
   functions =
     ''
