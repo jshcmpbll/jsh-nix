@@ -1,30 +1,44 @@
 { lib, config, pkgs, latest, scan, ... }:
 let
-  myFirefox = pkgs.wrapFirefox pkgs.firefox-esr-unwrapped {
-    cfg = { smarctcardSupport = true; };
-    nixExtensions = [
-      (pkgs.fetchFirefoxAddon {
-        name = "1password";
-        url = "https://addons.mozilla.org/firefox/downloads/file/4037440/1password_x_password_manager-2.5.0.xpi";
-        sha256 = "sha256:702a5cd8b63a326e1c4a839bdf075534d69074450db25fe9cddcd60186df02d6";
-      })
-      (pkgs.fetchFirefoxAddon {
-        name = "ublock";
-        url = "https://addons.mozilla.org/firefox/downloads/file/4028976/ublock_origin-1.45.2.xpi";
-        sha256 = "sha256-+xc4lcdsOwXxMsr4enFsdePbIb6GHq0bFLpqvH5xXos=";
-      })
-      (pkgs.fetchFirefoxAddon {
-        name = "custom_user_agent_revived";
-        url = "https://addons.mozilla.org/firefox/downloads/file/3648268/custom_user_agent_revived-0.2.1.xpi";
-        sha256 = "sha256-yOrXRXT8qjz4AI1Rw6r+ISogMRk0/OpMo0rEVJwT+J4=";
-      })
-      #(pkgs.fetchFirefoxAddon {
-      #  name = "MetaMask";
-      #  url = "https://addons.mozilla.org/firefox/downloads/file/4037096/ether_metamask-10.22.2.xpi";
-      #  sha256 = "sha256-G+MwJDOcsaxYSUXjahHJmkWnjLeQ0Wven8DU/lGeMzA=";
-      #})
-    ];
-  };
+  myFirefox = latest.pkgs.wrapFirefox
+    (latest.pkgs.firefox-esr-unwrapped.override (old: {
+      requireSigning = false;
+      allowAddonSideload = true;
+    }))
+    {
+      cfg = { smarctcardSupport = true; };
+      nixExtensions = [
+        (latest.pkgs.fetchFirefoxAddon {
+          name = "1password";
+          url = "https://addons.mozilla.org/firefox/downloads/file/4037440/1password_x_password_manager-2.5.0.xpi";
+          sha256 = "sha256:702a5cd8b63a326e1c4a839bdf075534d69074450db25fe9cddcd60186df02d6";
+        })
+        (latest.pkgs.fetchFirefoxAddon {
+          name = "ublock";
+          url = "https://addons.mozilla.org/firefox/downloads/file/4028976/ublock_origin-1.45.2.xpi";
+          sha256 = "sha256-+xc4lcdsOwXxMsr4enFsdePbIb6GHq0bFLpqvH5xXos=";
+        })
+        (latest.pkgs.fetchFirefoxAddon {
+          name = "custom_user_agent_revived";
+          url = "https://addons.mozilla.org/firefox/downloads/file/3648268/custom_user_agent_revived-0.2.1.xpi";
+          sha256 = "sha256-yOrXRXT8qjz4AI1Rw6r+ISogMRk0/OpMo0rEVJwT+J4=";
+        })
+        #(latest.pkgs.fetchFirefoxAddon {
+        #  name = "MetaMask";
+        #  url = "https://addons.mozilla.org/firefox/downloads/file/4037096/ether_metamask-10.22.2.xpi";
+        #  sha256 = "sha256-G+MwJDOcsaxYSUXjahHJmkWnjLeQ0Wven8DU/lGeMzA=";
+        #})
+      ];
+      extraPolicies = {
+        DisablePocket = true;
+        DisableTelemetry = true;
+        DisableFirefoxAccounts = true;
+        FirefoxHome = {
+          Pocket = false;
+          Snippets = false;
+        };
+      };
+    };
 in
 {
   imports = [
@@ -114,19 +128,19 @@ in
     nmap
     nodePackages.prettier
     ntfs3g
-    (wrapOBS {
-      plugins = with obs-studio-plugins; [ wlrobs obs-gstreamer obs-move-transition ] ++ (lib.optionals config.nixpkgs.config.allowUnfree [ (obs-ndi.override {
-        ndi = ndi.overrideAttrs (attrs: rec {
-          src = fetchurl {
-            name = "${attrs.pname}-${attrs.version}.tar.gz";
-            url = "https://downloads.ndi.tv/SDK/NDI_SDK_Linux/Install_NDI_SDK_v5_Linux.tar.gz";
-            hash = "sha256-ANC+3Cxyc22CiD/A/WvBpUTnlYx+Rtt58yZjPUThUVM=";
-          };
+    #(wrapOBS {
+    #  plugins = with obs-studio-plugins; [ wlrobs obs-gstreamer obs-move-transition ] ++ (lib.optionals config.nixpkgs.config.allowUnfree [ (obs-ndi.override {
+    #    ndi = ndi.overrideAttrs (attrs: rec {
+    #      src = fetchurl {
+    #        name = "${attrs.pname}-${attrs.version}.tar.gz";
+    #        url = "https://downloads.ndi.tv/SDK/NDI_SDK_Linux/Install_NDI_SDK_v5_Linux.tar.gz";
+    #        hash = "sha256-HPzDLuJrwlccXL9x6B2vxnbjiH5XJKic5Qj0njxeBXI=";
+    #      };
 
-          unpackPhase = ''unpackFile ${src}; echo y | ./${attrs.installerName}.sh; sourceRoot="NDI SDK for Linux";'';
-        });
-      }) ]);
-    })
+    #      unpackPhase = ''unpackFile ${src}; echo y | ./${attrs.installerName}.sh; sourceRoot="NDI SDK for Linux";'';
+    #    });
+    #  }) ]);
+    #})
     ofono-phonesim
     oh-my-zsh
     okular
