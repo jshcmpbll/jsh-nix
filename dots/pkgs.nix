@@ -214,7 +214,6 @@ in
     latest.odafileconverter
     latest.spotifyd
     latest.terraform
-    latest.yuzu-mainline
     zoom-us
     ranger
     unzip
