@@ -67,7 +67,7 @@ in
     longitude = -118.1;
   };
 
-  fonts.fonts = with pkgs; [
+  fonts.packages = with pkgs; [
     hermit
     source-code-pro
     terminus_font
