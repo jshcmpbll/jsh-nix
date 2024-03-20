@@ -32,10 +32,16 @@ let
       extraPolicies = {
         DisablePocket = true;
         DisableTelemetry = true;
+        DisableAccounts = true;
         DisableFirefoxAccounts = true;
+        DisableFirefoxScreenshots = true;
+        DisplayBookmarksToolbar = "newtab";
         FirefoxHome = {
           Pocket = false;
           Snippets = false;
+        };
+        Preferences = {
+          "extensions.activeThemeID" = { Value = "firefox-compact-dark@mozilla.org"; Status = "locked"; };
         };
       };
     };
