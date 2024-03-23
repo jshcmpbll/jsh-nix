@@ -79,7 +79,7 @@ in
     exiftool
     fdupes
     feh
-    ffmpeg
+    latest.ffmpeg-full
     file
     myFirefox
     foremost
@@ -321,6 +321,14 @@ in
     pdftk
     kcalc
     latest.beeper
+    freetube
+    nodejs
+    (vscode-with-extensions.override {
+      vscodeExtensions = with vscode-extensions; [
+        dbaeumer.vscode-eslint
+        github.copilot
+      ];
+    })
     #LPA
   ];
 }
