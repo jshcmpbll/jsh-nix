@@ -19,6 +19,8 @@
         }])
   ];
 
+  virtualisation.docker.enable = true;
+
   boot = {
     loader = {
       grub = {
