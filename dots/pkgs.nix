@@ -320,6 +320,8 @@ in
         github.copilot
       ];
     })
+    sipcalc
+    davinci-resolve-studio
     #LPA
   ];
 }
