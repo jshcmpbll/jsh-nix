@@ -14,7 +14,7 @@
       #  opt = [];
       #};
       vimrcConfig.customRC = ''
-        set list
+        set nolist
         set lcs+=space:·
         syntax on
         set autoindent
