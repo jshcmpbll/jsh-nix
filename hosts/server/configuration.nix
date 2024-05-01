@@ -86,6 +86,37 @@
         user = "jsh";
       };
     };
+    tailscale.enable =true;
+
+    acpid = {
+      enable = true;
+      handlers.brightnessup = {
+        event = "video/brightnessup*";
+        action = "bld=/sys/class/backlight/*/brightness; echo $(($(cat $bld)+5)) | tee $bld";
+      };
+      handlers.brightnessdown = {
+        event = "video/brightnessdown*";
+        action = "bld=/sys/class/backlight/*/brightness; echo $(($(cat $bld)-5)) | tee $bld";
+      };
+      handlers.volumeup = {
+        event = "button/volumeup*";
+        action = "/run/wrappers/bin/su jsh -c '/run/current-system/sw/bin/pactl --server=/run/user/1000/pulse/native set-sink-volume @DEFAULT_SINK@ +10%'";
+      };
+      handlers.volumedown = {
+        event = "button/volumedown*";
+        action = "/run/wrappers/bin/su jsh -c '/run/current-system/sw/bin/pactl --server=/run/user/1000/pulse/native set-sink-volume @DEFAULT_SINK@ -10%'";
+      };
+      handlers.volumemute = {
+        event = "button/mute*";
+        action = "/run/wrappers/bin/su jsh -c '/run/current-system/sw/bin/pactl --server=/run/user/1000/pulse/native set-sink-mute @DEFAULT_SINK@ toggle'";
+      };
+      #handlers.micmute = {
+      #  event = "button/f20*";
+      #  action = "/run/wrappers/bin/su jsh -c '/run/current-system/sw/bin/pactl set-source-mute @DEFAULT_SOURCE@ toggle'";
+      #};
+
+    };
+
 
     syncoid = {
       enable = true;
@@ -164,6 +195,11 @@
         };
       };
     };
+    plex = {
+      enable = true;
+      user = "jsh";
+    };
+
   };
 
   ### HARDWARE ###
