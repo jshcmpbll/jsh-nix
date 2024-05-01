@@ -1,0 +1,62 @@
+configuration {
+  font: "SF Mono 22";
+  run {
+    display-name: ":";
+  }
+  timeout {
+    delay: 11;
+    action: "kb-cancel";
+  }
+}
+
+* {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  spacing: 0;
+  border-radius: 0;
+
+  bg: #151515;
+  fg: #FFFFFF;
+  fg-2: #444444;
+
+  background-color: @bg;
+  text-color: @fg;
+}
+
+window {
+  transparency: "real";
+}
+
+mainbox {
+  children: [inputbar, listview];
+}
+
+inputbar {
+  children: [prompt, entry];
+}
+
+entry {
+  padding: 12px 0;
+}
+
+prompt {
+  padding: 12px;
+}
+
+listview {
+  lines: 10;
+}
+
+element {
+  children: [element-text];
+}
+
+element-text {
+  padding: 12px;
+  text-color: @fg-2;
+}
+
+element-text selected {
+  text-color: @fg;
+}

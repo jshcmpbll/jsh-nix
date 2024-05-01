@@ -14,6 +14,10 @@ in
         target = "/home/jsh/.config/rofi/config.rasi";
       }
         {
+          origin = ../dots/rofi/theme.rasi;
+          target = "/home/jsh/.config/rofi/theme.rasi";
+        }
+        {
           origin = ../dots/dunst/dunstrc;
           target = "/home/jsh/.config/dunst/dunstrc";
         }

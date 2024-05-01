@@ -1,3 +1,6 @@
 configuration {
-	font: "SF Mono 24";
+  modes: [ combi ];
+  combi-modes: [ window, drun, run ];
 }
+
+@theme "~/.config/rofi/theme.rasi"
