@@ -86,6 +86,84 @@
         user = "jsh";
       };
     };
+
+    syncoid = {
+      enable = true;
+      user = "root";
+      group = "root";
+      commonArgs = [ "--no-privilege-elevation" "--debug" ];
+      localSourceAllow = [
+        "change-key"
+        "compression"
+        "create"
+        "mount"
+        "mountpoint"
+        "receive" 
+        "rollback"
+        "bookmark"
+        "hold"
+        "send"
+        "snapshot"
+        "destroy"
+      ];
+      # Permissions the local `syncoid` user gets to manipulate local ZFS datasets that
+      # are the targets for backups. 
+      # NOTE: you must ensure the remote syncoid user has similar permissions. 
+      localTargetAllow = [
+        "change-key"
+        "compression"
+        "create"
+        "mount"
+        "mountpoint"
+        "receive"
+        "rollback"
+        "bookmark"
+        "hold"
+        "send"
+        "snapshot"
+        "destroy"
+      ];
+      commands = {
+        # CSAN
+        "zroot-csan-home" = {
+          source = "zroot/safe/home";
+          recursive = true;
+          target = "csan/jsh-server/home";
+        };
+        "zroot-csan-persist" = {
+          source = "zroot/safe/persist";
+          recursive = true;
+          target = "csan/jsh-server/persist";
+        };
+        # SIGMA
+        #"zroot-sigma-server" = {
+        #  source = "zroot/safe";
+        #  recursive = true;
+        #  target = "sigma/server";
+        #};
+        #"csan-sigma-media" = {
+        #  source = "csan/media";
+        #  recursive = true;
+        #  target = "sigma/media";
+        #};
+        # REIN
+        "zroot-rein-home" = {
+          source = "zroot/safe/home";
+          recursive = true;
+          target = "rein/jsh-server/home";
+        };
+        "zroot-rein-persist" = {
+          source = "zroot/safe/persist";
+          recursive = true;
+          target = "rein/jsh-server/persist";
+        };
+        "csan-rein-media" = {
+          source = "csan/media";
+          recursive = true;
+          target = "rein/media";
+        };
+      };
+    };
   };
 
   ### HARDWARE ###
