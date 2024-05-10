@@ -1,8 +1,7 @@
 { lib, config, pkgs, latest, ... }:
-let
-in
 {
   imports = [
+    ../dots/apple-cursor.nix
     ../dots/shells.nix
     ../dots/vim.nix
     ../dots/pkgs.nix
