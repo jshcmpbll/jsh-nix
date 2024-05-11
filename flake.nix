@@ -61,6 +61,21 @@
           };
         };
       };
+      jsh-mms = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          ./hosts/mms/configuration.nix
+        ];
+        specialArgs = {
+          latest = import nixpkgs-unstable {
+            system = "x86_64-linux";
+            config = {
+              allowUnfree = true;
+              allowBroken = true;
+            };
+          };
+        };
+      };
       pool = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         modules = [
