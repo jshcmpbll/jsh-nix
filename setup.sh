@@ -1,60 +1,68 @@
 #! /usr/bin/env bash
 
+set -x
 
-main()
-{
-case $1 in
+setup_disk() {
+ local disk="${1}"
+ blkdiscard -f "${disk}" || true
 
-  *tldr)
-    TLDR
-    ;;
-  *d)
-    echo "exit"
-    ;;
-  *help|*h|*)
-    Help
-    ;;
-  esac
+ parted --script --align=optimal  "${disk}" -- \
+ mklabel gpt \
+ mkpart ESP fat32 1MiB 1GiB \
+ mkpart swap 1GiB 10GiB \
+ mkpart zroot 10GiB 100% \
+ set 1 boot on
+
+ partprobe "${disk}"
+ udevadm settle
+
+ mkfs.fat -F 32 -n boot /dev/sda1
+ mkswap -L swap /dev/sda2
+
+
+ ATA_PATH=$(get_by_id_path ${disk})
+ zpool create -f zroot $ATA_PATH-part3
+ zfs set compression=on zroot
+
+ zfs create -p -o mountpoint=legacy zroot/root
+ zfs create -p -o mountpoint=legacy zroot/home
+ zfs create -p -o mountpoint=legacy zroot/peresist
+ zfs create -p -o mountpoint=legacy zroot/nix
+
+ zfs set xattr=sa zroot
+ zfs set acltype=posixacl zroot
+
+ zfs set atime=off zroot/nix
+ zfs set xattr=sa zroot/nix
+ zfs set acltype=posixacl zroot/nix
+ 
+ mount -t zfs zroot/root /mnt
+ mkdir -p /mnt/{boot,home,persist,nix}
+ mount -t vfat /dev/sda1 /mnt/boot
+ mount -t zfs zroot/nix /mnt/nix
+ mount -t zfs zroot/home /mnt/home
+ mount -t zfs zroot/persist /mnt/persist
+ 
+ swapon $ATA_PATH-part2
 }
 
-Help()
-{
-printf "This is the setup script for getting NixOS installed on a system via parted. The intent of this script is to take a device name for a storage volume and prepare the proper paritions and formats.\n\n"
-printf "\tSyntax: setup [-h|d|c|v]\n\n"
-printf "\th   Prints help function\n"
-printf "\td   Drive setup\n"
-printf "\tc   configuration via \$editor\n"
-printf "\tv   Verbose mode\n"
-printf "\n\nThis help function will run on any improper input. Run ./setup.sh tldr for concrete examples."
+get_by_id_path() {
+    local device_path="$1"
+    local by_id_path=""
+
+    # Check if the device path exists
+    if [ -e "$device_path" ]; then
+        # Get the device's ATA ID using udevadm
+        ata_id=$(udevadm info --query=property --name="$device_path" | grep ID_SERIAL= | cut -d'=' -f2)
+
+        # Construct the path in /dev/disk/by-id
+        by_id_path="/dev/disk/by-id/ata-$ata_id"
+    else
+        echo "Error: Device path $device_path does not exist"
+        return 1
+    fi
+
+    echo "$by_id_path"
 }
 
-TLDR()
-{
-  printf "Here are some concrete examples\n"
-
-}
-
-
-#parted /dev/$1 -- mklabel gpt
-#parted /dev/$1 -- mkpart primary 512MiB -110GiB
-## parted /dev/$1 -- mkpart primary linux-swap -110GiB 100%
-#parted /dev/$1 -- mkpart ESP fat32 1MiB 512MiB
-#parted /dev/$1 -- set 2 boot on
-#
-#mkfs.ext4 -L nixos /dev/$1p1
-#mkswap -L swap /dev/$1p2
-#mkfs.fat -F 32 -n boot /dev/$1p2
-#
-#mount /dev/$1p1 /mnt
-#mkdir -p /mnt/boot
-#mount /dev/$1p2 /mnt/boot
-#
-#swapon /dev/$1p2
-#
-#nixos-generate-config --root /mnt
-#
-#vim /mnt/etc/nixos/configuration.nix
-#
-#nixos-install
-
-main "$@"
+setup_disk "${1}"
