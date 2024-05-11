@@ -2,6 +2,7 @@
 {
   imports = [
     ../dots/apple-cursor.nix
+    ../dots/config.nix
     ../dots/shells.nix
     ../dots/vim.nix
     ../dots/pkgs.nix
