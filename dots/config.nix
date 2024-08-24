@@ -8,7 +8,7 @@ in
   nixpkgs.config.allowUnfree = true;
   imports = [
     (import ../lib/home-file.nix [
-      { origin = "${config}"; target = "/home/jsh/.config"; }
+      { origin = "${config}"; target = "/home/jsh/.config/nixpkgs/config.nix"; }
     ])
   ];
 }
