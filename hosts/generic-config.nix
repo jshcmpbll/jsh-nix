@@ -1,5 +1,6 @@
-{ lib, config, pkgs, latest, ... }:
-{
+{ lib, config, inputs, pkgs, latest, ... }:
+let
+in
   imports = [
     ../dots/apple-cursor.nix
     ../dots/config.nix
@@ -81,23 +82,25 @@
     lato
   ];
 
-  nix.extraOptions = ''
-    experimental-features = nix-command flakes
-  '';
-
-  nix.settings = {
-    trusted-users = [
-      "jsh"
-    ];
-    #trusted-substituters = [
-    #  "s3://nwi-nix-cache2?profile=nebulaworks&region=us-west-2"
-    #];
-    #substituters = [
-    #  "s3://nwi-nix-cache2?profile=nebulaworks&region=us-west-2"
-    #];
-    #trusted-public-keys = [
-    #  "nwi-nix-cache:50ocdfoVjjRt4utZ13VmoVk7TmTUXtZRSV3Q9XCEiEY="
-    #];
+  nix = {
+    settings = {
+      trusted-users = [
+        "jsh"
+      ];
+    };
+    optimise = {
+      automatic = true;
+      dates = ["00:00"];
+    };
+    gc = {
+      automatic = true;
+      dates = "weekly";
+      options = "--delete-older-than 30d";
+    };
+    extraOptions = ''
+      experimental-features = nix-command flakes
+    '';
+    registry.nixpkgs.flake = inputs.nixpkgs;
   };
 
   programs.ssh.startAgent = true;
