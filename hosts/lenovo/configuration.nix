@@ -24,7 +24,15 @@
         }])
   ];
 
-  boot.kernelModules = [ "kvm-amd" ];
+  systemd.tmpfiles.rules = [
+    "L+    /opt/rocm/hip   -    -    -     -    ${pkgs.rocmPackages.clr}"
+  ];
+
+  boot = {
+    extraModulePackages = with config.boot.kernelPackages; [ evdi ];
+    kernelModules = [ "kvm-amd" "evdi" ];
+    kernel.sysctl = { "unprivileged_userns_clone" = 1; };
+  };
 
   networking = {
 
