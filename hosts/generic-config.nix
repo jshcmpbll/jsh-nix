@@ -1,6 +1,5 @@
 { lib, config, inputs, pkgs, latest, ... }:
-let
-in
+{
   imports = [
     ../dots/apple-cursor.nix
     ../dots/config.nix
@@ -49,6 +48,7 @@ in
   ];
 
   boot = {
+    binfmt.emulatedSystems = [ "aarch64-linux" ];
     loader = {
       efi.canTouchEfiVariables = true;
       grub = {
@@ -77,7 +77,7 @@ in
     source-code-pro
     terminus_font
     dejavu_fonts
-    helvetica-neue-lt-std
+    #helvetica-neue-lt-std
     garamond-libre
     lato
   ];
@@ -229,6 +229,7 @@ in
           Enable = "Source,Sink,Media,Socket";
           # Set this so that I could connect to airpods
           ControllerMode = "bredr";
+          FastConnectable = true;
         };
       };
     };
