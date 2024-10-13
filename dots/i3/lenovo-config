@@ -64,7 +64,7 @@ set $mod Mod4
 # use Mouse+$mod to drag floating windows to their wanted position
 floating_modifier $mod
 # start a terminal
-bindsym $mod+Return exec urxvt -e tmux
+bindsym $mod+Return exec alacritty -e tmux
 # screenshot
 bindsym $mod+Shift+s exec sh ~/.config/screenshots/copy-img
 bindsym $mod+Shift+p exec scrot --focused

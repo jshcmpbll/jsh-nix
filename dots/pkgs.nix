@@ -292,7 +292,7 @@ in
     remmina
     sipcalc
     davinci-resolve-studio
-    rxvt-unicode
+    alacritty
     #LPA
   ];
 }
