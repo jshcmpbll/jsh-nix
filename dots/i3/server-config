@@ -6,9 +6,6 @@ exec xrdb -merge ~/.Xresources
 # Picom Compositor
 exec_always picom --config ~/git/jsh-nix/dots/picom/picom.conf
 
-# Polybar
-exec_always sh ~/.config/polybar/launch.sh
-
 # xset
 exec_always xset -dpms
 exec_always xset s off
@@ -23,7 +20,10 @@ exec_always sleep 5; feh --bg-fill ~/.i3_background --no-xinerama
 exec sh ~/.config/.sf-mono/.setup
 
 # Start slack
-exec --no-startup-id i3-msg 'workspace 9; exec slack'
+exec --no-startup-id i3-msg 'workspace 9; exec beeper'
+
+# Polybar
+exec_always sleep 5; sh ~/.config/polybar/launch.sh
 
 # Set audio to HDMI output
 # exec pactl set-card-profile alsa_card.pci-0000_0a_00.1 output:hdmi-stereo
@@ -190,32 +190,3 @@ mode "resize" {
         bindsym $mod+r mode "default"
 }
 bindsym $mod+r mode "resize"
-# Start i3bar to display a workspace bar (plus the system information i4status
-# finds out, if available)
-#bar {
-#  font pango: SF Mono 20
-#  colors {
-#      background #000000
-#      statusline #ffffff
-#      separator #ffffff
-#      focused_workspace #7cafc2 #7cafc2 #000000
-#      active_workspace #333333 #5f676a
-#  }
-#        status_command i3status -c ~/.config/i3/i3status.conf
-#        position top
-#        mode hide 
-#}
-
-# Thank you! https://bewilderedoctothorpe.net/2022/03/30/i3wm-zoom-screen-sharing/
-
-# Set Zoom notification window to floating with no focus
-for_window [title="^zoom\s?$"] floating enable
-no_focus [title="^zoom\s?$"]
-
-# For meetings that you have joined via a link
-for_window [title="^join\?action=join.*$"] floating enable
-no_focus [title="^join\?action=join.*$"]
-
-# Alternatively if the popups are annoying you...
-# for_window [title="^zoom\s?$"] kill
-# for_window [title="^join\?action=join.*$"] kill

@@ -200,6 +200,119 @@ let
     +
     ''
       export AWS_PAGER=""
+    ''
+    +
+    ''
+      function scan {
+        while true; do
+           if [ -n "$2" ]; then
+             NAME=$2.png
+             if [ -n "$3" ]; then
+               NAME=$2-$(date -u +%Y-%m-%dT%H%M%S).png
+             fi
+           else
+             NAME=$(date -u +%Y-%m-%dT%H%M%S).png
+           fi
+           if [ -s "$NAME" ]; then
+             return 
+           fi
+           scanimage --device-name=epsonds --format png --output-file="$NAME"
+           if [ -s "$NAME" ]; then
+             echo "Scan successful: $NAME"
+             sxiv "$NAME" &
+             pid=$!
+             (sleep 4 && kill $pid) &
+             wait $pid
+           else
+             echo "Deleted empty scan: $NAME"
+             rm "$NAME"
+           fi
+        done
+      }
+      
+    ''
+    +
+    ''
+      function b-scan {
+        while true; do
+           if [ -n "$2" ]; then
+             NAME=$2.png
+             if [ -n "$3" ]; then
+               NAME=$2-$(date -u +%Y-%m-%dT%H%M%S).png
+             fi
+           else
+             NAME=$(date -u +%Y-%m-%dT%H%M%S).png
+           fi
+           if [ -s "$NAME" ]; then
+             return 
+           fi
+           scanimage --device-name=$1 --format png --output-file="$NAME" $4
+           if [ -s "$NAME" ]; then
+             echo "Scan successful: $NAME"
+             sxiv "$NAME" &
+             pid=$!
+             (sleep 4 && kill $pid) &
+             wait $pid
+           else
+             echo "Deleted empty scan: $NAME"
+             rm "$NAME"
+           fi
+        done
+      };
+    ''
+    +
+    ''
+      function e-scan {
+        while true; do
+           if [ -n "$2" ]; then
+             NAME=$2.png
+             if [ -n "$3" ]; then
+               NAME=$2-$(date -u +%Y-%m-%dT%H%M%S).png
+             fi
+           else
+             NAME=$(date -u +%Y-%m-%dT%H%M%S).png
+           fi
+           if [ -s "$NAME" ]; then
+             return 
+           fi
+           scanimage --device-name=epsonds --adf-skew=yes --adf-crp=yes --format png --output-file="$NAME"
+           if [ -s "$NAME" ]; then
+             echo "Scan successful: $NAME"
+             sxiv "$NAME" &
+             pid=$!
+             (sleep 4 && kill $pid) &
+             wait $pid
+           else
+             echo "Deleted empty scan: $NAME"
+             rm "$NAME"
+           fi
+        done
+      };
+    ''
+    +
+    ''
+      function watchfile {
+        local filepath="$1"
+        local command="$2"
+        local last_modified=$(date -r "$filepath" +%s)
+
+        if [ ! -f "$filepath" ]; then
+            echo "Error: File $filepath does not exist."
+            return 1
+        fi
+        
+        echo "Watching $filepath for changes..."
+        
+        while true; do
+            current_modified=$(date -r "$filepath" +%s)
+            if [ "$current_modified" -gt "$last_modified" ]; then
+                last_modified="$current_modified"
+                echo "File $filepath has been modified. Running command..."
+                eval "$command"
+            fi
+            sleep 1 # Check every 1 second
+        done
+      };
     '';
 in
 {
@@ -226,10 +339,10 @@ in
       };
       shellAliases = aliases;
       shellInit = ''
-        ZSH_THEME_GIT_PROMPT_PREFIX="%{$reset_color%}%{$fg[white]%}["
-        ZSH_THEME_GIT_PROMPT_SUFFIX=""
-        ZSH_THEME_GIT_PROMPT_DIRTY="%{$fg[red]%}●%{$fg[white]%}]%{$reset_color%} "
-        ZSH_THEME_GIT_PROMPT_CLEAN="]%{$reset_color%} "
+        #ZSH_THEME_GIT_PROMPT_PREFIX="%{$reset_color%}%{$fg[white]%}["
+        #ZSH_THEME_GIT_PROMPT_SUFFIX=""
+        #ZSH_THEME_GIT_PROMPT_DIRTY="%{$fg[red]%}●%{$fg[white]%}]%{$reset_color%} "
+        #ZSH_THEME_GIT_PROMPT_CLEAN="]%{$reset_color%} "
         ZSH_THEME_SVN_PROMPT_PREFIX=$ZSH_THEME_GIT_PROMPT_PREFIX
         ZSH_THEME_SVN_PROMPT_SUFFIX=$ZSH_THEME_GIT_PROMPT_SUFFIX
         ZSH_THEME_SVN_PROMPT_DIRTY=$ZSH_THEME_GIT_PROMPT_DIRTY

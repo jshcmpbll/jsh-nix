@@ -5,6 +5,7 @@
       # Include the results of the hardware scan.
       ./hardware-configuration.nix
       ../../users/jsh.nix
+      ../../dots/shells.nix
     ];
 
   # Use the systemd-boot EFI boot loader.
@@ -39,13 +40,15 @@
   # Enable Desktop Environment.
   services.xserver = {
     enable = true;
-    layout = "us";
     displayManager.lightdm = {
       enable = true;
     };
+    xkb.layout = "us";
     desktopManager.gnome.enable = true;
     videoDrivers = [ "intel" ];
   };
+
+
 
   # VNC
   systemd.services.x11vnc = {
@@ -113,14 +116,13 @@
 
   services.openssh = {
     enable = true;
-      settings = {
-        X11Forwarding = true;
-        PermitRootLogin = "no";
-        PasswordAuthentication = false;
-      };
+    settings = {
+      X11Forwarding = true;
+      PermitRootLogin = "no";
+      PasswordAuthentication = false;
     };
   };
 
-  system.stateVersion = "23.11"; # Did you read the comment?
+  system.stateVersion = "24.05"; # Did you read the comment?
 
 }

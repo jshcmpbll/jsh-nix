@@ -1,6 +1,6 @@
 { lib, config, pkgs, latest, scan, stdenv, ... }:
 let
-  myFirefox = latest.pkgs.wrapFirefox
+  myFirefox = pkgs.wrapFirefox
     (latest.pkgs.firefox-unwrapped.override (old: {
       requireSigning = false;
       allowAddonSideload = true;
@@ -8,26 +8,21 @@ let
     {
       cfg = { smarctcardSupport = true; };
       nixExtensions = [
-        (latest.pkgs.fetchFirefoxAddon {
+        (pkgs.fetchFirefoxAddon {
           name = "1password";
           url = "https://addons.mozilla.org/firefox/downloads/file/4037440/1password_x_password_manager-2.5.0.xpi";
           sha256 = "sha256:702a5cd8b63a326e1c4a839bdf075534d69074450db25fe9cddcd60186df02d6";
         })
-        (latest.pkgs.fetchFirefoxAddon {
+        (pkgs.fetchFirefoxAddon {
           name = "ublock";
           url = "https://addons.mozilla.org/firefox/downloads/file/4028976/ublock_origin-1.45.2.xpi";
           sha256 = "sha256-+xc4lcdsOwXxMsr4enFsdePbIb6GHq0bFLpqvH5xXos=";
         })
-        (latest.pkgs.fetchFirefoxAddon {
+        (pkgs.fetchFirefoxAddon {
           name = "custom_user_agent_revived";
           url = "https://addons.mozilla.org/firefox/downloads/file/3648268/custom_user_agent_revived-0.2.1.xpi";
           sha256 = "sha256-yOrXRXT8qjz4AI1Rw6r+ISogMRk0/OpMo0rEVJwT+J4=";
         })
-        #(latest.pkgs.fetchFirefoxAddon {
-        #  name = "MetaMask";
-        #  url = "https://addons.mozilla.org/firefox/downloads/file/4037096/ether_metamask-10.22.2.xpi";
-        #  sha256 = "sha256-G+MwJDOcsaxYSUXjahHJmkWnjLeQ0Wven8DU/lGeMzA=";
-        #})
       ];
       extraPolicies = {
         DisablePocket = true;
@@ -133,24 +128,6 @@ in
     nmap
     nodePackages.prettier
     ntfs3g
-    #obs-studio
-    (wrapOBS {
-      plugins = with obs-studio-plugins; [ obs-freeze-filter ];
-      #plugins = with obs-studio-plugins; [ obs-freeze-filter obs-ndi ];
-    })
-    #(wrapOBS {
-    #  plugins = with obs-studio-plugins; [ wlrobs obs-gstreamer obs-move-transition ] ++ (lib.optionals config.nixpkgs.config.allowUnfree [ (obs-ndi.override {
-    #    ndi = ndi.overrideAttrs (attrs: rec {
-    #      src = fetchurl {
-    #        name = "${attrs.pname}-${attrs.version}.tar.gz";
-    #        url = "https://downloads.ndi.tv/SDK/NDI_SDK_Linux/Install_NDI_SDK_v5_Linux.tar.gz";
-    #        hash = "sha256-flxUaT1q7mtvHW1J9I1O/9coGr0hbZ/2Ab4tVa8S9/U=";
-    #      };
-
-    #      unpackPhase = ''unpackFile ${src}; echo y | ./${attrs.installerName}.sh; sourceRoot="NDI SDK for Linux";'';
-    #    });
-    #  }) ]);
-    #})
     ofono-phonesim
     oh-my-zsh
     okular
@@ -163,9 +140,6 @@ in
     picom
     polybarFull
     prometheus
-    #protonvpn-cli
-    protonvpn-cli_2
-    #protonvpn-gui
     pywal
     qemu
     qemu_kvm
@@ -204,7 +178,6 @@ in
     latest.argocd
     latest.azure-cli
     latest.azure-functions-core-tools
-    #latest.citrix_workspace
     latest.discord
     latest.fluxcd
     latest.github-cli
@@ -261,7 +234,7 @@ in
     hdparm
     latest.conftest
     json2hcl
-    open-policy-agent
+    latest.open-policy-agent
     ocrmypdf
     thunderbird
     hugo
@@ -290,7 +263,7 @@ in
     mtr
     ssh-agents
     wpa_supplicant
-    nvtop
+    nvtopPackages.full
     aria2
     pdftk
     kcalc
@@ -312,10 +285,14 @@ in
       vscodeExtensions = with vscode-extensions; [
         dbaeumer.vscode-eslint
         esbenp.prettier-vscode
+        genieai.chatgpt-vscode
       ];
     })
     latest.postman
     remmina
+    sipcalc
+    davinci-resolve-studio
+    rxvt-unicode
     #LPA
   ];
 }

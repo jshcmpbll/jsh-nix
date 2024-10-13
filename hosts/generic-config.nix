@@ -103,37 +103,43 @@
     registry.nixpkgs.flake = inputs.nixpkgs;
   };
 
-  programs.ssh.startAgent = true;
+  programs = {
+    ssh.startAgent = true;
+  };
 
   services = {
 
     xserver = {
       enable = true;
       autorun = true;
-      displayManager.gdm = {
-        enable = true;
-        autoLogin.delay = 10;
-        autoSuspend = false;
-        wayland = false;
-      };
-      displayManager.defaultSession = "none+i3";
+      #displayManager.gdm = {
+      #  enable = true;
+      #  #autoLogin.delay = 10;
+      #  autoSuspend = false;
+      #  wayland = false;
+      #};
       windowManager.i3 = {
         enable = true;
         package = pkgs.i3-gaps;
         configFile = "/etc/i3/config";
       };
-      layout = "us";
-      libinput = {
-        enable = true;
-        touchpad = {
-          disableWhileTyping = true;
-          naturalScrolling = true;
-          tapping = false;
-          accelSpeed = "10";
-          accelProfile = "flat";
-        };
+      xkb = {
+        options = "ctrl:swapcaps";
+        layout = "us";
       };
-      xkbOptions = "ctrl:swapcaps";
+    };
+
+    displayManager.defaultSession = "none+i3";
+
+    libinput = {
+      enable = true;
+      touchpad = {
+        disableWhileTyping = true;
+        naturalScrolling = true;
+        tapping = false;
+        accelSpeed = "10";
+        accelProfile = "flat";
+      };
     };
 
     openssh = {
@@ -148,7 +154,6 @@
     pcscd.enable = true;
 
     avahi.enable = true;
-    avahi.nssmdns = true;
 
     printing = {
       enable = true;
@@ -236,5 +241,5 @@
 
   };
 
-  system.stateVersion = "23.11"; # Did you read the comment?
+  system.stateVersion = "24.05"; # Did you read the comment?
 }

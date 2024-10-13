@@ -1,14 +1,16 @@
-{ config, lib, pkgs, modulePaths, ... }:
+{ config, lib, pkgs, modulePaths, options, ... }:
 {
   imports = [
+    ../../dots/vnc-local.nix
     ../../dots/vnc.nix
+    ../../dots/docker.nix
     ./hardware-configuration.nix
     ../generic-config.nix
     (import ../../lib/home-file.nix
-        [{
-          origin = ../../dots/i3/server-config;
-          target = "/etc/i3/config";
-        }
+      [{
+        origin = ../../dots/i3/server-config;
+        target = "/etc/i3/config";
+      }
         {
           origin = ../../dots/polybar/server-config.ini;
           target = "/home/jsh/.config/polybar/config.ini";
@@ -18,8 +20,6 @@
           target = "/home/jsh/.config/polybar/launch.sh";
         }])
   ];
-
-  virtualisation.docker.enable = true;
 
   boot = {
     loader = {
@@ -38,30 +38,41 @@
 
     hostName = "jsh-server";
     hostId = "a6bbe9e1";
-    useDHCP = true;
+    #useDHCP = true;
+    useNetworkd = true;
     nameservers = [ "1.1.1.1" "1.0.0.1" ];
-    interfaces.eth0.wakeOnLan.enable = true;
-    interfaces.eth1.wakeOnLan.enable = true;
-    #interfaces.*.wakeOnLan.enable = true;
-    firewall = {
-      enable = false;
-    };
+    #interfaces.eth0.wakeOnLan.enable = true;
+    #interfaces.eth1.wakeOnLan.enable = true;
     wg-quick.interfaces = {
       ca = {
         address = [ "10.2.0.2/32" ];
         dns = [ "10.2.0.1" ];
-        privateKeyFile = "/persist/pvpn-california";
+        privateKeyFile = "/persist/server-ca-2023-06-12";
         peers = [
           {
-            publicKey = "4v/dB/ha+PGL0jihNVlVj81NGAFh6VndO9s4giDZEUw=";
+            publicKey = "WC0Ke71Hw5NcJaRhkpbu60MyjdFilshCXwyuh0i2TXA=";
             allowedIPs = [ "0.0.0.0/0" ];
-            endpoint = "185.230.126.18:51820";
+            endpoint = "45.152.182.146:51820";
+          }
+        ];
+        autostart = false; # Stop by running `systemctl start wg-quick-${name}`
+      };
+      can = {
+        address = [ "10.2.0.2/32" ];
+        dns = [ "10.2.0.1" ];
+        privateKeyFile = "/persist/server-can-2023-09-29";
+        peers = [
+          {
+            publicKey = "28hrybwV/NiiMXvl1ynBvDvEvs1m8ABUzyvkQ7+ST3I=";
+            allowedIPs = [ "0.0.0.0/0" ];
+            endpoint = "146.70.198.34:51820";
           }
         ];
         autostart = false; # Stop by running `systemctl start wg-quick-${name}`
       };
     };
   };
+  systemd.network.enable = true;
   #systemd.network.links."10-eth0" = {
   #  matchConfig.PermanentMACAddress = "34:97:f6:32:70:9d";
   #  linkConfig.Name = "eth0";
@@ -78,15 +89,15 @@
   services = {
     xserver = {
       displayManager.setupCommands = ''
-        /nix/store/rqikhbksyzdgaddq50nqrnlgg6c3gky9-nvidia-settings-515.48.07/bin/nvidia-settings --assign CurrentMetaMode="DPY-1: nvidia-auto-select @2560x1440 +2160+0 {ViewPortIn=2560x1440, ViewPortOut=2560x1440+0+0}, DPY-0: 3840x2160 @2160x3840 +0+0 {ViewPortIn=2160x3840, ViewPortOut=3840x2160+0+0, Rotation=90}"
+        ${config.hardware.nvidia.package.settings.outPath}/bin/nvidia-settings --assign CurrentMetaMode="DPY-1: nvidia-auto-select @2560x1440 +2160+0 {ViewPortIn=2560x1440, ViewPortOut=2560x1440+0+0}, DPY-0: 3840x2160 @2160x3840 +0+0 {ViewPortIn=2160x3840, ViewPortOut=3840x2160+0+0, Rotation=90}"
       '';
       videoDrivers = [ "nvidia" ];
-      displayManager.autoLogin = {
-        enable = true;
-        user = "jsh";
-      };
+      #deviceSection = ''
+      #  Option "VirtualHeads" "1"
+      #'';
     };
-    tailscale.enable =true;
+
+    tailscale.enable = true;
 
     acpid = {
       enable = true;
@@ -129,7 +140,7 @@
         "create"
         "mount"
         "mountpoint"
-        "receive" 
+        "receive"
         "rollback"
         "bookmark"
         "hold"
@@ -199,7 +210,21 @@
       enable = true;
       user = "jsh";
     };
-
+  };
+  systemd.services.plex.serviceConfig.ProtectHome = lib.mkForce false;
+  systemd.services.wakeonlan = {
+    description = "Reenable wake on lan every boot";
+    after = [ "network.target" ];
+    wantedBy = [ "default.target" ];
+    path = [ pkgs.ethtool ];
+    serviceConfig = {
+      Type = "simple";
+      RemainAfterExit = "true";
+    };
+    script = ''
+      ethtool -s enp6s0f1 wol g
+      ethtool -s enp5s0 wol g
+    '';
   };
 
   ### HARDWARE ###
@@ -208,7 +233,7 @@
 
     nvidia = {
       open = false;
-      package = config.boot.kernelPackages.nvidiaPackages.beta;
+      package = config.boot.kernelPackages.nvidiaPackages.stable;
     };
 
     enableAllFirmware = true;
@@ -217,7 +242,8 @@
       enable = true;
       support32Bit = true;
       package = pkgs.pulseaudioFull;
-      extraConfig = "load-module module-switch-on-connect";
+      #extraModules = [ pkgs.
+      extraConfig = "load-module module-switch-on-connect auth-anonymous=1";
     };
 
     opengl = {
@@ -227,5 +253,5 @@
     };
   };
 
-  ### HARDWARE ###
+  ### HARDWARE ###]
 }
