@@ -1,7 +1,7 @@
 { lib, config, pkgs, latest, scan, stdenv, ... }:
 let
   myFirefox = latest.pkgs.wrapFirefox
-    (latest.pkgs.firefox-esr-unwrapped.override (old: {
+    (latest.pkgs.firefox-unwrapped.override (old: {
       requireSigning = false;
       allowAddonSideload = true;
     }))
@@ -126,48 +126,31 @@ in
     nmap
     ncdu
     ncurses
-    #ndi
-    neofetch
+    fastfetch
     nixpkgs-fmt
     nix-prefetch-git
     nload
     nmap
     nodePackages.prettier
     ntfs3g
+    #obs-studio
     (wrapOBS {
-      plugins = with obs-studio-plugins; [ wlrobs obs-gstreamer obs-move-transition ] ++ (lib.optionals config.nixpkgs.config.allowUnfree [
-        (obs-ndi.override {
-          ndi = ndi.overrideAttrs (attrs: rec {
-            src = requireFile {
-              name = "${attrs.pname}-${attrs.version}.tar.gz";
-              sha256 = "sha256:0wh5bqy9xx08wnfah92pgs4f6xn6mwfyhwdzbhf5ghkbw8pc7z0w";
-              message = "Download the sdk ya dummy";
-            };
-            unpackPhase = ''unpackFile ${src}; echo y | ./${attrs.installerName}.sh; sourceRoot="NDI SDK for Linux";'';
-            installPhase = ''
-              mkdir $out
-              mv bin/x86_64-linux-gnu $out/bin
-              for i in $out/bin/*; do
-                if [ -L "$i" ]; then continue; fi
-                patchelf --set-interpreter "$(cat $NIX_CC/nix-support/dynamic-linker)" "$i"
-              done
-              patchelf --set-rpath "${pkgs.avahi}/lib:${pkgs.stdenv.cc.libc}/lib" $out/bin/ndi-record
-              mv lib/x86_64-linux-gnu $out/lib
-              for i in $out/lib/*; do
-                if [ -L "$i" ]; then continue; fi
-                patchelf --set-rpath "${pkgs.avahi}/lib:${pkgs.stdenv.cc.libc}/lib" "$i"
-              done
-              rm $out/bin/libndi.so.5
-              ln -s $out/lib/libndi.so.5.6.1 $out/bin/libndi.so.5
-              mv include examples $out/
-              mkdir -p $out/share/doc/ndi-5.6.0
-              mv licenses $out/share/doc/ndi-5.6.0/licenses
-              mv documentation/* $out/share/doc/ndi-5.6.0/
-            '';
-          });
-        })
-      ]);
+      plugins = with obs-studio-plugins; [ obs-freeze-filter ];
+      #plugins = with obs-studio-plugins; [ obs-freeze-filter obs-ndi ];
     })
+    #(wrapOBS {
+    #  plugins = with obs-studio-plugins; [ wlrobs obs-gstreamer obs-move-transition ] ++ (lib.optionals config.nixpkgs.config.allowUnfree [ (obs-ndi.override {
+    #    ndi = ndi.overrideAttrs (attrs: rec {
+    #      src = fetchurl {
+    #        name = "${attrs.pname}-${attrs.version}.tar.gz";
+    #        url = "https://downloads.ndi.tv/SDK/NDI_SDK_Linux/Install_NDI_SDK_v5_Linux.tar.gz";
+    #        hash = "sha256-flxUaT1q7mtvHW1J9I1O/9coGr0hbZ/2Ab4tVa8S9/U=";
+    #      };
+
+    #      unpackPhase = ''unpackFile ${src}; echo y | ./${attrs.installerName}.sh; sourceRoot="NDI SDK for Linux";'';
+    #    });
+    #  }) ]);
+    #})
     ofono-phonesim
     oh-my-zsh
     okular
@@ -229,7 +212,7 @@ in
     joplin
     latest.joplin-desktop
     minecraft
-    latest.odafileconverter
+    #latest.odafileconverter
     latest.spotifyd
     latest.terraform
     zoom-us
@@ -301,7 +284,7 @@ in
     python310Packages.grip
     latest.nix
     ssh-agents
-    filebot
+    #filebot
     gnome.nautilus
     gnome.sushi
     mtr
@@ -314,14 +297,25 @@ in
     latest.beeper
     freetube
     nodejs
+    sipcalc
+    davinci-resolve-studio
+    v4l-utils
+    nodejs
+    wpa_supplicant_gui
+    slurm-nm
+    bat
+    cifs-utils
+    samba4Full
+    asciinema
+    bruno 
     (vscode-with-extensions.override {
       vscodeExtensions = with vscode-extensions; [
         dbaeumer.vscode-eslint
-        github.copilot
+        esbenp.prettier-vscode
       ];
     })
-    sipcalc
-    davinci-resolve-studio
+    latest.postman
+    remmina
     #LPA
   ];
 }
