@@ -8,7 +8,8 @@ xrandr | grep -q "DisplayPort-[0-9] connected"
 if [ $? -eq 0 ];
 then
   xrandr --output $PRIM_MON --mode 2560x1440 --rate 74.97
-  xrandr --output $VIRT_MON --mode 3840x2160 --rate 30.00 --rotate left --left-of $PRIM_MON
+  #xrandr --output $VIRT_MON --mode 3840x2160 --rate 30.00 --rotate left --left-of $PRIM_MON
+  xrandr --output $VIRT_MON --mode 3840x2160 --rate 30.00 --left-of $PRIM_MON
   xrandr --output eDP --off
 else
   for MON in $(xrandr | grep "DisplayPort-[0-9] disconnected" | awk '{print $1}'); do
