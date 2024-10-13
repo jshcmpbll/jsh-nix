@@ -15,7 +15,7 @@ let
     "tdown" = "sudo tailscale down";
     "display-off" = "for display in $(xrandr  | awk '{print $1}' | grep -); do xrandr --output $display --off; done";
   };
-  functions =
+  init =
     ''
       function osup {
         cd /home/jsh/git/jsh-nix
@@ -196,6 +196,10 @@ let
       function dotless {
         awk -F'.' '{printf("%u\n", $1 * 256^3 + $2 * 256^2 + $3 * 256 + $4)}'
       };
+    ''
+    +
+    ''
+      export AWS_PAGER=""
     '';
 in
 {
@@ -203,7 +207,7 @@ in
   programs = {
     bash = {
       shellAliases = aliases;
-      shellInit = functions;
+      shellInit = init;
     };
     zsh = {
       enable = true;
@@ -246,7 +250,7 @@ in
         PROMPT='%2~ $(vcs_status)'
       ''
       +
-      functions;
+      init;
     };
   };
 }
