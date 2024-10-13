@@ -58,7 +58,7 @@
           psk = "@PSK_HOME@";
           priority = 1;
         };
-        "iPhone-13-128" = {
+        "iPhone-15-Pro-Max-256" = {
           psk = "@PSK_PHONE@";
           priority = 2;
         };
@@ -78,16 +78,7 @@
     };
     wg-quick.interfaces = {
       ca = {
-        address = [ "10.2.0.2/32" ];
-        dns = [ "10.2.0.1" ];
-        privateKeyFile = "/persist/pvpn-california";
-        peers = [
-          {
-            publicKey = "D2ljOyE4iCiNDTEXME6qcraH97JRAWXsOTGXCb/vklY=";
-            allowedIPs = [ "0.0.0.0/0" ];
-            endpoint = "91.219.212.194:51820";
-          }
-        ];
+        configFile = "/persist/pvpn-california";
         autostart = false; # Start by running `systemctl start wg-quick-${name}`
       };
       can = {
@@ -101,6 +92,10 @@
             endpoint = "146.70.198.34:51820";
           }
         ];
+        autostart = false; # Start by running `systemctl start wg-quick-${name}`
+      };
+      lydon = {
+        configFile = "/persist/lydon.conf";
         autostart = false; # Start by running `systemctl start wg-quick-${name}`
       };
     };
