@@ -281,11 +281,12 @@ in
     samba4Full
     asciinema
     bruno 
-    (vscode-with-extensions.override {
+    (latest.vscode-with-extensions.override {
       vscodeExtensions = with vscode-extensions; [
         dbaeumer.vscode-eslint
         esbenp.prettier-vscode
-        genieai.chatgpt-vscode
+        github.copilot
+        latest.vscode-extensions.github.copilot-chat
       ];
     })
     latest.postman
