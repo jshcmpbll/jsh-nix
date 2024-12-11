@@ -97,8 +97,6 @@
       #'';
     };
 
-    tailscale.enable = true;
-
     acpid = {
       enable = true;
       handlers.brightnessup = {

@@ -7,6 +7,7 @@
     ../dots/vim.nix
     ../dots/pkgs.nix
     ../dots/zfs.nix
+    ../dots/tailscale.nix
     ../users/jsh.nix
     (import ../lib/home-file.nix
       [{
