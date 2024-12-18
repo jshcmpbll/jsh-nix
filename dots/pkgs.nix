@@ -177,7 +177,6 @@ in
     vlc
     latest.argocd
     latest.azure-cli
-    latest.azure-functions-core-tools
     latest.discord
     latest.fluxcd
     latest.github-cli
