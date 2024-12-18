@@ -330,7 +330,6 @@ in
         enable = true;
         plugins = [
           "z"
-          "ag"
           "branch"
           "aws"
           "kubectl"

@@ -83,7 +83,7 @@ in
     git
     git-lfs
     glxinfo
-    gnome3.adwaita-icon-theme
+    adwaita-icon-theme
     gnumake
     gnupg
     gnuplot
@@ -149,7 +149,6 @@ in
     rofi
     rpl
     rsync
-    rxvt_unicode
     samba
     sane-airscan
     screen
@@ -244,7 +243,7 @@ in
     latest.obsidian
     imv
     signal-desktop
-    _1password
+    _1password-cli
     arandr
     font-manager
     v4l-utils
@@ -257,8 +256,8 @@ in
     latest.nix
     ssh-agents
     #filebot
-    gnome.nautilus
-    gnome.sushi
+    nautilus
+    sushi
     mtr
     ssh-agents
     wpa_supplicant

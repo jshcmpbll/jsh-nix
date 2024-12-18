@@ -237,17 +237,15 @@
     enableAllFirmware = true;
 
     pulseaudio = {
-      enable = true;
+      enable = false;
       support32Bit = true;
       package = pkgs.pulseaudioFull;
       #extraModules = [ pkgs.
       extraConfig = "load-module module-switch-on-connect auth-anonymous=1";
     };
 
-    opengl = {
+    graphics = {
       enable = true;
-      driSupport32Bit = true;
-      driSupport = true;
     };
   };
 

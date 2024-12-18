@@ -86,10 +86,6 @@
     };
   }; 
 
-  # GPU
-  hardware.opengl.driSupport = true;
-  hardware.opengl.driSupport32Bit = true;
-
   environment.systemPackages = with pkgs; [
     tmux
     wget
@@ -123,6 +119,6 @@
     };
   };
 
-  system.stateVersion = "24.05"; # Did you read the comment?
+  system.stateVersion = "24.11"; # Did you read the comment?
 
 }
