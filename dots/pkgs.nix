@@ -297,7 +297,7 @@ in
     remmina
     sipcalc
     davinci-resolve-studio
-    alacritty
+    latest.ghostty
     #LPA
   ];
 }
