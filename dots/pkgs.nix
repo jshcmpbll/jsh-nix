@@ -1,7 +1,7 @@
 { lib, config, pkgs, latest, scan, stdenv, ... }:
 let
   myFirefox = pkgs.wrapFirefox
-    (latest.pkgs.firefox-unwrapped.override (old: {
+    (latest.pkgs.firefox-devedition-unwrapped.override (old: {
       requireSigning = false;
       allowAddonSideload = true;
     }))
@@ -10,13 +10,13 @@ let
       nixExtensions = [
         (pkgs.fetchFirefoxAddon {
           name = "1password";
-          url = "https://addons.mozilla.org/firefox/downloads/file/4037440/1password_x_password_manager-2.5.0.xpi";
-          sha256 = "sha256:702a5cd8b63a326e1c4a839bdf075534d69074450db25fe9cddcd60186df02d6";
+          url = "https://addons.mozilla.org/firefox/downloads/file/4404461/1password_x_password_manager-8.10.56.28.xpi";
+          sha256 = "sha256-3SPjR6e1G4pu8uu0Y3ZKsI3sCQDf50VLWIyhI6dEnXE=";
         })
         (pkgs.fetchFirefoxAddon {
           name = "ublock";
-          url = "https://addons.mozilla.org/firefox/downloads/file/4028976/ublock_origin-1.45.2.xpi";
-          sha256 = "sha256-+xc4lcdsOwXxMsr4enFsdePbIb6GHq0bFLpqvH5xXos=";
+          url = "https://addons.mozilla.org/firefox/downloads/file/4391011/ublock_origin-1.61.2.xpi";
+          sha256 = "sha256-7jpySkb/MsF9FyMHf+zG7ef9q3QhVAILUftiU93LuhQ=";
         })
         (pkgs.fetchFirefoxAddon {
           name = "custom_user_agent_revived";
@@ -37,6 +37,12 @@ let
         };
         Preferences = {
           "extensions.activeThemeID" = { Value = "firefox-compact-dark@mozilla.org"; Status = "locked"; };
+          "quicksuggest.enabled" = { Value = "false"; Status = "locked"; };
+          "full-screen-api.warning.timeout" = { Value = "1000"; Status = "locked"; };
+          "signon.autofill.plugins.disabled" = { Value = "true"; Status = "locked"; };
+          "browser.search.selectedEngine" = { Value = "DuckDuckGo"; Status = "locked"; };
+          "browser.search.suggest" = { Value = "false"; Status = "locked"; };
+          "browser.fullscreen.autohide" = { Value = "false"; Status = "locked"; };
         };
       };
     };
