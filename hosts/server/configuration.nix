@@ -89,7 +89,7 @@
   services = {
     xserver = {
       displayManager.setupCommands = ''
-        ${config.hardware.nvidia.package.settings.outPath}/bin/nvidia-settings --assign CurrentMetaMode="DPY-1: nvidia-auto-select @2560x1440 +2160+0 {ViewPortIn=2560x1440, ViewPortOut=2560x1440+0+0}, DPY-0: 3840x2160 @2160x3840 +0+0 {ViewPortIn=2160x3840, ViewPortOut=3840x2160+0+0, Rotation=90}"
+        ${config.hardware.nvidia.package.settings.outPath}/bin/nvidia-settings --assign CurrentMetaMode="DP-0: nvidia-auto-select +2560+0, HDMI-0: nvidia-auto-select +0+0 {viewportin=2560x1440}"
       '';
       videoDrivers = [ "nvidia" ];
       #deviceSection = ''
@@ -232,6 +232,7 @@
     nvidia = {
       open = false;
       package = config.boot.kernelPackages.nvidiaPackages.stable;
+      modesetting.enable = true;
     };
 
     enableAllFirmware = true;
@@ -244,9 +245,6 @@
       extraConfig = "load-module module-switch-on-connect auth-anonymous=1";
     };
 
-    graphics = {
-      enable = true;
-    };
   };
 
   ### HARDWARE ###]
