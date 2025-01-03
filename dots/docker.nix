@@ -4,5 +4,5 @@
     enable = true;
     storageDriver = "zfs";
   };
-  hardware.nvidia-container-toolkit.enable = lib.mkIf (config.hardware.nvidia != null) true;
+  hardware.nvidia-container-toolkit.enable = builtins.elem "nvidia" config.services.xserver.videoDrivers;
 }
