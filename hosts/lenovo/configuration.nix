@@ -52,14 +52,14 @@
       ];
       userControlled.enable = true;
       allowAuxiliaryImperativeNetworks = true;
-      environmentFile = "/persist/wireless.env";
+      secretsFile = "/persist/wireless.env";
       networks = {
         "The LAN Before Time" = {
-          psk = "@PSK_HOME@";
+          pskRaw = "ext:PSK_HOME";
           priority = 1;
         };
         "iPhone-15-Pro-Max-256" = {
-          psk = "@PSK_PHONE@";
+          pskRaw = "ext:PSK_PHONE";
           priority = 2;
         };
         "aainflight.com" = {
@@ -103,7 +103,7 @@
 
   hardware = {
     pulseaudio = {
-      enable = true;
+      enable = false;
       support32Bit = true;
       package = pkgs.pulseaudioFull;
       extraConfig = "load-module module-switch-on-connect";
