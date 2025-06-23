@@ -17,7 +17,7 @@ let
   };
   init =
     ''
-      function osup {
+      osup() {
         cd /home/jsh/git/jsh-nix
         sudo nixos-rebuild switch --flake .# --impure
         #sudo nix build .#nixosConfigurations.$(hostname).config.system.build.toplevel --impure
@@ -26,13 +26,13 @@ let
     ''
     +
     ''
-      function gi {
+      gi() {
         curl -L -s https://www.gitignore.io/api/$@ ;
       }
     ''
     +
     ''
-      function extract {
+      extract() {
          if [[ -z "$1" ]]; then
             # display usage if no parameters given
             echo "Usage: extract <path/file_name>.<zip|rar|bz2|gz|tar|tbz2|tgz|Z|7z|xz|ex|tar.bz2|tar.gz|tar.xz>"
@@ -66,7 +66,7 @@ let
     ''
     +
     ''
-      function open {  
+      open() {  
         case $1 in
         *.[mM][pP]3 | *.[fF][lL][aA][cC] | *.[wW][aA][vV])
         # mp3 flac wav
@@ -107,19 +107,19 @@ let
     ''
     +
     ''
-      function xc {
+      xc() {
         xclip -sel copy
       }
     ''
     +
     ''
-      function xp {
+      xp() {
         xclip -o -sel clip
       }
     ''
     +
     ''
-      function gp {
+      gp() {
         CURRENT=$(git rev-parse --abbrev-ref HEAD)
         DEFAULT=$(git remote show origin | grep 'HEAD branch' | cut -d' ' -f5)
         if [[ $CURRENT = $DEFAULT ]] ; then
@@ -132,7 +132,7 @@ let
     ''
     +
     ''
-      function gr {
+      gr() {
         DEFAULT=$(git remote show origin | grep 'HEAD branch' | cut -d' ' -f5)
         COMMIT_COUNT=$(git rev-list --count $DEFAULT..HEAD)
         if [[ $1 == 2 ]]; then
@@ -152,7 +152,7 @@ let
     ''
     +
     ''
-      function mm {
+      mm() {
         while true; do
           i3-msg workspace 9 -q
           sleep $(( $RANDOM % 240 + 40 ))
@@ -163,7 +163,7 @@ let
     ''
     +
     ''
-      function teamscam {
+      teamscam() {
         case $1 in
           /dev/video*)            export CAMERA=$1       ;;
           *)                      export CAMERA=/dev/video2;;
@@ -173,7 +173,7 @@ let
     ''
     +
     ''
-      function pdfocr {
+      pdfocr() {
         FN=$(basename -s .pdf $1)
         ocrmypdf $1 --image-dpi 1200 -d -c $FN-ocr.pdf
         mv $1 /tmp/
@@ -183,7 +183,7 @@ let
     ''
     +
     ''
-      function replacespaces {
+      replacespaces() {
         for file in *' '*
         do
           mv -- "$file" "''${file// /_}"
@@ -193,7 +193,7 @@ let
     ''
     +
     ''
-      function dotless {
+      dotless() {
         awk -F'.' '{printf("%u\n", $1 * 256^3 + $2 * 256^2 + $3 * 256 + $4)}'
       };
     ''
@@ -229,11 +229,10 @@ let
            fi
         done
       }
-      
     ''
     +
     ''
-      function b-scan {
+      b-scan() {
         while true; do
            if [ -n "$2" ]; then
              NAME=$2.png
@@ -262,7 +261,7 @@ let
     ''
     +
     ''
-      function e-scan {
+      e-scan() {
         while true; do
            if [ -n "$2" ]; then
              NAME=$2.png
