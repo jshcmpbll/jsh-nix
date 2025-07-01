@@ -8,6 +8,7 @@
     ../dots/pkgs.nix
     ../dots/zfs.nix
     ../dots/tailscale.nix
+    ../dots/ssh-config.nix
     ../users/jsh.nix
     (import ../lib/home-file.nix
       [{
@@ -25,10 +26,6 @@
         {
           origin = ../dots/Xresources;
           target = "/home/jsh/.Xresources";
-        }
-        {
-          origin = /persist/ssh-config;
-          target = "/home/jsh/.ssh/config";
         }
         {
           origin = ../dots/tmux.conf;
