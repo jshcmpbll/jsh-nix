@@ -146,8 +146,9 @@ let
     ''
     +
     ''
-      function geoloc {
-        curl -s "https://geo.ipify.org/api/v1?apiKey=at_q1SwFLqdSx2d0BHZLP5RuxVJCqJeq&ipAddress=$1" | jq
+      geoloc() {
+        curl ifconfig.io | nix run nixpkgs#toilet -- -f mono9 -t
+        # curl -s "https://geo.ipify.org/api/v1?apiKey=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxipAddress=$1" | jq
       }
     ''
     +
