@@ -74,7 +74,7 @@ in
     dmg2img
     dmidecode
     docker-compose
-    latest.dolphin
+    kdePackages.dolphin
     dunst
     eagle
     exiftool
@@ -298,6 +298,7 @@ in
     sipcalc
     davinci-resolve-studio
     latest.ghostty
+    latest.claude-code
     #LPA
   ];
 }
