@@ -158,6 +158,11 @@
 
   };
   systemd.services.create_ap.enable = lib.mkForce false;
+  services.fprintd = {
+    enable = true;
+    tod.enable = true;
+    tod.driver = pkgs.libfprint-2-tod1-goodix;
+  };
 
   security.pam.services = {
     login.fprintAuth = true;
