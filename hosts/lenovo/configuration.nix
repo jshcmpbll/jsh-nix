@@ -29,8 +29,8 @@
   ];
 
   boot = {
-    extraModulePackages = with config.boot.kernelPackages; [ evdi ];
-    kernelModules = [ "kvm-amd" "evdi" ];
+    kernelPackages = latest.linuxPackages_6_12;
+    kernelModules = [ "kvm-amd" ];
     kernel.sysctl = { "unprivileged_userns_clone" = 1; };
   };
 
