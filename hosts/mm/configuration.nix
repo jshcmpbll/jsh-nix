@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, latest, ... }:
 
 {
   imports =
@@ -126,7 +126,10 @@
         openFirewall = true;
       };
     };
-    sonarr.enable = true;
+    sonarr = {
+      enable = true;
+      package = latest.sonarr;
+    };
     radarr.enable = true;
     plex = {
       enable = true;
