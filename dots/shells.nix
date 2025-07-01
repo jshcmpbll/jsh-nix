@@ -288,7 +288,45 @@ let
     ''
     +
     ''
-      function watchfile {
+      ssm-connect() {
+        if [ -z "$1" ]; then
+          echo "Usage: ssm-connect <instance-name>"
+          return 1
+        fi
+      
+        INSTANCE_NAME="$1"
+        REGION="us-west-2"  # You can modify this or make it an optional argument
+      
+        INSTANCE_ID=$(aws ec2 describe-instances \
+          --region "$REGION" \
+          --filters "Name=tag:Name,Values=$INSTANCE_NAME" "Name=instance-state-name,Values=running" \
+          --query "Reservations[*].Instances[*].InstanceId" \
+          --output text)
+      
+        if [ -z "$INSTANCE_ID" ]; then
+          echo "Instance with name '$INSTANCE_NAME' not found or not running in region '$REGION'."
+          return 1
+        fi
+      
+        echo "Starting SSM session with instance $INSTANCE_ID ($INSTANCE_NAME)..."
+        aws ssm start-session --target "$INSTANCE_ID" --region "$REGION"
+      }
+    ''
+    +
+    ''
+      list-instances() {
+        REGION="''${1:-us-west-2}"  # Default to us-west-2 if no region passed
+      
+        aws ec2 describe-instances \
+          --region "$REGION" \
+          --filters "Name=instance-state-name,Values=running" \
+          --query "Reservations[*].Instances[*].{ID:InstanceId,Name:Tags[?Key=='Name']|[0].Value}" \
+          --output table
+      }
+    ''
+    +
+    ''
+      watchfile() {
         local filepath="$1"
         local command="$2"
         local last_modified=$(date -r "$filepath" +%s)
