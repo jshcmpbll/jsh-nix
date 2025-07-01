@@ -147,7 +147,7 @@
     };
 
     create_ap = {
-      enable = false;
+      enable = true;
       settings = {
         SSID = "The LAN Before Time";
         PASSPHRASE = "";
@@ -157,8 +157,7 @@
     };
 
   };
-
-  services.fprintd.enable = true;
+  systemd.services.create_ap.enable = lib.mkForce false;
 
   security.pam.services = {
     login.fprintAuth = true;
