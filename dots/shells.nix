@@ -204,18 +204,12 @@ let
     ''
     +
     ''
-      function scan {
+      scan() {
         while true; do
-           if [ -n "$2" ]; then
-             NAME=$2.png
-             if [ -n "$3" ]; then
-               NAME=$2-$(date -u +%Y-%m-%dT%H%M%S).png
-             fi
+           if [ -n "$1" ]; then
+             NAME=$1.png
            else
              NAME=$(date -u +%Y-%m-%dT%H%M%S).png
-           fi
-           if [ -s "$NAME" ]; then
-             return 
            fi
            scanimage --device-name=epsonds --format png --output-file="$NAME"
            if [ -s "$NAME" ]; then
@@ -224,6 +218,9 @@ let
              pid=$!
              (sleep 4 && kill $pid) &
              wait $pid
+             if [ -n "$1" ]; then
+               return
+             fi
            else
              echo "Deleted empty scan: $NAME"
              rm "$NAME"
