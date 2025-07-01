@@ -1,7 +1,7 @@
-{ lib, config, pkgs, latest, scan, stdenv, ... }:
+{ lib, config, pkgs, latest, scan, stdenv,  ... }:
 let
   myFirefox = pkgs.wrapFirefox
-    (latest.pkgs.firefox-devedition-unwrapped.override (old: {
+    (latest.pkgs.firefox-unwrapped.override (old: {
       requireSigning = false;
       allowAddonSideload = true;
     }))
@@ -36,13 +36,13 @@ let
           Snippets = false;
         };
         Preferences = {
+          "browser.fullscreen.autohide" = { Value = "false"; };
           "extensions.activeThemeID" = { Value = "firefox-compact-dark@mozilla.org"; Status = "locked"; };
           "quicksuggest.enabled" = { Value = "false"; Status = "locked"; };
           "full-screen-api.warning.timeout" = { Value = "1000"; Status = "locked"; };
           "signon.autofill.plugins.disabled" = { Value = "true"; Status = "locked"; };
           "browser.search.selectedEngine" = { Value = "DuckDuckGo"; Status = "locked"; };
           "browser.search.suggest" = { Value = "false"; Status = "locked"; };
-          "browser.fullscreen.autohide" = { Value = "false"; Status = "locked"; };
         };
       };
     };
