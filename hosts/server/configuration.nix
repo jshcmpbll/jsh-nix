@@ -45,30 +45,16 @@
     #interfaces.eth1.wakeOnLan.enable = true;
     wg-quick.interfaces = {
       ca = {
-        address = [ "10.2.0.2/32" ];
-        dns = [ "10.2.0.1" ];
-        privateKeyFile = "/persist/server-ca-2023-06-12";
-        peers = [
-          {
-            publicKey = "WC0Ke71Hw5NcJaRhkpbu60MyjdFilshCXwyuh0i2TXA=";
-            allowedIPs = [ "0.0.0.0/0" ];
-            endpoint = "45.152.182.146:51820";
-          }
-        ];
-        autostart = false; # Stop by running `systemctl start wg-quick-${name}`
+        configFile = "/persist/ca.conf";
+        autostart = false;
       };
       can = {
-        address = [ "10.2.0.2/32" ];
-        dns = [ "10.2.0.1" ];
-        privateKeyFile = "/persist/server-can-2023-09-29";
-        peers = [
-          {
-            publicKey = "28hrybwV/NiiMXvl1ynBvDvEvs1m8ABUzyvkQ7+ST3I=";
-            allowedIPs = [ "0.0.0.0/0" ];
-            endpoint = "146.70.198.34:51820";
-          }
-        ];
-        autostart = false; # Stop by running `systemctl start wg-quick-${name}`
+        configFile = "/persist/can.conf";
+        autostart = false;
+      };
+      lydon = {
+        configFile = "/persist/lydon.conf";
+        autostart = false;
       };
     };
   };
