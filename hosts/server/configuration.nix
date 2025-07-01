@@ -1,4 +1,4 @@
-{ config, lib, pkgs, modulePaths, options, ... }:
+{ config, lib, pkgs, modulePaths, options, latest, ... }:
 {
   imports = [
     ../../dots/vnc-local.nix
@@ -193,6 +193,24 @@
     plex = {
       enable = true;
       user = "jsh";
+    };
+    ollama = {
+      enable = true;
+      acceleration = "cuda";
+      package = latest.ollama;
+    };
+    open-webui = {
+      enable = true;
+      package = latest.open-webui;
+      environment = {
+        ANONYMIZED_TELEMETRY = "False";
+        DO_NOT_TRACK = "True";
+        SCARF_NO_ANALYTICS = "True";
+        WEBUI_AUTH = "False";
+        OLLAMA_API_BASE_URL = "http://127.0.0.1:11434";
+      };
+      host = "0.0.0.0";
+      openFirewall = true;
     };
   };
   systemd.services.plex.serviceConfig.ProtectHome = lib.mkForce false;
