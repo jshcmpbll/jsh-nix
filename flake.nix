@@ -8,6 +8,8 @@
 
   outputs = inputs @ { self, nixpkgs, nixos-hardware, nixpkgs-unstable, nixpkgs-scan }:
   let
+    system = "x86_64-linux";
+    pkgs = import nixpkgs { inherit system; };
     sA = {
       inherit inputs;
       latest = import nixpkgs-unstable {
@@ -23,6 +25,9 @@
     };
   in
   {
+    packages.x86_64-linux = {
+     finvizrec = pkgs.callPackage ./apps/finvizrec/default.nix { };
+    };
     nixosConfigurations = {
       jsh-server = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
