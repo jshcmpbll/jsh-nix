@@ -46,6 +46,20 @@ let
         };
       };
     };
+    myZoom-us = if config.networking.hostName == "jsh-lenovo"
+      then pkgs.runCommand "zoom" { buildInputs = [ pkgs.makeWrapper ]; } ''
+        mkdir -p $out/bin $out/share
+        makeWrapper ${pkgs.zoom-us}/bin/zoom $out/bin/zoom $@ \
+        --set QT_SCALE_FACTOR 0.50
+        
+        # Copy desktop file and other necessary directories
+        cp -r ${pkgs.zoom-us}/share/* $out/share/
+        
+        # Update desktop file to use our wrapper
+        substituteInPlace $out/share/applications/Zoom.desktop \
+          --replace "Exec=zoom" "Exec=$out/bin/zoom"
+      ''
+      else pkgs.zoom-us;
 in
 {
   imports = [
@@ -192,7 +206,7 @@ in
     #latest.odafileconverter
     latest.spotifyd
     latest.terraform
-    zoom-us
+    myZoom-us
     ranger
     unzip
     usbmuxd
