@@ -212,6 +212,13 @@
       host = "0.0.0.0";
       openFirewall = true;
     };
+    cron = {
+      enable = true;
+      systemCronJobs = [
+        # Add "export NIX_PATH='nixpkgs=flake:nixpkgs:/nix/var/nix/profiles/per-user/root/channels" for access to allow access to nix
+        #"cron-date     user     script | 2>&1 tee logfile_$EPOCHSECONDS.log"
+      ];
+    };
   };
   systemd.services.plex.serviceConfig.ProtectHome = lib.mkForce false;
   systemd.services.wakeonlan = {
