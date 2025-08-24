@@ -231,10 +231,11 @@
       powerOnBoot = true;
       settings = {
         General = {
-          Enable = "Source,Sink,Media,Socket";
+          Enable = "Source,Sink,Media,Socket,Input,InputLe";
           # Set this so that I could connect to airpods
-          ControllerMode = "bredr";
+          ControllerMode = "dual";
           FastConnectable = true;
+          AutoEnable = true;
         };
       };
     };
