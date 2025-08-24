@@ -1,28 +1,34 @@
 { lib, config, pkgs, latest, ... }:
 {
-  imports = [
-    ../../dots/docker.nix
-    ./hardware-configuration.nix
-    ../generic-config.nix
-    ../../dots/vnc.nix
-    (import ../../lib/home-file.nix
+  imports =
+    let
+      i3-lenovo = builtins.readFile ../../dots/i3/lenovo-config;
+      i3-zoom = builtins.readFile ../../dots/i3/zoom-config;
+      i3-config = pkgs.writeText "config" (i3-lenovo + "\n" + i3-zoom);
+    in
+    [
+      ../../dots/docker.nix
+      ./hardware-configuration.nix
+      ../generic-config.nix
+      ../../dots/vnc.nix
+      (import ../../lib/home-file.nix
         [{
-          origin = ../../dots/i3/lenovo-config;
+          origin = i3-config;
           target = "/etc/i3/config";
         }
-        {
-          origin = ../../scripts/screens;
-          target = "/home/jsh/.config/screens";
-        }
-        {
-          origin = ../../dots/polybar/lenovo-config.ini;
-          target = "/home/jsh/.config/polybar/config.ini";
-        }
-        {
-          origin = ../../dots/polybar/lenovo-launch.sh;
-          target = "/home/jsh/.config/polybar/launch.sh";
-        }])
-  ];
+          {
+            origin = ../../scripts/screens;
+            target = "/home/jsh/.config/screens";
+          }
+          {
+            origin = ../../dots/polybar/lenovo-config.ini;
+            target = "/home/jsh/.config/polybar/config.ini";
+          }
+          {
+            origin = ../../dots/polybar/lenovo-launch.sh;
+            target = "/home/jsh/.config/polybar/launch.sh";
+          }])
+    ];
 
   systemd.tmpfiles.rules = [
     "L+    /opt/rocm/hip   -    -    -     -    ${pkgs.rocmPackages.clr}"

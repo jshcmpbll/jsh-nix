@@ -1,25 +1,31 @@
 { config, lib, pkgs, modulePaths, options, latest, ... }:
 {
-  imports = [
-    ../../dots/vnc-local.nix
-    ../../dots/vnc.nix
-    ../../dots/docker.nix
-    ./hardware-configuration.nix
-    ../generic-config.nix
-    (import ../../lib/home-file.nix
-      [{
-        origin = ../../dots/i3/server-config;
-        target = "/etc/i3/config";
-      }
-        {
-          origin = ../../dots/polybar/server-config.ini;
-          target = "/home/jsh/.config/polybar/config.ini";
+  imports =
+    let
+      i3-server = builtins.readFile ../../dots/i3/server-config;
+      i3-zoom = builtins.readFile ../../dots/i3/zoom-config;
+      i3-config = pkgs.writeText "config" (i3-server + "\n" + i3-zoom);
+    in
+    [
+      ../../dots/vnc-local.nix
+      ../../dots/vnc.nix
+      ../../dots/docker.nix
+      ./hardware-configuration.nix
+      ../generic-config.nix
+      (import ../../lib/home-file.nix
+        [{
+          origin = i3-config;
+          target = "/etc/i3/config";
         }
-        {
-          origin = ../../dots/polybar/server-launch.sh;
-          target = "/home/jsh/.config/polybar/launch.sh";
-        }])
-  ];
+          {
+            origin = ../../dots/polybar/server-config.ini;
+            target = "/home/jsh/.config/polybar/config.ini";
+          }
+          {
+            origin = ../../dots/polybar/server-launch.sh;
+            target = "/home/jsh/.config/polybar/launch.sh";
+          }])
+    ];
 
   boot = {
     loader = {

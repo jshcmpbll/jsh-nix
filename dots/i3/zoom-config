@@ -1,0 +1,10 @@
+# Stop Zoom from ever taking focus!
+no_focus [class="(.*zoom.*)"]
+
+# Float all Zoom windows
+for_window [class="(.*zoom.*)"] floating enable
+
+# Dont float these windows
+for_window [class="(.*zoom.*)" title="Zoom Workplace - Licensed account"] floating disable
+for_window [class="(.*zoom.*)" title="Meeting"] floating disable
+for_window [class="(.*zoom.*)" title="Settings"] floating disable
