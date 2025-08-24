@@ -25,17 +25,9 @@
     nameservers = [ "1.1.1.1" "1.0.0.1" ];
     firewall.enable = false;
     wg-quick.interfaces = {
-      wg0 = {
-        address = [ "10.2.0.2/32" ];
-        dns = [ "10.2.0.1" ];
-        privateKeyFile = "/persist/pvpn-canada";
-        peers = [
-          {
-            publicKey = "28hrybwV/NiiMXvl1ynBvDvEvs1m8ABUzyvkQ7+ST3I=";
-            allowedIPs = [ "0.0.0.0/0" ];
-            endpoint = "146.70.198.34:51820";
-          }
-        ];
+      ca = {
+        configFile = "/persist/ca.conf";
+        autostart = false;
       };
     };
   };
@@ -45,13 +37,19 @@
   security.polkit.enable = true;
 
   environment.systemPackages = with pkgs; [
-    edgetpu-compiler
+    wakeonlan
+    vim
+    jq
+    tailscale
     git
   ];
 
-  nix.extraOptions = ''
-    experimental-features = nix-command flakes
-  '';
+  nix = {
+    extraOptions = ''
+      experimental-features = nix-command flakes
+    '';
+    settings.trusted-users = [ "jsh" ];
+  };
 
   nixpkgs.config.allowUnfree = true;
 
@@ -60,28 +58,28 @@
     oci-containers = {
       backend = "podman";
       containers = {
-        frigate = {
-          image = "blakeblackshear/frigate:stable-amd64";
-          autoStart = true;
-          volumes = [
-            "/home/jsh/frigate/storage:/media/frigate"
-            "/home/jsh/frigate/config.yaml:/config/config.yml:ro"
-            "/etc/localtime:/etc/localtime:ro"
-          ];
-          ports = [
-            "5000:5000"
-            "1935:1935"
-          ];
-          environment = {
-            FRIGATE_RTSP_PASSWORD = "password";
-          };
-          extraOptions = [
-            "--mount=type=tmpfs,target=/tmp/cache,tmpfs-size=1000000000"
-            "--device=/dev/bus/usb:/dev/bus/usb"
-            "--device=/dev/dri/renderD128"
-            "--shm-size=64m"
-          ];
-        };
+        #frigate = {
+        #  image = "blakeblackshear/frigate:stable-amd64";
+        #  autoStart = true;
+        #  volumes = [
+        #    "/home/jsh/frigate/storage:/media/frigate"
+        #    "/home/jsh/frigate/config.yaml:/config/config.yml:ro"
+        #    "/etc/localtime:/etc/localtime:ro"
+        #  ];
+        #  ports = [
+        #    "5000:5000"
+        #    "1935:1935"
+        #  ];
+        #  environment = {
+        #    FRIGATE_RTSP_PASSWORD = "password";
+        #  };
+        #  extraOptions = [
+        #    "--mount=type=tmpfs,target=/tmp/cache,tmpfs-size=1000000000"
+        #    "--device=/dev/bus/usb:/dev/bus/usb"
+        #    "--device=/dev/dri/renderD128"
+        #    "--shm-size=64m"
+        #  ];
+        #};
       };
     };
   };
@@ -95,42 +93,38 @@
         PasswordAuthentication = false;
       };
     };
-    mosquitto = {
+    cloudflared = {
       enable = true;
-      listeners = [{
-        port = 1883;
-        omitPasswordAuth = true;
-        settings = {
-          allow_anonymous = true;
+      tunnels = {
+        "home" = {
+          credentialsFile = "/etc/cloudflared/876bf7bc-d9de-4d2f-b287-7d90b68be053.json";
+          default = "http_status:404";
         };
-      }];
+      };
     };
-    deluge = {
-      user = "jsh";
-      group = "users";
+    vikunja = {
       enable = true;
-      declarative = true;
-      openFirewall = true;
-      authFile = "/persist/deluge-auth";
+      frontendScheme = "http";
+      frontendHostname = "vikunja";
+    };
+    home-assistant = {
+      enable = true;
+      extraComponents = [
+        "sense"
+        "homekit"
+        "generic"
+        "amcrest"
+        "iaqualink"
+        "webostv"
+        "rest"
+        "rest_command"
+        "lutron_caseta"
+        "wake_on_lan"
+      ];
       config = {
-        #download_location = "/home/jsh/Downloads";
-        info_sent = 0.0;
-        prioritize_first_last_pieces = true;
-        send_info = false;
-        stop_seed_at_ratio = true;
-        stop_seed_ratio = 2;
-        outgoing_interface = "wg0";
-      };
-      web = {
-        enable = true;
-        openFirewall = true;
+        default_config = {};
       };
     };
-    sonarr = {
-      enable = true;
-      package = latest.sonarr;
-    };
-    radarr.enable = true;
     plex = {
       enable = true;
       user = "jsh";
@@ -139,4 +133,3 @@
 
   system.stateVersion = "24.11"; # Did you read the comment?
 }
-

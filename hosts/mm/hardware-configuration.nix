@@ -8,44 +8,20 @@
     [ (modulesPath + "/installer/scan/not-detected.nix")
     ];
 
-  boot.initrd.availableKernelModules = [ "xhci_pci" "nvme" "usb_storage" "sd_mod" ];
+  boot.initrd.availableKernelModules = [ "xhci_pci" "nvme" ];
   boot.initrd.kernelModules = [ ];
   boot.kernelModules = [ "kvm-intel" ];
   boot.extraModulePackages = [ ];
 
   fileSystems."/" =
-    { device = "zroot/local/root";
+    { device = "zroot";
       fsType = "zfs";
     };
 
   fileSystems."/boot" =
-    { device = "/dev/disk/by-id/nvme-APPLE_SSD_AP0512M_C079415007DJRH1AK-part2";
+    { device = "/dev/disk/by-uuid/12CE-A600";
       fsType = "vfat";
-    };
-
-  fileSystems."/nix" =
-    { device = "zroot/local/nix";
-      fsType = "zfs";
-    };
-
-  fileSystems."/home" =
-    { device = "zroot/safe/home";
-      fsType = "zfs";
-    };
-
-  fileSystems."/persist" =
-    { device = "zroot/safe/persist";
-      fsType = "zfs";
-    };
-
-  fileSystems."/sigma/media/tv" =
-    { device = "sigma/media/tv";
-      fsType = "zfs";
-    };
-
-  fileSystems."/sigma/media/movies" =
-    { device = "sigma/media/movies";
-      fsType = "zfs";
+      options = [ "fmask=0022" "dmask=0022" ];
     };
 
   swapDevices = [ ];
@@ -55,8 +31,8 @@
   # still possible to use this option, but it's recommended to use it in conjunction
   # with explicit per-interface declarations with `networking.interfaces.<interface>.useDHCP`.
   networking.useDHCP = lib.mkDefault true;
-  # networking.interfaces.ens1.useDHCP = lib.mkDefault true;
+  # networking.interfaces.eth0.useDHCP = lib.mkDefault true;
 
-  powerManagement.cpuFreqGovernor = lib.mkDefault "powersave";
+  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 }
