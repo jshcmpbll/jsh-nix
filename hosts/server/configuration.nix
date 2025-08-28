@@ -207,7 +207,7 @@
     };
     open-webui = {
       enable = true;
-      package = latest.open-webui;
+      package = pkgs.open-webui;
       environment = {
         ANONYMIZED_TELEMETRY = "False";
         DO_NOT_TRACK = "True";

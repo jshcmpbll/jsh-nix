@@ -35,9 +35,10 @@
   ];
 
   boot = {
-    kernelPackages = latest.linuxPackages_6_12;
+    kernelPackages = pkgs.linuxPackages_6_12;
     kernelModules = [ "kvm-amd" ];
     kernel.sysctl = { "unprivileged_userns_clone" = 1; };
+    hardwareScan = true;
   };
 
   networking = {

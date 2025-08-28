@@ -10,13 +10,13 @@ let
       nixExtensions = [
         (pkgs.fetchFirefoxAddon {
           name = "1password";
-          url = "https://addons.mozilla.org/firefox/downloads/file/4404461/1password_x_password_manager-8.10.56.28.xpi";
-          sha256 = "sha256-3SPjR6e1G4pu8uu0Y3ZKsI3sCQDf50VLWIyhI6dEnXE=";
+          url = "https://addons.mozilla.org/firefox/downloads/file/4546733/1password_x_password_manager-8.11.4.27.xpi";
+          sha256 = "sha256-Pt0F9pysyl7fLkoG+cMtsHBdTPLBM8ISE2z12w++ZIk=";
         })
         (pkgs.fetchFirefoxAddon {
           name = "ublock";
-          url = "https://addons.mozilla.org/firefox/downloads/file/4391011/ublock_origin-1.61.2.xpi";
-          sha256 = "sha256-7jpySkb/MsF9FyMHf+zG7ef9q3QhVAILUftiU93LuhQ=";
+          url = "https://addons.mozilla.org/firefox/downloads/file/4531307/ublock_origin-1.65.0.xpi";
+          sha256 = "sha256-PnPJaimpM4ZgZfB1b+AymEv1slSvjdGv16f34GaKM88=";
         })
         (pkgs.fetchFirefoxAddon {
           name = "custom_user_agent_revived";
@@ -80,8 +80,8 @@ in
     bc
     bind
     blueman
-    breeze-gtk
-    breeze-qt5
+    kdePackages.breeze-gtk
+    kdePackages.breeze
     cava
     darktable
     digikam
@@ -94,7 +94,7 @@ in
     exiftool
     fdupes
     feh
-    latest.ffmpeg-full
+    ffmpeg-full
     file
     myFirefox
     foremost
@@ -132,7 +132,7 @@ in
     linuxPackages.v4l2loopback
     lm_sensors
     lsof
-    latest.lutris
+    lutris
     lyx
     mediainfo
     mkdocs
@@ -150,7 +150,7 @@ in
     ntfs3g
     ofono-phonesim
     oh-my-zsh
-    okular
+    kdePackages.okular
     os-prober
     pandoc
     pavucontrol
@@ -176,7 +176,7 @@ in
     scrot
     silver-searcher
     scan.simple-scan
-    latest.slack
+    slack
     smartmontools
     spotify
     sshfs
@@ -194,18 +194,16 @@ in
     tree
     unrar
     vlc
-    latest.argocd
-    latest.azure-cli
-    latest.discord
-    latest.fluxcd
-    latest.github-cli
-    latest.guvcview
+    argocd
+    azure-cli
+    discord
+    fluxcd
+    github-cli
+    guvcview
     joplin
-    latest.joplin-desktop
+    joplin-desktop
     minecraft
-    #latest.odafileconverter
-    latest.spotifyd
-    latest.terraform
+    terraform
     myZoom-us
     ranger
     unzip
@@ -239,20 +237,20 @@ in
     libimobiledevice
     magic-wormhole
     wormhole-william
-    latest.nufraw
+    nufraw
     nixpkgs-review
     deluge
     at
-    latest.btop
+    btop
     lm_sensors
     ansible
     openconnect
     stoken
-    latest.dolphin-emu
+    dolphin-emu
     hdparm
-    latest.conftest
+    conftest
     json2hcl
-    latest.open-policy-agent
+    open-policy-agent
     ocrmypdf
     thunderbird
     hugo
@@ -260,7 +258,7 @@ in
     ifuse
     wireguard-tools
     element-desktop
-    latest.obsidian
+    obsidian
     imv
     signal-desktop
     _1password-cli
@@ -272,7 +270,7 @@ in
     coldsnap
     ticker
     ssm-session-manager-plugin
-    python310Packages.grip
+    python313Packages.grip
     latest.nix
     ssh-agents
     #filebot
@@ -284,7 +282,7 @@ in
     nvtopPackages.full
     aria2
     pdftk
-    kcalc
+    kdePackages.kcalc
     latest.beeper
     freetube
     nodejs
@@ -305,14 +303,16 @@ in
         esbenp.prettier-vscode
         github.copilot
         latest.vscode-extensions.github.copilot-chat
+        continue.continue
       ];
     })
-    latest.postman
+    postman
     remmina
     sipcalc
     davinci-resolve-studio
-    latest.ghostty
+    ghostty
     latest.claude-code
+    simplescreenrecorder
     #LPA
   ];
 }

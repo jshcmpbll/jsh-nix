@@ -98,6 +98,7 @@
     };
     extraOptions = ''
       experimental-features = nix-command flakes
+      download-buffer-size = 500000000
     '';
     registry.nixpkgs.flake = inputs.nixpkgs;
   };

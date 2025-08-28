@@ -1,7 +1,10 @@
 { lib, config, pkgs, latest, ... }:
 let
   config = pkgs.writeText "config.nix" ''
-  { allowUnfree = true; }
+  {
+    allowUnfree = true;
+    download-buffer-size = 500000000
+  }
   '';
 in
 {
