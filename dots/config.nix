@@ -3,7 +3,7 @@ let
   config = pkgs.writeText "config.nix" ''
   {
     allowUnfree = true;
-    download-buffer-size = 500000000
+    download-buffer-size = 500000000;
   }
   '';
 in
