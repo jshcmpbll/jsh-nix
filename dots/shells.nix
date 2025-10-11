@@ -331,6 +331,17 @@ let
     ''
     +
     ''
+      get-console-output() {
+        echo -e "$(
+          aws ec2 get-console-output \
+            --instance-id "$1" \
+            --query 'Output' \
+            --output text
+        )"
+      }
+    ''
+    +
+    ''
       watchfile() {
         local filepath="$1"
         local command="$2"
