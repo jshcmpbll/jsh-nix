@@ -181,7 +181,7 @@ in
     spotify
     sshfs
     sshfs-fuse
-    steam
+    latest.steam
     sxiv
     synergy
     inetutils # telnet
