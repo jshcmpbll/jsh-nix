@@ -16,6 +16,10 @@
       systemd-boot.enable = true;
       efi.canTouchEfiVariables = true;
     };
+    kernel.sysctl = {
+      "net.ipv4.ip_forward" = true;
+      "net.ipv6.conf.all.forwarding" = true;
+    };
   };
 
   networking = {
@@ -24,6 +28,7 @@
     useDHCP = true;
     nameservers = [ "1.1.1.1" "1.0.0.1" ];
     firewall.enable = false;
+    firewall.checkReversePath = "loose";
     wg-quick.interfaces = {
       ca = {
         configFile = "/persist/ca.conf";
@@ -129,6 +134,7 @@
       enable = true;
       user = "jsh";
     };
+    tailscale.enable = true;
   };
 
   system.stateVersion = "24.11"; # Did you read the comment?
