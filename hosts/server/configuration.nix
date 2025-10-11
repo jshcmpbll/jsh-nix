@@ -245,15 +245,11 @@
   ### HARDWARE ###
 
   hardware = {
-
     nvidia = {
       open = false;
-      package = config.boot.kernelPackages.nvidiaPackages.stable;
       modesetting.enable = true;
     };
-
     enableAllFirmware = true;
-
     pulseaudio = {
       enable = false;
       support32Bit = true;
@@ -261,7 +257,6 @@
       #extraModules = [ pkgs.
       extraConfig = "load-module module-switch-on-connect auth-anonymous=1";
     };
-
   };
 
   ### HARDWARE ###]
