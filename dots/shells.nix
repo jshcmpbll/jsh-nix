@@ -17,6 +17,11 @@ let
   };
   init =
     ''
+      esc=/persist/extra-shell-config
+      if [ -f $esc ]; then source $esc; fi
+    ''
+    +
+    ''
       osup() {
         cd /home/jsh/git/jsh-nix
         sudo nixos-rebuild switch --flake .# --impure
