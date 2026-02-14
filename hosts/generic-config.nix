@@ -82,11 +82,6 @@
   ];
 
   nix = {
-    settings = {
-      trusted-users = [
-        "jsh"
-      ];
-    };
     optimise = {
       automatic = true;
       dates = ["00:00"];

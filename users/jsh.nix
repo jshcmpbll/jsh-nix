@@ -4,7 +4,7 @@
   users.users.jsh = {
     uid = 1000; # setting for x11vnc auth
     isNormalUser = true;
-    extraGroups = [ "wheel" "sudo" "audio" "pulse-access" "docker" ];
+    extraGroups = [ "wheel" "sudo" "audio" "pulse-access" "docker" "remotebuild"];
     shell = pkgs.zsh;
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIB29bu0cfW5fIIISVOycKIfEpfAekl9BDfAvea62QgfL"
@@ -16,4 +16,5 @@
     ];
   };
   security.sudo.wheelNeedsPassword = false;
+  nix.settings.trusted-users = [ "jsh" ];
 }
