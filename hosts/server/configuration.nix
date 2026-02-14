@@ -7,7 +7,6 @@
       i3-config = pkgs.writeText "config" (i3-server + "\n" + i3-zoom);
     in
     [
-      ../../dots/vnc-local.nix
       ../../dots/vnc.nix
       ../../dots/docker.nix
       ./hardware-configuration.nix
