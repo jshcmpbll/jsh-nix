@@ -21,6 +21,14 @@
             target = "/home/jsh/.config/polybar/config.ini";
           }
           {
+            origin = ../../dots/firefox/profiles.ini;
+            target = "/home/jsh/.mozilla/firefox/profiles.ini";
+          }
+          {
+            origin = ../../dots/firefox/proxy-user.js;
+            target = "/home/jsh/.mozilla/firefox/proxy-profile/user.js";
+          }
+          {
             origin = ../../dots/polybar/server-launch.sh;
             target = "/home/jsh/.config/polybar/launch.sh";
           }])
