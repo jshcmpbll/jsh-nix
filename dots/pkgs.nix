@@ -306,12 +306,11 @@ in
     asciinema
     bruno 
     (latest.vscode-with-extensions.override {
-      vscodeExtensions = with vscode-extensions; [
+      vscodeExtensions = with latest.vscode-extensions; [
         dbaeumer.vscode-eslint
         esbenp.prettier-vscode
         github.copilot
-        latest.vscode-extensions.github.copilot-chat
-        continue.continue
+        github.copilot-chat
       ];
     })
     postman
