@@ -36,6 +36,7 @@ let
           Snippets = false;
         };
         Preferences = {
+          "geo.enabled" = { Value = "false"; };
           "browser.fullscreen.autohide" = { Value = "false"; };
           "extensions.activeThemeID" = { Value = "firefox-compact-dark@mozilla.org"; Status = "locked"; };
           "quicksuggest.enabled" = { Value = "false"; Status = "locked"; };
@@ -43,6 +44,13 @@ let
           "signon.autofill.plugins.disabled" = { Value = "true"; Status = "locked"; };
           "browser.search.selectedEngine" = { Value = "DuckDuckGo"; Status = "locked"; };
           "browser.search.suggest" = { Value = "false"; Status = "locked"; };
+
+          "proxy-profile/network.proxy.type" = { Value = 1; Status = "locked"; };
+          "proxy-profile/network.proxy.socks" = { Value = "127.0.0.1"; Status = "locked"; };
+          "proxy-profile/network.proxy.socks_port" = { Value = 1080; Status = "locked"; };
+          "proxy-profile/network.proxy.socks_version" = { Value = 5; Status = "locked"; };
+          "proxy-profile/network.proxy.socks_remote_dns" = { Value = true; Status = "locked"; };
+
         };
       };
     };
