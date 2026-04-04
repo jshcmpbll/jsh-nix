@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  latest2,
   ...
 }:
 let
@@ -107,7 +108,7 @@ in
     ];
     
     # Ensure rclone is available
-    environment.systemPackages = [ pkgs.rclone ];
+    environment.systemPackages = [ latest2.pkgs.rclone ];
 
     # Create rclone config directory and file
     systemd.tmpfiles.rules = [
@@ -131,9 +132,9 @@ in
         mkdir -p /var/cache/immich-protondrive-backup/rclone
         
         # Obscure passwords and OTP secret key
-        OBSCURED_PASSWORD=$(${pkgs.rclone}/bin/rclone obscure "${cfg.password}")
-        OBSCURED_MAILBOX_PASSWORD=$(${pkgs.rclone}/bin/rclone obscure "${cfg.mailboxPassword}")
-        OBSCURED_OTP_KEY=$(${pkgs.rclone}/bin/rclone obscure "${cfg.otpSecretKey}")
+        OBSCURED_PASSWORD=$(${latest2.pkgs.rclone}/bin/rclone obscure "${cfg.password}")
+        OBSCURED_MAILBOX_PASSWORD=$(${latest2.pkgs.rclone}/bin/rclone obscure "${cfg.mailboxPassword}")
+        OBSCURED_OTP_KEY=$(${latest2.pkgs.rclone}/bin/rclone obscure "${cfg.otpSecretKey}")
         
         # Create rclone config file
         cat > /var/cache/immich-protondrive-backup/rclone/rclone.conf <<EOF
@@ -180,7 +181,7 @@ in
       };
       
       script = ''
-        ${pkgs.rclone}/bin/rclone sync \
+        ${latest2.pkgs.rclone}/bin/rclone sync \
           ${cfg.syncLocation} \
           ${cfg.remoteName}:${cfg.syncDestination} \
           ${cfg.extraRcloneArgs}

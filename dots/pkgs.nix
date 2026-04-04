@@ -1,4 +1,4 @@
-{ lib, config, pkgs, latest, scan, stdenv,  ... }:
+{ lib, config, pkgs, latest, latest2, scan, stdenv,  ... }:
 let
   myFirefox = pkgs.wrapFirefox
     (latest.pkgs.firefox-unwrapped.override (old: {
@@ -210,7 +210,6 @@ in
     guvcview
     joplin
     joplin-desktop
-    minecraft
     terraform
     myZoom-us
     ranger
@@ -305,8 +304,9 @@ in
     samba4Full
     asciinema
     bruno 
-    (latest.vscode-with-extensions.override {
-      vscodeExtensions = with latest.vscode-extensions; [
+    latest.kiro
+    (latest2.vscode-with-extensions.override {
+      vscodeExtensions = with latest2.vscode-extensions; [
         dbaeumer.vscode-eslint
         esbenp.prettier-vscode
         github.copilot

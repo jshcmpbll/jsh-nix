@@ -13,6 +13,7 @@
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDXVBd7IcaNgtZrAPFiQKQAkTt0uFzbxYBl0qIAHSBlz"
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICF/mh2HQ/a/n0z5tCa/8F67unG/wYJfuj/jAFGijnYA" # Mobile
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJCsNnDhsjRbk6oZwOg81cU9NYuSrkcHDAHussAJMuT9" # Mobile shortcuts
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKNv0HiLkpp06WEwht49vDedowRKv53VGvk4kY6Q59d5" # E
     ];
   };
   security.sudo.wheelNeedsPassword = false;

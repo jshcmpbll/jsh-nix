@@ -364,12 +364,6 @@ let
             sleep 1 # Check every 1 second
         done
       };
-    ''
-    +
-    ''
-    export ANTHROPIC_AUTH_TOKEN=ollama
-    export ANTHROPIC_API_KEY=""
-    export ANTHROPIC_BASE_URL=http://localhost:11434
     '';
 in
 {
