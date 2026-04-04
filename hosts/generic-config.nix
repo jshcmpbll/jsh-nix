@@ -10,6 +10,7 @@
     ../dots/tailscale.nix
     ../dots/ssh-config.nix
     ../users/jsh.nix
+    #./builders.nix
     (import ../lib/home-file.nix
       [{
         origin = ../dots/rofi/config.rasi;
@@ -46,7 +47,7 @@
   ];
 
   boot = {
-    binfmt.emulatedSystems = [ "aarch64-linux" ];
+    binfmt.emulatedSystems = [ "aarch64-linux" "riscv64-linux" ];
     loader = {
       efi.canTouchEfiVariables = true;
       grub = {
