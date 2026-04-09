@@ -694,7 +694,7 @@ EOF
         Type = "simple";
         Restart = "always";
         RestartSec = "5s";
-        ExecStart = "${pkgs.socat}/bin/socat TCP-LISTEN:${toString cfg.deluge.daemonPort},reuseaddr,fork EXEC:'${pkgs.iproute2}/bin/ip netns exec ${cfg.proton.namespaceName} ${pkgs.socat}/bin/socat STDIO TCP-CONNECT:127.0.0.1:${toString cfg.deluge.daemonPort}'";
+        ExecStart = "${pkgs.socat}/bin/socat TCP-LISTEN:${toString cfg.deluge.daemonPort},reuseaddr,fork SYSTEM:'${pkgs.iproute2}/bin/ip netns exec ${cfg.proton.namespaceName} ${pkgs.socat}/bin/socat STDIO TCP-CONNECT:127.0.0.1:${toString cfg.deluge.daemonPort}'";
       };
     };
     
@@ -825,8 +825,8 @@ EOF
   <EnableSsl>False</EnableSsl>
   <LaunchBrowser>False</LaunchBrowser>
   <ApiKey></ApiKey>
-  <AuthenticationMethod>DisabledForLocalAddresses</AuthenticationMethod>
-  <AuthenticationRequired>DisabledForLocalAddresses</AuthenticationRequired>
+  <AuthenticationMethod>None</AuthenticationMethod>
+  <AuthenticationRequired>Enabled</AuthenticationRequired>
   <Branch>main</Branch>
   <LogLevel>Info</LogLevel>
   <SslCertPath></SslCertPath>
