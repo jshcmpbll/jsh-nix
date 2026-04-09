@@ -123,6 +123,12 @@ in {
         default = 4096;
         description = "Maximum number of open files for Deluge";
       };
+
+      webPassword = mkOption {
+        type = types.str;
+        default = "deluge";
+        description = "Password for Deluge web interface (used by Sonarr to connect)";
+      };
     };
     
     sonarr = {
@@ -157,6 +163,33 @@ in {
       };
     };
     
+    prowlarr = {
+      enable = mkOption {
+        type = types.bool;
+        default = false;
+        description = "Enable Prowlarr indexer manager";
+      };
+
+      port = mkOption {
+        type = types.port;
+        default = 9696;
+        description = "Port for Prowlarr web interface";
+      };
+
+      dataDir = mkOption {
+        type = types.path;
+        default = "/var/lib/prowlarr";
+        description = "Directory for Prowlarr data";
+      };
+
+      indexers = mkOption {
+        type = types.listOf types.str;
+        default = [ "thepiratebay" "limetorrents" "nyaasi" "showrss" ];
+        # Note: "internetarchive" excluded — too slow, causes search timeouts
+        description = "List of Prowlarr Cardigann definition names to add as public indexers";
+      };
+    };
+
     overseerr = {
       enable = mkOption {
         type = types.bool;
@@ -270,10 +303,12 @@ in {
           fi
           
           if [ "${toString cfg.proton.useNetworkNamespace}" = "1" ]; then
-            # Force clean state: delete namespace (takes the interface with it) and recreate.
-            ip netns del ${cfg.proton.namespaceName} 2>/dev/null || true
-            ip netns add ${cfg.proton.namespaceName}
-            ip link set lo up 2>/dev/null || true
+            # Create namespace once if it doesn't exist; do NOT delete it on restart
+            # so deluged (attached via NetworkNamespacePath) stays in the same namespace.
+            ip netns add ${cfg.proton.namespaceName} 2>/dev/null || true
+
+            # Delete only the WireGuard interface (if present) so we can reconfigure it.
+            ip netns exec ${cfg.proton.namespaceName} ip link del ${cfg.proton.interfaceName} 2>/dev/null || true
 
             # Create WireGuard interface and move it into the namespace.
             ip link add ${cfg.proton.interfaceName} type wireguard
@@ -630,20 +665,29 @@ in {
         mkdir -p /var/lib/deluge/.config/deluge
 
         ${if cfg.proton.useNetworkNamespace then ''
-          # Namespace mode: deluge runs inside the VPN namespace and naturally
-          # uses the only available interface. No explicit IP binding needed.
-          # Just wait for the namespace to exist before writing config.
-          echo "Waiting for VPN namespace..."
+          # Namespace mode: preStart runs inside the VPN namespace (NetworkNamespacePath
+          # applies to all exec commands). Wait for protonvpn interface to have an IP,
+          # then bind Deluge explicitly to it.
+          echo "Waiting for VPN interface..."
+          VPN_IP=""
           for i in {1..60}; do
-            if ${pkgs.iproute2}/bin/ip netns list | grep -q "${cfg.proton.namespaceName}"; then
-              echo "VPN namespace is ready"
-              break
+            if ${pkgs.iproute2}/bin/ip link show ${cfg.proton.interfaceName} &>/dev/null; then
+              VPN_IP=$(${pkgs.iproute2}/bin/ip -4 addr show ${cfg.proton.interfaceName} | grep inet | ${pkgs.gawk}/bin/awk '{print $2}' | cut -d'/' -f1)
+              if [ -n "$VPN_IP" ]; then
+                echo "VPN interface ready: $VPN_IP"
+                break
+              fi
             fi
             sleep 1
           done
+          if [ -z "$VPN_IP" ]; then
+            echo "Error: VPN interface never got an IP"
+            exit 1
+          fi
 
-          cat > /var/lib/deluge/.config/deluge/core.conf.tmp <<'EOF'
-{"file": 1, "format": 1}{"upnp": false, "natpmp": false}
+          cat > /var/lib/deluge/.config/deluge/core.conf.tmp <<EOF
+{"file": 1, "format": 1}
+{"listen_interface": "$VPN_IP", "outgoing_interface": "${cfg.proton.interfaceName}", "upnp": false, "natpmp": false, "enabled_plugins": ["Label"]}
 EOF
         '' else ''
           # Non-namespace mode: bind deluge explicitly to the VPN interface IP.
@@ -663,11 +707,16 @@ EOF
           fi
           echo "Binding Deluge to VPN IP: $VPN_IP"
           cat > /var/lib/deluge/.config/deluge/core.conf.tmp <<EOF
-{"file": 1, "format": 1}{"listen_interface": "$VPN_IP", "outgoing_interface": "${cfg.proton.interfaceName}", "upnp": false, "natpmp": false}
+{"file": 1, "format": 1}
+{"listen_interface": "$VPN_IP", "outgoing_interface": "${cfg.proton.interfaceName}", "upnp": false, "natpmp": false, "enabled_plugins": ["Label"]}
 EOF
         ''}
         mv /var/lib/deluge/.config/deluge/core.conf.tmp /var/lib/deluge/.config/deluge/core.conf
         chown -R deluge:deluge /var/lib/deluge/.config
+        # Ensure download dir is group-readable so sonarr can import completed files
+        mkdir -p ${cfg.deluge.downloadDir}
+        chmod 775 ${cfg.deluge.downloadDir}
+        chown deluge:deluge ${cfg.deluge.downloadDir}
       '';
     };
     
@@ -821,7 +870,7 @@ EOF
   <LaunchBrowser>False</LaunchBrowser>
   <ApiKey></ApiKey>
   <AuthenticationMethod>None</AuthenticationMethod>
-  <AuthenticationRequired>Enabled</AuthenticationRequired>
+  <AuthenticationRequired>DisabledForLocalAddresses</AuthenticationRequired>
   <Branch>main</Branch>
   <LogLevel>Info</LogLevel>
   <SslCertPath></SslCertPath>
@@ -835,7 +884,213 @@ EOF
       '';
     };
     
-    # Overseerr service configuration  
+    # Configure Sonarr via API after startup
+    systemd.services.aargh-sonarr-configure = mkIf (cfg.sonarr.enable && cfg.deluge.enable) {
+      description = "Configure Sonarr download client and root folder";
+      after = [ "sonarr.service" ];
+      wants = [ "sonarr.service" ];
+      wantedBy = [ "multi-user.target" ];
+
+      path = with pkgs; [ curl jq gawk ];
+
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        User = "sonarr";
+        Group = "sonarr";
+      };
+
+      script = ''
+        set -euo pipefail
+
+        SONARR_URL="http://localhost:${toString cfg.sonarr.port}"
+
+        # Wait for Sonarr API to be ready
+        echo "Waiting for Sonarr API..."
+        for i in {1..60}; do
+          API_KEY=$(awk -F '[<>]' '/<ApiKey>/{print $3}' ${cfg.sonarr.dataDir}/config.xml 2>/dev/null || true)
+          if [ -n "$API_KEY" ] && curl -sf "$SONARR_URL/api/v3/system/status" -H "X-Api-Key: $API_KEY" > /dev/null 2>&1; then
+            echo "Sonarr API ready"
+            break
+          fi
+          sleep 2
+        done
+
+        # Configure Deluge download client
+        CLIENTS=$(curl -sf "$SONARR_URL/api/v3/downloadclient" -H "X-Api-Key: $API_KEY")
+        if echo "$CLIENTS" | jq -e '.[] | select(.name == "Deluge")' > /dev/null 2>&1; then
+          echo "Deluge download client already configured"
+        else
+          echo "Adding Deluge download client..."
+          curl -sf -X POST "$SONARR_URL/api/v3/downloadclient" \
+            -H "X-Api-Key: $API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "enable": true,
+              "protocol": "torrent",
+              "priority": 1,
+              "name": "Deluge",
+              "fields": [
+                {"name": "host", "value": "localhost"},
+                {"name": "port", "value": ${toString cfg.deluge.webPort}},
+                {"name": "urlBase", "value": ""},
+                {"name": "password", "value": "${cfg.deluge.webPassword}"},
+                {"name": "category", "value": ""},
+                {"name": "recentTvPriority", "value": 0},
+                {"name": "olderTvPriority", "value": 0},
+                {"name": "addPaused", "value": false}
+              ],
+              "implementationName": "Deluge",
+              "implementation": "Deluge",
+              "configContract": "DelugeSettings",
+              "tags": []
+            }'
+          echo "Deluge download client added"
+        fi
+
+        # Configure TV root folder
+        FOLDERS=$(curl -sf "$SONARR_URL/api/v3/rootfolder" -H "X-Api-Key: $API_KEY")
+        if echo "$FOLDERS" | jq -e --arg p "${cfg.sonarr.tvDir}" '.[] | select(.path == $p)' > /dev/null 2>&1; then
+          echo "Root folder already configured"
+        else
+          echo "Adding root folder ${cfg.sonarr.tvDir}..."
+          curl -sf -X POST "$SONARR_URL/api/v3/rootfolder" \
+            -H "X-Api-Key: $API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "{\"path\": \"${cfg.sonarr.tvDir}\"}"
+          echo "Root folder added"
+        fi
+      '';
+    };
+
+    # Prowlarr indexer manager
+    services.prowlarr = mkIf cfg.prowlarr.enable {
+      enable = true;
+      openFirewall = false;
+    };
+
+    systemd.services.prowlarr = mkIf cfg.prowlarr.enable {
+      after = [ "sonarr.service" ];
+      wants = [ "sonarr.service" ];
+
+      # Disable auth for local addresses (same as Sonarr)
+      preStart = lib.mkAfter ''
+        CONFIG_FILE="${cfg.prowlarr.dataDir}/config.xml"
+        if [ -f "$CONFIG_FILE" ]; then
+          ${pkgs.gnused}/bin/sed -i \
+            -e 's|<AuthenticationMethod>[^<]*</AuthenticationMethod>|<AuthenticationMethod>External</AuthenticationMethod>|' \
+            -e 's|<AuthenticationRequired>[^<]*</AuthenticationRequired>|<AuthenticationRequired>DisabledForLocalAddresses</AuthenticationRequired>|' \
+            "$CONFIG_FILE"
+        fi
+      '';
+    };
+
+    # Wire Prowlarr → Sonarr automatically
+    systemd.services.aargh-prowlarr-configure = mkIf (cfg.prowlarr.enable && cfg.sonarr.enable) {
+      description = "Connect Prowlarr to Sonarr";
+      after = [ "prowlarr.service" "sonarr.service" ];
+      wants = [ "prowlarr.service" "sonarr.service" ];
+      wantedBy = [ "multi-user.target" ];
+
+      path = with pkgs; [ curl jq gawk ];
+
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+      };
+
+      script = ''
+        set -euo pipefail
+
+        PROWLARR_URL="http://localhost:${toString cfg.prowlarr.port}"
+        SONARR_URL="http://localhost:${toString cfg.sonarr.port}"
+
+        # Wait for Prowlarr API
+        echo "Waiting for Prowlarr API..."
+        for i in {1..60}; do
+          PROWLARR_KEY=$(awk -F '[<>]' '/<ApiKey>/{print $3}' ${cfg.prowlarr.dataDir}/config.xml 2>/dev/null || true)
+          if [ -n "$PROWLARR_KEY" ] && curl -sf "$PROWLARR_URL/api/v1/system/status" -H "X-Api-Key: $PROWLARR_KEY" > /dev/null 2>&1; then
+            echo "Prowlarr API ready"
+            break
+          fi
+          sleep 2
+        done
+
+        # Get Sonarr API key
+        SONARR_KEY=$(awk -F '[<>]' '/<ApiKey>/{print $3}' ${cfg.sonarr.dataDir}/config.xml)
+
+        # Check if Sonarr is already added as an application
+        APPS=$(curl -sf "$PROWLARR_URL/api/v1/applications" -H "X-Api-Key: $PROWLARR_KEY")
+        if echo "$APPS" | jq -e '.[] | select(.name == "Sonarr")' > /dev/null 2>&1; then
+          echo "Sonarr already configured in Prowlarr"
+        else
+          echo "Adding Sonarr to Prowlarr..."
+          curl -sf -X POST "$PROWLARR_URL/api/v1/applications" \
+            -H "X-Api-Key: $PROWLARR_KEY" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"name\": \"Sonarr\",
+              \"implementation\": \"Sonarr\",
+              \"configContract\": \"SonarrSettings\",
+              \"syncLevel\": \"addOnly\",
+              \"fields\": [
+                {\"name\": \"prowlarrUrl\", \"value\": \"$PROWLARR_URL\"},
+                {\"name\": \"baseUrl\", \"value\": \"$SONARR_URL\"},
+                {\"name\": \"apiKey\", \"value\": \"$SONARR_KEY\"},
+                {\"name\": \"syncCategories\", \"value\": [5000,5010,5020,5030,5040,5045,5050,5090]},
+                {\"name\": \"animeSyncCategories\", \"value\": [5070]},
+                {\"name\": \"syncLevel\", \"value\": \"addOnly\"}
+              ],
+              \"tags\": []
+            }"
+          echo "Sonarr added to Prowlarr"
+        fi
+
+        # Add public indexers
+        EXISTING_INDEXERS=$(curl -sf "$PROWLARR_URL/api/v1/indexer" -H "X-Api-Key: $PROWLARR_KEY")
+        SCHEMA=$(curl -sf "$PROWLARR_URL/api/v1/indexer/schema" -H "X-Api-Key: $PROWLARR_KEY")
+
+        add_indexer() {
+          local defName=$1
+          # Look up display name and implementation from schema
+          local name
+          name=$(echo "$SCHEMA" | jq -r --arg d "$defName" '.[] | select(.definitionName == $d) | .name' | head -1)
+          if [ -z "$name" ]; then
+            echo "Warning: no schema found for $defName, skipping"
+            return
+          fi
+          if echo "$EXISTING_INDEXERS" | jq -e --arg n "$name" '.[] | select(.name == $n)' > /dev/null 2>&1; then
+            echo "$name already added"
+          else
+            echo "Adding indexer: $name ($defName)..."
+            resp=$(curl -s -w "\n%{http_code}" -X POST "$PROWLARR_URL/api/v1/indexer" \
+              -H "X-Api-Key: $PROWLARR_KEY" \
+              -H "Content-Type: application/json" \
+              -d "{
+                \"name\": \"$name\",
+                \"implementation\": \"Cardigann\",
+                \"configContract\": \"CardigannSettings\",
+                \"enable\": true,
+                \"protocol\": \"torrent\",
+                \"priority\": 25,
+                \"appProfileId\": 1,
+                \"fields\": [{\"name\": \"definitionFile\", \"value\": \"$defName\"}],
+                \"tags\": []
+              }")
+            http_code=$(echo "$resp" | tail -1)
+            if [ "$http_code" = "201" ]; then
+              echo "$name added"
+            else
+              echo "Warning: failed to add $name (HTTP $http_code): $(echo "$resp" | head -1 | jq -r '.[0].errorMessage // .' 2>/dev/null)"
+            fi
+          fi
+        }
+
+        ${lib.concatMapStrings (d: "add_indexer ${lib.escapeShellArg d}\n") cfg.prowlarr.indexers}
+      '';
+    };
+
+    # Overseerr service configuration
     systemd.services.overseerr = mkIf cfg.overseerr.enable {
       description = "Overseerr request management service";
       wantedBy = [ "multi-user.target" ];
@@ -869,6 +1124,11 @@ EOF
       '';
     };
     
+    # Give sonarr read access to deluge's download dir so it can import completed files
+    users.users.sonarr = mkIf (cfg.sonarr.enable && cfg.deluge.enable) {
+      extraGroups = [ "deluge" ];
+    };
+
     # Create users for services
     users.users.overseerr = mkIf cfg.overseerr.enable {
       isSystemUser = true;

@@ -36,6 +36,7 @@
       enable = true;
       tvDir = "/mnt/mm-tv";
     };
+    prowlarr.enable = true;
     overseerr.enable = false;
   };
 
