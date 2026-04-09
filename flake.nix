@@ -94,17 +94,12 @@
         jsh-mms = nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
           modules = [
+            inputs.self.nixosModules.default
             ./hosts/mms/configuration.nix
+            ./hosts/mms/disko.nix
+            inputs.disko.nixosModules.disko
           ];
-          specialArgs = {
-            latest = import nixpkgs-unstable {
-              system = "x86_64-linux";
-              config = {
-                allowUnfree = true;
-                allowBroken = true;
-              };
-            };
-          };
+          specialArgs = sA;
         };
         pool = nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
