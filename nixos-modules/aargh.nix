@@ -680,7 +680,8 @@ EOF
 
       serviceConfig = let
         bridgeScript = pkgs.writeShellScript "deluge-ns-bridge" ''
-          exec ${pkgs.iproute2}/bin/ip netns exec ${cfg.proton.namespaceName} \
+          DPID=$(${pkgs.systemd}/bin/systemctl show deluged -p MainPID --value)
+          exec ${pkgs.util-linux}/bin/nsenter -t "$DPID" -n \
             ${pkgs.socat}/bin/socat STDIO \
             TCP-CONNECT:127.0.0.1:${toString cfg.deluge.daemonPort}
         '';
