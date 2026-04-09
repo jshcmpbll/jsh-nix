@@ -269,60 +269,50 @@ in {
             return 1
           fi
           
-          # Remove existing interface if present
-          ip link del ${cfg.proton.interfaceName} 2>/dev/null || true
-          
-          # Create network namespace if using namespace isolation
           if [ "${toString cfg.proton.useNetworkNamespace}" = "1" ]; then
-            # Create namespace
-            ip netns add ${cfg.proton.namespaceName} 2>/dev/null || true
-            
-            # Create WireGuard interface in namespace
+            # Force clean state: delete namespace (takes the interface with it) and recreate.
+            ip netns del ${cfg.proton.namespaceName} 2>/dev/null || true
+            ip netns add ${cfg.proton.namespaceName}
+            ip link set lo up 2>/dev/null || true
+
+            # Create WireGuard interface and move it into the namespace.
             ip link add ${cfg.proton.interfaceName} type wireguard
             ip link set ${cfg.proton.interfaceName} netns ${cfg.proton.namespaceName}
-            
-            # Configure interface within namespace
-            ip netns exec ${cfg.proton.namespaceName} ip link set lo up
-          else
-            # Create WireGuard interface in default namespace
-            ip link add ${cfg.proton.interfaceName} type wireguard
-          fi
-          
-          # Configure interface (with namespace awareness)
-          if [ "${toString cfg.proton.useNetworkNamespace}" = "1" ]; then
-            # Configure within namespace
-            wg set ${cfg.proton.interfaceName} private-key <(echo "$PRIVATE_KEY")
-            wg set ${cfg.proton.interfaceName} peer "$PUBLIC_KEY" \
-              endpoint "$ENDPOINT" \
-              persistent-keepalive 25 \
-              allowed-ips 0.0.0.0/0
-            
-            # Configure IP and routing within namespace
+
+            # Configure WireGuard entirely inside the namespace.
+            ip netns exec ${cfg.proton.namespaceName} \
+              wg set ${cfg.proton.interfaceName} \
+                private-key <(echo "$PRIVATE_KEY") \
+                peer "$PUBLIC_KEY" \
+                endpoint "$ENDPOINT" \
+                persistent-keepalive 25 \
+                allowed-ips 0.0.0.0/0
+
+            # Bring up the interface and set address/routing inside the namespace.
             ip netns exec ${cfg.proton.namespaceName} ip addr add "$ADDRESS" dev ${cfg.proton.interfaceName}
             ip netns exec ${cfg.proton.namespaceName} ip link set ${cfg.proton.interfaceName} up
-            
-            # Add default route within namespace
+            ip netns exec ${cfg.proton.namespaceName} ip link set lo up
             ip netns exec ${cfg.proton.namespaceName} ip route add default dev ${cfg.proton.interfaceName}
-            
-            # Add route to VPN endpoint via default gateway (outside namespace)
-            DEFAULT_GW=$(ip route | grep default | awk '{print $3}' | head -n1)
+
+            # Route the VPN endpoint itself via the real gateway (outside namespace).
+            DEFAULT_GW=$(ip route | grep default | ${pkgs.gawk}/bin/awk '{print $3}' | head -n1)
             if [ -n "$DEFAULT_GW" ]; then
               ip route add "$ENDPOINT_IP/32" via "$DEFAULT_GW" 2>/dev/null || true
             fi
           else
-            # Configure in default namespace
-            wg set ${cfg.proton.interfaceName} private-key <(echo "$PRIVATE_KEY")
-            wg set ${cfg.proton.interfaceName} peer "$PUBLIC_KEY" \
+            # Non-namespace mode: clean up old interface and reconfigure in default namespace.
+            ip link del ${cfg.proton.interfaceName} 2>/dev/null || true
+            ip link add ${cfg.proton.interfaceName} type wireguard
+            wg set ${cfg.proton.interfaceName} \
+              private-key <(echo "$PRIVATE_KEY") \
+              peer "$PUBLIC_KEY" \
               endpoint "$ENDPOINT" \
               persistent-keepalive 25 \
               allowed-ips 0.0.0.0/0
-            
-            # Assign IP address
             ip addr add "$ADDRESS" dev ${cfg.proton.interfaceName}
             ip link set ${cfg.proton.interfaceName} up
-            
-            # Add route to VPN endpoint (so handshake can reach server)
-            DEFAULT_GW=$(ip route | grep default | awk '{print $3}' | head -n1)
+
+            DEFAULT_GW=$(ip route | grep default | ${pkgs.gawk}/bin/awk '{print $3}' | head -n1)
             if [ -n "$DEFAULT_GW" ]; then
               ip route add "$ENDPOINT_IP/32" via "$DEFAULT_GW" 2>/dev/null || true
             fi
@@ -687,14 +677,18 @@ EOF
       after = [ "deluged.service" ];
       requires = [ "deluged.service" ];
       wantedBy = [ "multi-user.target" ];
-      
-      path = with pkgs; [ socat ];
-      
-      serviceConfig = {
+
+      serviceConfig = let
+        bridgeScript = pkgs.writeShellScript "deluge-ns-bridge" ''
+          exec ${pkgs.iproute2}/bin/ip netns exec ${cfg.proton.namespaceName} \
+            ${pkgs.socat}/bin/socat STDIO \
+            TCP-CONNECT:127.0.0.1:${toString cfg.deluge.daemonPort}
+        '';
+      in {
         Type = "simple";
         Restart = "always";
         RestartSec = "5s";
-        ExecStart = "${pkgs.socat}/bin/socat TCP-LISTEN:${toString cfg.deluge.daemonPort},reuseaddr,fork SYSTEM:'${pkgs.iproute2}/bin/ip netns exec ${cfg.proton.namespaceName} ${pkgs.socat}/bin/socat STDIO TCP-CONNECT:127.0.0.1:${toString cfg.deluge.daemonPort}'";
+        ExecStart = "${pkgs.socat}/bin/socat TCP-LISTEN:${toString cfg.deluge.daemonPort},reuseaddr,fork EXEC:${bridgeScript}";
       };
     };
     
