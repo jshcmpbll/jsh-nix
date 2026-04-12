@@ -10,20 +10,80 @@
       ../../dots/vim.nix
     ];
 
+  sops = {
+    defaultSopsFile = ../../secrets/mm.yaml;
+    age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
+    secrets = {
+      immich_backup_key_id = {};
+      immich_backup_application_key = {};
+      immich_protondrive_password = {};
+      immich_protondrive_mailbox_password = {};
+      immich_protondrive_otp_secret_key = {};
+      rathole_default_token = {};
+      grafana_cloud_password = {};
+    };
+    templates."rathole-client-creds.toml".content = ''
+      [client]
+      default_token = "${config.sops.placeholder.rathole_default_token}"
+    '';
+
+    templates."alloy-config.alloy" = {
+      owner = "alloy";
+      group = "alloy";
+      path = "/etc/alloy/config.alloy";
+      content = ''
+        // HTTP service checks
+        prometheus.scrape "blackbox_http" {
+          targets = [
+            {__address__ = "localhost:9115", __param_target = "http://localhost:8123",  __param_module = "http_2xx", instance = "home-assistant"},
+            {__address__ = "localhost:9115", __param_target = "http://localhost:32400", __param_module = "http_2xx", instance = "plex"},
+            {__address__ = "localhost:9115", __param_target = "http://localhost:2283",  __param_module = "http_2xx", instance = "immich"},
+            {__address__ = "localhost:9115", __param_target = "http://localhost:3001",  __param_module = "http_2xx", instance = "uptime-kuma"},
+          ]
+          metrics_path    = "/probe"
+          scrape_interval = "30s"
+          forward_to      = [prometheus.remote_write.grafana_cloud.receiver]
+        }
+
+        // ICMP ping checks — detects internet outages and local network issues
+        prometheus.scrape "blackbox_icmp" {
+          targets = [
+            {__address__ = "localhost:9115", __param_target = "192.168.0.1", __param_module = "icmp", instance = "gateway"},
+            {__address__ = "localhost:9115", __param_target = "1.1.1.1",     __param_module = "icmp", instance = "cloudflare"},
+            {__address__ = "localhost:9115", __param_target = "8.8.8.8",     __param_module = "icmp", instance = "google"},
+          ]
+          metrics_path    = "/probe"
+          scrape_interval = "15s"
+          forward_to      = [prometheus.remote_write.grafana_cloud.receiver]
+        }
+
+        prometheus.remote_write "grafana_cloud" {
+          endpoint {
+            url = "https://prometheus-prod-67-prod-us-west-0.grafana.net/api/prom/push"
+            basic_auth {
+              username = "3085006"
+              password = "${config.sops.placeholder.grafana_cloud_password}"
+            }
+          }
+        }
+      '';
+    };
+  };
+
   # Custom modules
   immich-backup = {
     enable = true;
     bucketName = "immich-jshcmpbll";
-    keyID = "";
-    applicationKey = "";
+    keyIDFile = config.sops.secrets.immich_backup_key_id.path;
+    applicationKeyFile = config.sops.secrets.immich_backup_application_key.path;
   };
 
   immich-protondrive-backup = {
     enable = true;
     username = "joshuadcampbell@protonmail.com";
-    password = "";
-    mailboxPassword = "";
-    otpSecretKey = "";
+    passwordFile = config.sops.secrets.immich_protondrive_password.path;
+    mailboxPasswordFile = config.sops.secrets.immich_protondrive_mailbox_password.path;
+    otpSecretKeyFile = config.sops.secrets.immich_protondrive_otp_secret_key.path;
   };
 
   # Use the systemd-boot EFI boot loader.
@@ -195,6 +255,7 @@
     rathole = {
       enable = true;
       role = "client";
+      credentialsFile = config.sops.templates."rathole-client-creds.toml".path;
       settings = {
         client = {
           remote_addr = "helium.api.predictablehorizons.com:2333";
@@ -287,43 +348,6 @@
     enable = true;
   };
 
-  environment.etc."alloy/config.alloy".text = ''
-    // HTTP service checks
-    prometheus.scrape "blackbox_http" {
-      targets = [
-        {__address__ = "localhost:9115", __param_target = "http://localhost:8123",  __param_module = "http_2xx", instance = "home-assistant"},
-        {__address__ = "localhost:9115", __param_target = "http://localhost:32400", __param_module = "http_2xx", instance = "plex"},
-        {__address__ = "localhost:9115", __param_target = "http://localhost:2283",  __param_module = "http_2xx", instance = "immich"},
-        {__address__ = "localhost:9115", __param_target = "http://localhost:3001",  __param_module = "http_2xx", instance = "uptime-kuma"},
-      ]
-      metrics_path    = "/probe"
-      scrape_interval = "30s"
-      forward_to      = [prometheus.remote_write.grafana_cloud.receiver]
-    }
-
-    // ICMP ping checks — detects internet outages and local network issues
-    prometheus.scrape "blackbox_icmp" {
-      targets = [
-        {__address__ = "localhost:9115", __param_target = "192.168.0.1", __param_module = "icmp", instance = "gateway"},
-        {__address__ = "localhost:9115", __param_target = "100.80.0.1", __param_module = "icmp", instance = "cityside_gateway"},
-        {__address__ = "localhost:9115", __param_target = "1.1.1.1",     __param_module = "icmp", instance = "cloudflare"},
-        {__address__ = "localhost:9115", __param_target = "8.8.8.8",     __param_module = "icmp", instance = "google"},
-      ]
-      metrics_path    = "/probe"
-      scrape_interval = "15s"
-      forward_to      = [prometheus.remote_write.grafana_cloud.receiver]
-    }
-
-    prometheus.remote_write "grafana_cloud" {
-      endpoint {
-        url = "https://prometheus-prod-67-prod-us-west-0.grafana.net/api/prom/push"
-        basic_auth {
-          username = "3085006"
-          password = ""
-        }
-      }
-    }
-  '';
 
   system.stateVersion = "25.05"; # Did you read the comment?
 }

@@ -1,0 +1,20 @@
+keys:
+  # Developer (this machine)
+  - &admin age1xny4u4zhdkj50he8wyvuxwu9unx5hhrmx3qu972tllydy6g5s47sr8e8gu
+  # mm host key
+  - &mm age186jns3gac0zldydnsrhgmj409rhv0ky4vs34zmmnrxmeawgvu3qs0fjtvw
+  # mms host key
+  - &mms age1rzymhhfd6ks0dh7l66vs5h6wq4pchpgr4zhe0mewvshpnqeuq4pqhcvep3
+
+creation_rules:
+  - path_regex: secrets/mm\.yaml$
+    key_groups:
+      - age:
+          - *admin
+          - *mm
+
+  - path_regex: secrets/mms\.yaml$
+    key_groups:
+      - age:
+          - *admin
+          - *mms

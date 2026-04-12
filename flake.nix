@@ -7,9 +7,11 @@
     nixpkgs-scan.url = "github:nixos/nixpkgs/bf3c55095633ed6d504b10e3612e30a9a72fcb6e";
     disko.url = "github:nix-community/disko";
     disko.inputs.nixpkgs.follows = "nixpkgs";
+    sops-nix.url = "github:Mic92/sops-nix";
+    sops-nix.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = inputs @ { self, disko, nixpkgs, nixos-hardware, nixpkgs-unstable, nixpkgs-unstable2, nixpkgs-scan }:
+  outputs = inputs @ { self, disko, nixpkgs, nixos-hardware, nixpkgs-unstable, nixpkgs-unstable2, nixpkgs-scan, sops-nix }:
     let
       system = "x86_64-linux";
       pkgs = import nixpkgs { inherit system; };
@@ -84,6 +86,7 @@
           system = "x86_64-linux";
           modules = [
             inputs.self.nixosModules.default
+            sops-nix.nixosModules.sops
             ./hosts/mm/configuration.nix
             ./hosts/mm/disko.nix
             nixos-hardware.nixosModules.common-cpu-intel-cpu-only
@@ -95,6 +98,7 @@
           system = "x86_64-linux";
           modules = [
             inputs.self.nixosModules.default
+            sops-nix.nixosModules.sops
             ./hosts/mms/configuration.nix
             ./hosts/mms/disko.nix
             inputs.disko.nixosModules.disko

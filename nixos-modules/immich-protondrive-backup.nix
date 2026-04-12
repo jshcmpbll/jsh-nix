@@ -10,7 +10,7 @@ let
 
   inherit (lib.modules) mkIf;
   inherit (lib.options) mkEnableOption mkOption;
-  inherit (lib.types) str bool;
+  inherit (lib.types) str bool nullOr path;
 in
 {
   options.immich-protondrive-backup = {
@@ -31,17 +31,38 @@ in
     
     password = mkOption {
       type = str;
-      description = "ProtonDrive login password (will be obscured by rclone)";
+      default = "";
+      description = "ProtonDrive login password (plaintext; prefer passwordFile)";
     };
-    
+
+    passwordFile = mkOption {
+      type = nullOr path;
+      default = null;
+      description = "File containing ProtonDrive login password";
+    };
+
     mailboxPassword = mkOption {
       type = str;
-      description = "Mailbox password / second password for two-password Proton accounts (will be obscured by rclone)";
+      default = "";
+      description = "Mailbox password for two-password Proton accounts (plaintext; prefer mailboxPasswordFile)";
     };
-    
+
+    mailboxPasswordFile = mkOption {
+      type = nullOr path;
+      default = null;
+      description = "File containing Proton mailbox password";
+    };
+
     otpSecretKey = mkOption {
       type = str;
-      description = "OTP secret key for automatic 2FA authentication (will be obscured by rclone)";
+      default = "";
+      description = "OTP secret key for automatic 2FA (plaintext; prefer otpSecretKeyFile)";
+    };
+
+    otpSecretKeyFile = mkOption {
+      type = nullOr path;
+      default = null;
+      description = "File containing OTP secret key";
     };
     
     syncLocation = mkOption {
@@ -94,16 +115,16 @@ in
     # Validate required options
     assertions = [
       {
-        assertion = cfg.password != "";
-        message = "immich-protondrive-backup.password must be set";
+        assertion = cfg.password != "" || cfg.passwordFile != null;
+        message = "immich-protondrive-backup: set password or passwordFile";
       }
       {
-        assertion = cfg.mailboxPassword != "";
-        message = "immich-protondrive-backup.mailboxPassword must be set";
+        assertion = cfg.mailboxPassword != "" || cfg.mailboxPasswordFile != null;
+        message = "immich-protondrive-backup: set mailboxPassword or mailboxPasswordFile";
       }
       {
-        assertion = cfg.otpSecretKey != "";
-        message = "immich-protondrive-backup.otpSecretKey must be set";
+        assertion = cfg.otpSecretKey != "" || cfg.otpSecretKeyFile != null;
+        message = "immich-protondrive-backup: set otpSecretKey or otpSecretKeyFile";
       }
     ];
     
@@ -130,11 +151,22 @@ in
       script = ''
         # Create rclone config directory
         mkdir -p /var/cache/immich-protondrive-backup/rclone
-        
-        # Obscure passwords and OTP secret key
-        OBSCURED_PASSWORD=$(${latest2.pkgs.rclone}/bin/rclone obscure "${cfg.password}")
-        OBSCURED_MAILBOX_PASSWORD=$(${latest2.pkgs.rclone}/bin/rclone obscure "${cfg.mailboxPassword}")
-        OBSCURED_OTP_KEY=$(${latest2.pkgs.rclone}/bin/rclone obscure "${cfg.otpSecretKey}")
+
+        # Read secrets (from file if configured, otherwise from inline value)
+        ${if cfg.passwordFile != null
+          then "PASSWORD=$(cat ${cfg.passwordFile})"
+          else "PASSWORD=${lib.escapeShellArg cfg.password}"}
+        ${if cfg.mailboxPasswordFile != null
+          then "MAILBOX_PASSWORD=$(cat ${cfg.mailboxPasswordFile})"
+          else "MAILBOX_PASSWORD=${lib.escapeShellArg cfg.mailboxPassword}"}
+        ${if cfg.otpSecretKeyFile != null
+          then "OTP_KEY=$(cat ${cfg.otpSecretKeyFile})"
+          else "OTP_KEY=${lib.escapeShellArg cfg.otpSecretKey}"}
+
+        # Obscure passwords for rclone config
+        OBSCURED_PASSWORD=$(${latest2.pkgs.rclone}/bin/rclone obscure "$PASSWORD")
+        OBSCURED_MAILBOX_PASSWORD=$(${latest2.pkgs.rclone}/bin/rclone obscure "$MAILBOX_PASSWORD")
+        OBSCURED_OTP_KEY=$(${latest2.pkgs.rclone}/bin/rclone obscure "$OTP_KEY")
         
         # Create rclone config file
         cat > /var/cache/immich-protondrive-backup/rclone/rclone.conf <<EOF

@@ -10,6 +10,11 @@
       ../../dots/vim.nix
     ];
 
+  sops = {
+    defaultSopsFile = ../../secrets/mms.yaml;
+    age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
+  };
+
   # Mount mm's media shares over NFS. mm exports these restricted to this machine's IP.
   # all_squash on the export side maps writes to jsh (uid 1000) so Plex can read them.
   fileSystems."/mnt/mm-tv" = {
