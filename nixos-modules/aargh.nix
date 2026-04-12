@@ -214,12 +214,34 @@ in {
       socat
     ] ++ lib.optionals cfg.overseerr.enable [ pkgs.overseerr ];
     
+    # Oneshot service that owns the network namespace lifetime.
+    # Keeping namespace creation separate from the VPN service means deluged
+    # (which uses NetworkNamespacePath) can survive a VPN service restart or a
+    # nixos-rebuild switch without the namespace disappearing under it.
+    systemd.services.aargh-vpn-namespace = mkIf (cfg.proton.enable && cfg.proton.useNetworkNamespace) {
+      description = "Create aargh VPN network namespace";
+      wantedBy = [ "multi-user.target" ];
+      before = [ "aargh-protonvpn.service" "deluged.service" ];
+      after = [ "network-pre.target" ];
+
+      path = [ pkgs.iproute2 ];
+
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        ExecStart = "${pkgs.iproute2}/bin/ip netns add ${cfg.proton.namespaceName}";
+        ExecStartPre = "${pkgs.coreutils}/bin/test ! -e /run/netns/${cfg.proton.namespaceName}";
+        ExecStop = "${pkgs.iproute2}/bin/ip netns del ${cfg.proton.namespaceName}";
+      };
+    };
+
     # Proton VPN service with failover
     systemd.services.aargh-protonvpn = mkIf cfg.proton.enable {
       description = "Aargh Proton VPN with automatic failover";
       wantedBy = [ "multi-user.target" ];
-      after = [ "network-online.target" ];
+      after = [ "network-online.target" ] ++ lib.optional cfg.proton.useNetworkNamespace "aargh-vpn-namespace.service";
       wants = [ "network-online.target" ];
+      requires = lib.optional cfg.proton.useNetworkNamespace "aargh-vpn-namespace.service";
       
       path = with pkgs; [ wireguard-tools iproute2 coreutils gnugrep gawk curl netcat-gnu dnsutils ];
       
@@ -517,9 +539,6 @@ in {
       
       preStop = ''
         ${pkgs.iproute2}/bin/ip link del ${cfg.proton.interfaceName} 2>/dev/null || true
-        if [ "${toString cfg.proton.useNetworkNamespace}" = "1" ]; then
-          ${pkgs.iproute2}/bin/ip netns del ${cfg.proton.namespaceName} 2>/dev/null || true
-        fi
       '';
     };
     
@@ -602,8 +621,10 @@ in {
     
     # Ensure Deluge starts after VPN is up
     systemd.services.deluged = mkIf cfg.deluge.enable {
-      after = [ "aargh-protonvpn.service" ];
-      requires = [ "aargh-protonvpn.service" ];
+      after = [ "aargh-protonvpn.service" ]
+        ++ lib.optional cfg.proton.useNetworkNamespace "aargh-vpn-namespace.service";
+      requires = [ "aargh-protonvpn.service" ]
+        ++ lib.optional cfg.proton.useNetworkNamespace "aargh-vpn-namespace.service";
       
       # Additional binding configuration
       serviceConfig = mkMerge [
