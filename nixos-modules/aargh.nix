@@ -746,9 +746,9 @@ EOF
       requires = [ "deluged.service" ];
       wants = [ "aargh-portforward.service" ];
       wantedBy = [ "multi-user.target" ];
-      
-      path = with pkgs; [ curl jq inotify-tools ];
-      
+
+      path = with pkgs; [ curl jq ];
+
       serviceConfig = {
         Type = "simple";
         Restart = "always";
@@ -794,30 +794,19 @@ EOF
           rm -f "$COOKIES"
         }
         
-        echo "Monitoring port forwarding changes for Deluge..."
-        
-        # Initial port check
-        if [ -f "$PORT_FILE" ]; then
-          CURRENT_PORT=$(cat "$PORT_FILE" 2>/dev/null || echo "")
-          if [ -n "$CURRENT_PORT" ] && [ "$CURRENT_PORT" != "$LAST_PORT" ]; then
-            update_deluge_port "$CURRENT_PORT"
-            LAST_PORT="$CURRENT_PORT"
-          fi
-        fi
-        
-        # Monitor for port file changes
+        echo "Polling for port forwarding changes..."
+
+        # Poll every 10 s — port renews every 45 s so this is more than fast enough.
+        # inotifywait is unreliable when the file doesn't exist yet at startup.
         while true; do
-          if inotifywait -e modify,create "$PORT_FILE" 2>/dev/null; then
-            sleep 2  # Give time for file write to complete
-            
-            if [ -f "$PORT_FILE" ]; then
-              NEW_PORT=$(cat "$PORT_FILE" 2>/dev/null || echo "")
-              if [ -n "$NEW_PORT" ] && [ "$NEW_PORT" != "$LAST_PORT" ]; then
-                update_deluge_port "$NEW_PORT"
-                LAST_PORT="$NEW_PORT"
-              fi
+          if [ -f "$PORT_FILE" ]; then
+            NEW_PORT=$(cat "$PORT_FILE" 2>/dev/null || echo "")
+            if [ -n "$NEW_PORT" ] && [ "$NEW_PORT" != "$LAST_PORT" ]; then
+              update_deluge_port "$NEW_PORT"
+              LAST_PORT="$NEW_PORT"
             fi
           fi
+          sleep 10
         done
       '';
     };
