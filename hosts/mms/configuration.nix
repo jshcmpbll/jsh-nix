@@ -30,7 +30,7 @@
   };
 
   # Aargh: VPN-routed torrent + media management stack
-  services.aargh = {
+  services.privatarr = {
     enable = true;
     proton = {
       enable = true;

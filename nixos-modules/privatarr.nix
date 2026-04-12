@@ -3,10 +3,10 @@
 with lib;
 
 let
-  cfg = config.services.aargh;
+  cfg = config.services.privatarr;
 
 in {
-  options.services.aargh = {
+  options.services.privatarr = {
     enable = mkEnableOption "Aargh - VPN-enabled torrent service";
     
     proton = {
@@ -72,7 +72,7 @@ in {
       
       namespaceName = mkOption {
         type = types.str;
-        default = "aargh-vpn";
+        default = "privatarr-vpn";
         description = "Name of the network namespace";
       };
     };
@@ -195,7 +195,7 @@ in {
     assertions = [
       {
         assertion = cfg.proton.enable -> (cfg.proton.configFiles != [] || cfg.proton.configDir != null);
-        message = "services.aargh.proton: set configFiles (for sops-deployed configs) or configDir";
+        message = "services.privatarr.proton: set configFiles (for sops-deployed configs) or configDir";
       }
       {
         assertion = cfg.deluge.enable -> cfg.proton.enable;
@@ -218,10 +218,10 @@ in {
     # Keeping namespace creation separate from the VPN service means deluged
     # (which uses NetworkNamespacePath) can survive a VPN service restart or a
     # nixos-rebuild switch without the namespace disappearing under it.
-    systemd.services.aargh-vpn-namespace = mkIf (cfg.proton.enable && cfg.proton.useNetworkNamespace) {
-      description = "Create aargh VPN network namespace";
+    systemd.services.privatarr-vpn-namespace = mkIf (cfg.proton.enable && cfg.proton.useNetworkNamespace) {
+      description = "Create privatarr VPN network namespace";
       wantedBy = [ "multi-user.target" ];
-      before = [ "aargh-protonvpn.service" "deluged.service" ];
+      before = [ "privatarr-protonvpn.service" "deluged.service" ];
       after = [ "network-pre.target" ];
 
       path = [ pkgs.iproute2 ];
@@ -236,12 +236,12 @@ in {
     };
 
     # Proton VPN service with failover
-    systemd.services.aargh-protonvpn = mkIf cfg.proton.enable {
+    systemd.services.privatarr-protonvpn = mkIf cfg.proton.enable {
       description = "Aargh Proton VPN with automatic failover";
       wantedBy = [ "multi-user.target" ];
-      after = [ "network-online.target" ] ++ lib.optional cfg.proton.useNetworkNamespace "aargh-vpn-namespace.service";
+      after = [ "network-online.target" ] ++ lib.optional cfg.proton.useNetworkNamespace "privatarr-vpn-namespace.service";
       wants = [ "network-online.target" ];
-      requires = lib.optional cfg.proton.useNetworkNamespace "aargh-vpn-namespace.service";
+      requires = lib.optional cfg.proton.useNetworkNamespace "privatarr-vpn-namespace.service";
       
       path = with pkgs; [ wireguard-tools iproute2 coreutils gnugrep gawk curl netcat-gnu dnsutils ];
       
@@ -543,10 +543,10 @@ in {
     };
     
     # ProtonVPN Port Forwarding service
-    systemd.services.aargh-portforward = mkIf (cfg.proton.enable && cfg.proton.enablePortForwarding) {
+    systemd.services.privatarr-portforward = mkIf (cfg.proton.enable && cfg.proton.enablePortForwarding) {
       description = "Aargh ProtonVPN Port Forwarding";
-      after = [ "aargh-protonvpn.service" ];
-      requires = [ "aargh-protonvpn.service" ];
+      after = [ "privatarr-protonvpn.service" ];
+      requires = [ "privatarr-protonvpn.service" ];
       wantedBy = [ "multi-user.target" ];
 
       path = with pkgs; [ libnatpmp iproute2 gawk ];
@@ -557,8 +557,8 @@ in {
           Restart = "always";
           RestartSec = "10s";
 
-          User = "aargh-portforward";
-          Group = "aargh-portforward";
+          User = "privatarr-portforward";
+          Group = "privatarr-portforward";
           NoNewPrivileges = true;
           PrivateTmp = true;
           ProtectHome = true;
@@ -567,7 +567,7 @@ in {
           # Use a runtime (tmpfs) directory so the port file is readable by
           # other services (e.g. deluge user). State doesn't need to persist
           # across reboots — ProtonVPN assigns a new port each session.
-          RuntimeDirectory = "aargh-portforward";
+          RuntimeDirectory = "privatarr-portforward";
           RuntimeDirectoryMode = "0755";
         }
         # Must run inside the VPN namespace — the gateway 10.2.0.1 is only
@@ -580,7 +580,7 @@ in {
       script = ''
         set -euo pipefail
 
-        PORT_FILE="/run/aargh-portforward/forwarded_port"
+        PORT_FILE="/run/privatarr-portforward/forwarded_port"
 
         request_port_forwarding() {
           echo "Requesting port forwarding from ProtonVPN (gateway ${cfg.proton.portForwardingGateway})..."
@@ -625,10 +625,10 @@ in {
     
     # Ensure Deluge starts after VPN is up
     systemd.services.deluged = mkIf cfg.deluge.enable {
-      after = [ "aargh-protonvpn.service" ]
-        ++ lib.optional cfg.proton.useNetworkNamespace "aargh-vpn-namespace.service";
-      requires = [ "aargh-protonvpn.service" ]
-        ++ lib.optional cfg.proton.useNetworkNamespace "aargh-vpn-namespace.service";
+      after = [ "privatarr-protonvpn.service" ]
+        ++ lib.optional cfg.proton.useNetworkNamespace "privatarr-vpn-namespace.service";
+      requires = [ "privatarr-protonvpn.service" ]
+        ++ lib.optional cfg.proton.useNetworkNamespace "privatarr-vpn-namespace.service";
       
       # Additional binding configuration
       serviceConfig = mkMerge [
@@ -701,7 +701,7 @@ EOF
     };
     
     # Bridge service to connect default namespace to VPN namespace
-    systemd.services.aargh-deluge-bridge = mkIf (cfg.deluge.enable && cfg.proton.useNetworkNamespace) {
+    systemd.services.privatarr-deluge-bridge = mkIf (cfg.deluge.enable && cfg.proton.useNetworkNamespace) {
       description = "Bridge Deluge daemon in VPN namespace to default namespace";
       after = [ "deluged.service" ];
       requires = [ "deluged.service" ];
@@ -726,10 +726,10 @@ EOF
       description = "Deluge BitTorrent Web Interface";
       wantedBy = [ "multi-user.target" ];
       after = if cfg.proton.useNetworkNamespace
-              then [ "deluged.service" "aargh-deluge-bridge.service" ]
+              then [ "deluged.service" "privatarr-deluge-bridge.service" ]
               else [ "deluged.service" ];
       requires = if cfg.proton.useNetworkNamespace
-                 then [ "deluged.service" "aargh-deluge-bridge.service" ]
+                 then [ "deluged.service" "privatarr-deluge-bridge.service" ]
                  else [ "deluged.service" ];
       serviceConfig = {
         ExecStart = mkForce "${pkgs.deluge}/bin/deluge-web --do-not-daemonize --port ${toString cfg.deluge.webPort}";
@@ -741,11 +741,11 @@ EOF
     };
     
     # Service to monitor port forwarding changes and update Deluge
-    systemd.services.aargh-deluge-port-updater = mkIf (cfg.deluge.enable && cfg.proton.enablePortForwarding) {
+    systemd.services.privatarr-deluge-port-updater = mkIf (cfg.deluge.enable && cfg.proton.enablePortForwarding) {
       description = "Update Deluge with forwarded port changes";
-      after = [ "deluged.service" "aargh-portforward.service" ];
+      after = [ "deluged.service" "privatarr-portforward.service" ];
       requires = [ "deluged.service" ];
-      wants = [ "aargh-portforward.service" ];
+      wants = [ "privatarr-portforward.service" ];
       wantedBy = [ "multi-user.target" ];
 
       path = with pkgs; [ curl jq ];
@@ -761,7 +761,7 @@ EOF
       script = ''
         set -euo pipefail
         
-        PORT_FILE="/run/aargh-portforward/forwarded_port"
+        PORT_FILE="/run/privatarr-portforward/forwarded_port"
         LAST_PORT=""
         
         update_deluge_port() {
@@ -864,7 +864,7 @@ EOF
     };
     
     # Configure Sonarr via API after startup
-    systemd.services.aargh-sonarr-configure = mkIf (cfg.sonarr.enable && cfg.deluge.enable) {
+    systemd.services.privatarr-sonarr-configure = mkIf (cfg.sonarr.enable && cfg.deluge.enable) {
       description = "Configure Sonarr download client and root folder";
       after = [ "sonarr.service" ];
       wants = [ "sonarr.service" ];
@@ -965,7 +965,7 @@ EOF
     };
 
     # Wire Prowlarr → Sonarr automatically
-    systemd.services.aargh-prowlarr-configure = mkIf (cfg.prowlarr.enable && cfg.sonarr.enable) {
+    systemd.services.privatarr-prowlarr-configure = mkIf (cfg.prowlarr.enable && cfg.sonarr.enable) {
       description = "Connect Prowlarr to Sonarr";
       after = [ "prowlarr.service" "sonarr.service" ];
       wants = [ "prowlarr.service" "sonarr.service" ];
@@ -1104,13 +1104,13 @@ EOF
     };
     
     # Give sonarr read access to deluge's download dir so it can import completed files
-    users.users.aargh-portforward = mkIf (cfg.proton.enable && cfg.proton.enablePortForwarding) {
+    users.users.privatarr-portforward = mkIf (cfg.proton.enable && cfg.proton.enablePortForwarding) {
       isSystemUser = true;
-      group = "aargh-portforward";
-      description = "aargh ProtonVPN port forwarding service user";
+      group = "privatarr-portforward";
+      description = "privatarr ProtonVPN port forwarding service user";
     };
 
-    users.groups.aargh-portforward = mkIf (cfg.proton.enable && cfg.proton.enablePortForwarding) { };
+    users.groups.privatarr-portforward = mkIf (cfg.proton.enable && cfg.proton.enablePortForwarding) { };
 
     users.users.sonarr = mkIf (cfg.sonarr.enable && cfg.deluge.enable) {
       extraGroups = [ "deluge" ];
@@ -1126,7 +1126,7 @@ EOF
     users.groups.overseerr = mkIf cfg.overseerr.enable { };
     
     # Service integration configuration
-    systemd.services.aargh-configure = mkIf (cfg.sonarr.enable && cfg.deluge.enable) {
+    systemd.services.privatarr-configure = mkIf (cfg.sonarr.enable && cfg.deluge.enable) {
       description = "Configure Aargh service integrations";
       wantedBy = [ "multi-user.target" ];
       after = [ "sonarr.service" "deluged.service" "deluge-web.service" ];
