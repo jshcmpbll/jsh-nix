@@ -16,6 +16,7 @@
     secrets = {
       immich_backup_key_id = {};
       immich_backup_application_key = {};
+      immich_protondrive_username = {};
       immich_protondrive_password = {};
       immich_protondrive_mailbox_password = {};
       immich_protondrive_otp_secret_key = {};
@@ -80,7 +81,7 @@
 
   immich-protondrive-backup = {
     enable = true;
-    username = "joshuadcampbell@protonmail.com";
+    usernameFile = config.sops.secrets.immich_protondrive_username.path;
     passwordFile = config.sops.secrets.immich_protondrive_password.path;
     mailboxPasswordFile = config.sops.secrets.immich_protondrive_mailbox_password.path;
     otpSecretKeyFile = config.sops.secrets.immich_protondrive_otp_secret_key.path;

@@ -25,8 +25,15 @@ in
     
     username = mkOption {
       type = str;
-      description = "ProtonDrive username (email address)";
+      default = "";
+      description = "ProtonDrive username (email address; prefer usernameFile)";
       example = "you@protonmail.com";
+    };
+
+    usernameFile = mkOption {
+      type = nullOr path;
+      default = null;
+      description = "File containing ProtonDrive username (email address)";
     };
     
     password = mkOption {
@@ -153,6 +160,9 @@ in
         mkdir -p /var/cache/immich-protondrive-backup/rclone
 
         # Read secrets (from file if configured, otherwise from inline value)
+        ${if cfg.usernameFile != null
+          then "USERNAME=$(cat ${cfg.usernameFile})"
+          else "USERNAME=${lib.escapeShellArg cfg.username}"}
         ${if cfg.passwordFile != null
           then "PASSWORD=$(cat ${cfg.passwordFile})"
           else "PASSWORD=${lib.escapeShellArg cfg.password}"}
@@ -172,7 +182,7 @@ in
         cat > /var/cache/immich-protondrive-backup/rclone/rclone.conf <<EOF
         [${cfg.remoteName}]
         type = protondrive
-        username = ${cfg.username}
+        username = $USERNAME
         password = $OBSCURED_PASSWORD
         mailbox_password = $OBSCURED_MAILBOX_PASSWORD
         otp_secret_key = $OBSCURED_OTP_KEY
