@@ -529,92 +529,65 @@ in {
       after = [ "aargh-protonvpn.service" ];
       requires = [ "aargh-protonvpn.service" ];
       wantedBy = [ "multi-user.target" ];
-      
-      path = with pkgs; [ libnatpmp curl iproute2 ];
-      
-      serviceConfig = {
-        Type = "simple";
-        Restart = "always";
-        RestartSec = "10s";
-        
-        # Security settings
-        DynamicUser = true;
-        NoNewPrivileges = true;
-        PrivateTmp = true;
-        ProtectHome = true;
-        ProtectSystem = "strict";
-        
-        # State directory for port info
-        StateDirectory = "aargh-portforward";
-        StateDirectoryMode = "0755";
-      };
-      
+
+      path = with pkgs; [ libnatpmp iproute2 ];
+
+      serviceConfig = mkMerge [
+        {
+          Type = "simple";
+          Restart = "always";
+          RestartSec = "10s";
+
+          DynamicUser = true;
+          NoNewPrivileges = true;
+          PrivateTmp = true;
+          ProtectHome = true;
+          ProtectSystem = "strict";
+
+          StateDirectory = "aargh-portforward";
+          StateDirectoryMode = "0755";
+        }
+        # Must run inside the VPN namespace — the gateway 10.2.0.1 is only
+        # reachable from within it.
+        (mkIf cfg.proton.useNetworkNamespace {
+          NetworkNamespacePath = "/run/netns/${cfg.proton.namespaceName}";
+        })
+      ];
+
       script = ''
         set -euo pipefail
-        
+
         PORT_FILE="/var/lib/aargh-portforward/forwarded_port"
-        
-        # Function to request port forwarding
+
         request_port_forwarding() {
-          echo "Requesting port forwarding from ProtonVPN..."
-          
-          # Wait for VPN interface to be fully up
-          for i in {1..30}; do
-            if ip link show ${cfg.proton.interfaceName} &>/dev/null; then
-              break
-            fi
-            echo "Waiting for VPN interface..."
-            sleep 2
-          done
-          
-          # Get local IP on VPN interface
-          VPN_LOCAL_IP=$(ip -4 addr show ${cfg.proton.interfaceName} | grep inet | awk '{print $2}' | cut -d'/' -f1)
-          if [ -z "$VPN_LOCAL_IP" ]; then
-            echo "Error: Could not determine VPN local IP"
-            return 1
-          fi
-          
-          echo "VPN Local IP: $VPN_LOCAL_IP"
-          echo "Gateway IP: ${cfg.proton.portForwardingGateway}"
-          
-          # Request port mapping using NAT-PMP
-          # This requests a random port mapping for 60 seconds
-          OUTPUT=$(natpmpc -g ${cfg.proton.portForwardingGateway} -a 0 0 tcp 60 2>&1)
-          
+          echo "Requesting port forwarding from ProtonVPN (gateway ${cfg.proton.portForwardingGateway})..."
+
+          # Map both UDP and TCP as required by ProtonVPN's guide.
+          # -a 1 0 <proto> 60: request a dynamically-assigned port, lease 60s.
+          natpmpc -a 1 0 udp 60 -g ${cfg.proton.portForwardingGateway} 2>&1 || true
+          OUTPUT=$(natpmpc -a 1 0 tcp 60 -g ${cfg.proton.portForwardingGateway} 2>&1)
+
           if echo "$OUTPUT" | grep -q "Mapped public port"; then
-            # Extract the mapped port from output
             EXTERNAL_PORT=$(echo "$OUTPUT" | grep "Mapped public port" | awk '{print $4}')
-            INTERNAL_PORT=$(echo "$OUTPUT" | grep "to local port" | awk '{print $4}')
-            
-            echo "Port forwarding successful!"
-            echo "External port: $EXTERNAL_PORT"
-            echo "Internal port: $INTERNAL_PORT"
-            
-            # Save port info
+            echo "Port forwarding active on port $EXTERNAL_PORT"
             echo "$EXTERNAL_PORT" > "$PORT_FILE"
-            
             return 0
           else
             echo "Port forwarding request failed: $OUTPUT"
             return 1
           fi
         }
-        
-        # Function to maintain port forwarding
-        maintain_port_forwarding() {
-          while true; do
-            if request_port_forwarding; then
-              # Refresh every 45 seconds (mapping lasts 60 seconds)
-              sleep 45
-            else
-              echo "Port forwarding failed, retrying in 30 seconds..."
-              sleep 30
-            fi
-          done
-        }
-        
+
         echo "Starting ProtonVPN port forwarding service..."
-        maintain_port_forwarding
+        while true; do
+          if request_port_forwarding; then
+            # Renew every 45 s — lease lasts 60 s
+            sleep 45
+          else
+            echo "Retrying in 30 seconds..."
+            sleep 30
+          fi
+        done
       '';
     };
     
@@ -768,10 +741,9 @@ EOF
         
         update_deluge_port() {
           local new_port=$1
-          echo "Updating Deluge to use port: $new_port"
-          
-          # Update Deluge daemon configuration via API
-          # Note: This requires the daemon to be running
+          echo "Updating Deluge listen port to: $new_port"
+
+          # Wait for Deluge web interface to be ready
           for i in {1..30}; do
             if curl -s http://localhost:${toString cfg.deluge.webPort} > /dev/null 2>&1; then
               break
@@ -779,12 +751,23 @@ EOF
             echo "Waiting for Deluge web interface..."
             sleep 2
           done
-          
-          # Get Deluge session state and update port
-          curl -X POST http://localhost:${toString cfg.deluge.webPort}/json \
+
+          local COOKIES
+          COOKIES=$(mktemp)
+
+          # Login first to get a session cookie
+          curl -s -c "$COOKIES" -X POST http://localhost:${toString cfg.deluge.webPort}/json \
             -H "Content-Type: application/json" \
-            -d "{\"method\": \"core.set_config\", \"params\": [{\"listen_ports\": [$new_port, $new_port], \"random_port\": false}], \"id\": 1}" \
-            2>/dev/null || echo "Failed to update Deluge port via API"
+            -d "{\"method\": \"auth.login\", \"params\": [\"${cfg.deluge.webPassword}\"], \"id\": 1}" \
+            > /dev/null
+
+          # Now set the listen port via the authenticated session
+          curl -s -b "$COOKIES" -X POST http://localhost:${toString cfg.deluge.webPort}/json \
+            -H "Content-Type: application/json" \
+            -d "{\"method\": \"core.set_config\", \"params\": [{\"listen_ports\": [$new_port, $new_port], \"random_port\": false}], \"id\": 2}" \
+            > /dev/null && echo "Deluge port updated to $new_port" || echo "Failed to update Deluge port"
+
+          rm -f "$COOKIES"
         }
         
         echo "Monitoring port forwarding changes for Deluge..."
