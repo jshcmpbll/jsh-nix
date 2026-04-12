@@ -549,7 +549,7 @@ in {
       requires = [ "aargh-protonvpn.service" ];
       wantedBy = [ "multi-user.target" ];
 
-      path = with pkgs; [ libnatpmp iproute2 ];
+      path = with pkgs; [ libnatpmp iproute2 gawk ];
 
       serviceConfig = mkMerge [
         {
