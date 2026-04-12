@@ -557,7 +557,8 @@ in {
           Restart = "always";
           RestartSec = "10s";
 
-          User = "nobody";
+          User = "aargh-portforward";
+          Group = "aargh-portforward";
           NoNewPrivileges = true;
           PrivateTmp = true;
           ProtectHome = true;
@@ -1103,6 +1104,14 @@ EOF
     };
     
     # Give sonarr read access to deluge's download dir so it can import completed files
+    users.users.aargh-portforward = mkIf (cfg.proton.enable && cfg.proton.enablePortForwarding) {
+      isSystemUser = true;
+      group = "aargh-portforward";
+      description = "aargh ProtonVPN port forwarding service user";
+    };
+
+    users.groups.aargh-portforward = mkIf (cfg.proton.enable && cfg.proton.enablePortForwarding) { };
+
     users.users.sonarr = mkIf (cfg.sonarr.enable && cfg.deluge.enable) {
       extraGroups = [ "deluge" ];
     };
