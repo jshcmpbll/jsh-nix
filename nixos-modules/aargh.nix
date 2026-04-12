@@ -4,38 +4,6 @@ with lib;
 
 let
   cfg = config.services.aargh;
-  
-  # Parse a WireGuard config file
-  parseWgConfig = configFile: 
-    let
-      content = builtins.readFile configFile;
-      lines = lib.splitString "\n" content;
-      
-      # Extract values from INI-style config
-      getValue = key: 
-        let
-          matching = builtins.filter (line: 
-            lib.hasPrefix key (lib.removePrefix " " line)
-          ) lines;
-        in
-          if matching == [] then null
-          else lib.removeSuffix " " (lib.removePrefix "${key} = " (lib.removePrefix " " (builtins.head matching)));
-    in {
-      privateKey = getValue "PrivateKey";
-      address = getValue "Address";
-      peerPublicKey = getValue "PublicKey";
-      endpoint = getValue "Endpoint";
-    };
-  
-  # Get all .conf files from the config directory
-  configFiles = 
-    if cfg.proton.configDir != null
-    then builtins.filter (name: lib.hasSuffix ".conf" name) 
-         (builtins.attrNames (builtins.readDir cfg.proton.configDir))
-    else [];
-  
-  # Parse all configs
-  parsedConfigs = map (f: parseWgConfig "${cfg.proton.configDir}/${f}") configFiles;
 
 in {
   options.services.aargh = {
@@ -44,14 +12,26 @@ in {
     proton = {
       enable = mkEnableOption "Proton VPN WireGuard connection";
       
+      configFiles = mkOption {
+        type = types.listOf types.path;
+        default = [];
+        description = ''
+          List of WireGuard config file paths to use. Intended for sops-decrypted
+          secrets (e.g. config.sops.secrets."protonvpn-us.conf".path). Takes
+          precedence over configDir when non-empty.
+        '';
+        example = [ "/run/secrets/protonvpn-us-ny.conf" "/run/secrets/protonvpn-us-ca.conf" ];
+      };
+
       configDir = mkOption {
         type = types.nullOr types.path;
         default = null;
         description = ''
-          Path to directory containing Proton VPN WireGuard configuration files.
-          All .conf files in this directory will be tried in random order until one connects.
+          Path to a directory containing Proton VPN WireGuard .conf files.
+          All .conf files will be tried in random order. Use configFiles instead
+          when you want to deploy configs via sops-nix.
         '';
-        example = "/etc/nixos/protonvpn-configs";
+        example = "/persist/protonvpn-configs";
       };
       
       interfaceName = mkOption {
@@ -214,8 +194,8 @@ in {
   config = mkIf cfg.enable {
     assertions = [
       {
-        assertion = cfg.proton.enable -> cfg.proton.configDir != null;
-        message = "services.aargh.proton.configDir must be set when Proton VPN is enabled";
+        assertion = cfg.proton.enable -> (cfg.proton.configFiles != [] || cfg.proton.configDir != null);
+        message = "services.aargh.proton: set configFiles (for sops-deployed configs) or configDir";
       }
       {
         assertion = cfg.deluge.enable -> cfg.proton.enable;
@@ -452,20 +432,22 @@ in {
         }
         
         # Main loop - try configs in random order
-        CONFIG_DIR="${cfg.proton.configDir}"
-        
-        if [ ! -d "$CONFIG_DIR" ]; then
-          echo "Error: Config directory $CONFIG_DIR does not exist"
-          exit 1
-        fi
-        
-        # Get all .conf files and shuffle them
-        mapfile -t CONFIGS < <(find "$CONFIG_DIR" -maxdepth 1 -name "*.conf" | shuf)
-        
-        if [ ''${#CONFIGS[@]} -eq 0 ]; then
-          echo "Error: No .conf files found in $CONFIG_DIR"
-          exit 1
-        fi
+        ${if cfg.proton.configFiles != [] then ''
+          # Config files deployed at build time (e.g. via sops-nix)
+          mapfile -t CONFIGS < <(printf '%s\n' ${lib.concatStringsSep " " (map lib.escapeShellArg cfg.proton.configFiles)} | shuf)
+        '' else ''
+          # Scan directory for .conf files at runtime
+          CONFIG_DIR="${cfg.proton.configDir}"
+          if [ ! -d "$CONFIG_DIR" ]; then
+            echo "Error: Config directory $CONFIG_DIR does not exist"
+            exit 1
+          fi
+          mapfile -t CONFIGS < <(find "$CONFIG_DIR" -maxdepth 1 -name "*.conf" | shuf)
+          if [ ''${#CONFIGS[@]} -eq 0 ]; then
+            echo "Error: No .conf files found in $CONFIG_DIR"
+            exit 1
+          fi
+        ''}
         
         echo "Found ''${#CONFIGS[@]} VPN configuration(s)"
         
