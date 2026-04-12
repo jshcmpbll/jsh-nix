@@ -557,14 +557,17 @@ in {
           Restart = "always";
           RestartSec = "10s";
 
-          DynamicUser = true;
+          User = "nobody";
           NoNewPrivileges = true;
           PrivateTmp = true;
           ProtectHome = true;
           ProtectSystem = "strict";
 
-          StateDirectory = "aargh-portforward";
-          StateDirectoryMode = "0755";
+          # Use a runtime (tmpfs) directory so the port file is readable by
+          # other services (e.g. deluge user). State doesn't need to persist
+          # across reboots — ProtonVPN assigns a new port each session.
+          RuntimeDirectory = "aargh-portforward";
+          RuntimeDirectoryMode = "0755";
         }
         # Must run inside the VPN namespace — the gateway 10.2.0.1 is only
         # reachable from within it.
@@ -576,7 +579,7 @@ in {
       script = ''
         set -euo pipefail
 
-        PORT_FILE="/var/lib/aargh-portforward/forwarded_port"
+        PORT_FILE="/run/aargh-portforward/forwarded_port"
 
         request_port_forwarding() {
           echo "Requesting port forwarding from ProtonVPN (gateway ${cfg.proton.portForwardingGateway})..."
@@ -757,7 +760,7 @@ EOF
       script = ''
         set -euo pipefail
         
-        PORT_FILE="/var/lib/aargh-portforward/forwarded_port"
+        PORT_FILE="/run/aargh-portforward/forwarded_port"
         LAST_PORT=""
         
         update_deluge_port() {
