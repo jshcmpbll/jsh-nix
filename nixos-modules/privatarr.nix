@@ -831,7 +831,7 @@ EOF
               update_deluge_port "$NEW_PORT"
             fi
           fi
-          sleep 10
+          sleep 60
         done
       '';
     };
