@@ -788,8 +788,7 @@ EOF
         set -euo pipefail
         
         PORT_FILE="/run/privatarr-portforward/forwarded_port"
-        LAST_PORT=""
-        
+
         update_deluge_port() {
           local new_port=$1
           echo "Updating Deluge listen port to: $new_port"
@@ -828,9 +827,8 @@ EOF
         while true; do
           if [ -f "$PORT_FILE" ]; then
             NEW_PORT=$(cat "$PORT_FILE" 2>/dev/null || echo "")
-            if [ -n "$NEW_PORT" ] && [ "$NEW_PORT" != "$LAST_PORT" ]; then
+            if [ -n "$NEW_PORT" ]; then
               update_deluge_port "$NEW_PORT"
-              LAST_PORT="$NEW_PORT"
             fi
           fi
           sleep 10
