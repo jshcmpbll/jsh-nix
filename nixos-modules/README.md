@@ -31,7 +31,8 @@ VPN drops. Sonarr and Prowlarr are auto-configured on first boot.
 | `privatarr-deluge-bridge` | socat bridge exposing the namespaced daemon port to the host |
 | `privatarr-deluge-port-updater` | Polls the forwarded port and applies it to Deluge |
 | `privatarr-sonarr-configure` | One-shot: wires Sonarr → Deluge and sets root folder |
-| `privatarr-prowlarr-configure` | One-shot: links Prowlarr → Sonarr and adds public indexers |
+| `privatarr-radarr-configure` | One-shot: wires Radarr → Deluge and sets root folder |
+| `privatarr-prowlarr-configure` | One-shot: links Prowlarr → Sonarr/Radarr and adds public indexers |
 | `deluged` / `deluge-web` | Deluge daemon and web UI (via upstream NixOS service) |
 | `sonarr` | Sonarr (via upstream NixOS service) |
 | `prowlarr` | Prowlarr (via upstream NixOS service) |
@@ -76,6 +77,13 @@ services.privatarr = {
     port = 8989;
     dataDir = "/var/lib/sonarr";
     tvDir = "/var/lib/media/TV";
+  };
+
+  radarr = {
+    enable = false;                             # default: false
+    port = 7878;
+    dataDir = "/var/lib/radarr";
+    moviesDir = "/var/lib/media/Movies";
   };
 
   prowlarr = {

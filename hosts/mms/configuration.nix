@@ -41,6 +41,10 @@
       enable = true;
       tvDir = "/mnt/mm-tv";
     };
+    radarr = {
+      enable = true;
+      moviesDir = "/mnt/mm-movies";
+    };
     prowlarr.enable = true;
     overseerr.enable = false;
   };

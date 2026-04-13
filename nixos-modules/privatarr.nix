@@ -143,6 +143,32 @@ in {
       };
     };
     
+    radarr = {
+      enable = mkOption {
+        type = types.bool;
+        default = false;
+        description = "Enable Radarr movie management";
+      };
+
+      port = mkOption {
+        type = types.port;
+        default = 7878;
+        description = "Port for Radarr web interface";
+      };
+
+      dataDir = mkOption {
+        type = types.path;
+        default = "/var/lib/radarr";
+        description = "Directory for Radarr data";
+      };
+
+      moviesDir = mkOption {
+        type = types.path;
+        default = "/var/lib/media/Movies";
+        description = "Directory for organized movies";
+      };
+    };
+
     prowlarr = {
       enable = mkOption {
         type = types.bool;
@@ -942,6 +968,125 @@ EOF
       '';
     };
 
+    # Radarr movie management
+    services.radarr = mkIf cfg.radarr.enable {
+      enable = true;
+      dataDir = cfg.radarr.dataDir;
+    };
+
+    systemd.services.radarr = mkIf cfg.radarr.enable {
+      after = [ "deluged.service" ];
+      wants = [ "deluged.service" ];
+
+      preStart = lib.mkAfter ''
+        mkdir -p ${cfg.radarr.dataDir}
+        mkdir -p ${cfg.radarr.moviesDir}
+        chown -R radarr:radarr ${cfg.radarr.dataDir}
+
+        CONFIG_FILE="${cfg.radarr.dataDir}/config.xml"
+        if [ ! -f "$CONFIG_FILE" ]; then
+          cat > "$CONFIG_FILE" <<EOF
+<Config>
+  <Port>${toString cfg.radarr.port}</Port>
+  <SslPort>9898</SslPort>
+  <EnableSsl>False</EnableSsl>
+  <LaunchBrowser>False</LaunchBrowser>
+  <ApiKey></ApiKey>
+  <AuthenticationMethod>External</AuthenticationMethod>
+  <AuthenticationRequired>DisabledForLocalAddresses</AuthenticationRequired>
+  <Branch>master</Branch>
+  <LogLevel>Info</LogLevel>
+  <UrlBase></UrlBase>
+  <InstanceName>Radarr</InstanceName>
+</Config>
+EOF
+          chown radarr:radarr "$CONFIG_FILE"
+        else
+          ${pkgs.gnused}/bin/sed -i \
+            -e 's|<AuthenticationMethod>[^<]*</AuthenticationMethod>|<AuthenticationMethod>External</AuthenticationMethod>|' \
+            -e 's|<AuthenticationRequired>[^<]*</AuthenticationRequired>|<AuthenticationRequired>DisabledForLocalAddresses</AuthenticationRequired>|' \
+            "$CONFIG_FILE"
+        fi
+      '';
+    };
+
+    systemd.services.privatarr-radarr-configure = mkIf (cfg.radarr.enable && cfg.deluge.enable) {
+      description = "Configure Radarr download client and root folder";
+      after = [ "radarr.service" ];
+      wants = [ "radarr.service" ];
+      wantedBy = [ "multi-user.target" ];
+
+      path = with pkgs; [ curl jq gawk ];
+
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        User = "radarr";
+        Group = "radarr";
+      };
+
+      script = ''
+        set -euo pipefail
+
+        RADARR_URL="http://localhost:${toString cfg.radarr.port}"
+
+        echo "Waiting for Radarr API..."
+        for i in {1..60}; do
+          API_KEY=$(awk -F '[<>]' '/<ApiKey>/{print $3}' ${cfg.radarr.dataDir}/config.xml 2>/dev/null || true)
+          if [ -n "$API_KEY" ] && curl -sf "$RADARR_URL/api/v3/system/status" -H "X-Api-Key: $API_KEY" > /dev/null 2>&1; then
+            echo "Radarr API ready"
+            break
+          fi
+          sleep 2
+        done
+
+        # Configure Deluge download client
+        CLIENTS=$(curl -sf "$RADARR_URL/api/v3/downloadclient" -H "X-Api-Key: $API_KEY")
+        if echo "$CLIENTS" | jq -e '.[] | select(.name == "Deluge")' > /dev/null 2>&1; then
+          echo "Deluge download client already configured"
+        else
+          echo "Adding Deluge download client..."
+          curl -sf -X POST "$RADARR_URL/api/v3/downloadclient" \
+            -H "X-Api-Key: $API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "enable": true,
+              "protocol": "torrent",
+              "priority": 1,
+              "name": "Deluge",
+              "fields": [
+                {"name": "host", "value": "localhost"},
+                {"name": "port", "value": ${toString cfg.deluge.webPort}},
+                {"name": "urlBase", "value": ""},
+                {"name": "password", "value": "${cfg.deluge.webPassword}"},
+                {"name": "category", "value": ""},
+                {"name": "recentMoviePriority", "value": 0},
+                {"name": "olderMoviePriority", "value": 0},
+                {"name": "addPaused", "value": false}
+              ],
+              "implementationName": "Deluge",
+              "implementation": "Deluge",
+              "configContract": "DelugeSettings",
+              "tags": []
+            }'
+          echo "Deluge download client added"
+        fi
+
+        # Configure movies root folder
+        FOLDERS=$(curl -sf "$RADARR_URL/api/v3/rootfolder" -H "X-Api-Key: $API_KEY")
+        if echo "$FOLDERS" | jq -e --arg p "${cfg.radarr.moviesDir}" '.[] | select(.path == $p)' > /dev/null 2>&1; then
+          echo "Root folder already configured"
+        else
+          echo "Adding root folder ${cfg.radarr.moviesDir}..."
+          curl -sf -X POST "$RADARR_URL/api/v3/rootfolder" \
+            -H "X-Api-Key: $API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "{\"path\": \"${cfg.radarr.moviesDir}\"}"
+          echo "Root folder added"
+        fi
+      '';
+    };
+
     # Prowlarr indexer manager
     services.prowlarr = mkIf cfg.prowlarr.enable {
       enable = true;
@@ -965,10 +1110,14 @@ EOF
     };
 
     # Wire Prowlarr → Sonarr automatically
-    systemd.services.privatarr-prowlarr-configure = mkIf (cfg.prowlarr.enable && cfg.sonarr.enable) {
-      description = "Connect Prowlarr to Sonarr";
-      after = [ "prowlarr.service" "sonarr.service" ];
-      wants = [ "prowlarr.service" "sonarr.service" ];
+    systemd.services.privatarr-prowlarr-configure = mkIf (cfg.prowlarr.enable && (cfg.sonarr.enable || cfg.radarr.enable)) {
+      description = "Connect Prowlarr to Sonarr and Radarr";
+      after = [ "prowlarr.service" ]
+        ++ lib.optional cfg.sonarr.enable "sonarr.service"
+        ++ lib.optional cfg.radarr.enable "radarr.service";
+      wants = [ "prowlarr.service" ]
+        ++ lib.optional cfg.sonarr.enable "sonarr.service"
+        ++ lib.optional cfg.radarr.enable "radarr.service";
       wantedBy = [ "multi-user.target" ];
 
       path = with pkgs; [ curl jq gawk ];
@@ -982,7 +1131,6 @@ EOF
         set -euo pipefail
 
         PROWLARR_URL="http://localhost:${toString cfg.prowlarr.port}"
-        SONARR_URL="http://localhost:${toString cfg.sonarr.port}"
 
         # Wait for Prowlarr API
         echo "Waiting for Prowlarr API..."
@@ -995,11 +1143,11 @@ EOF
           sleep 2
         done
 
-        # Get Sonarr API key
-        SONARR_KEY=$(awk -F '[<>]' '/<ApiKey>/{print $3}' ${cfg.sonarr.dataDir}/config.xml)
-
-        # Check if Sonarr is already added as an application
         APPS=$(curl -sf "$PROWLARR_URL/api/v1/applications" -H "X-Api-Key: $PROWLARR_KEY")
+
+        ${lib.optionalString cfg.sonarr.enable ''
+        SONARR_URL="http://localhost:${toString cfg.sonarr.port}"
+        SONARR_KEY=$(awk -F '[<>]' '/<ApiKey>/{print $3}' ${cfg.sonarr.dataDir}/config.xml)
         if echo "$APPS" | jq -e '.[] | select(.name == "Sonarr")' > /dev/null 2>&1; then
           echo "Sonarr already configured in Prowlarr"
         else
@@ -1024,6 +1172,35 @@ EOF
             }"
           echo "Sonarr added to Prowlarr"
         fi
+        ''}
+
+        ${lib.optionalString cfg.radarr.enable ''
+        RADARR_URL="http://localhost:${toString cfg.radarr.port}"
+        RADARR_KEY=$(awk -F '[<>]' '/<ApiKey>/{print $3}' ${cfg.radarr.dataDir}/config.xml)
+        if echo "$APPS" | jq -e '.[] | select(.name == "Radarr")' > /dev/null 2>&1; then
+          echo "Radarr already configured in Prowlarr"
+        else
+          echo "Adding Radarr to Prowlarr..."
+          curl -sf -X POST "$PROWLARR_URL/api/v1/applications" \
+            -H "X-Api-Key: $PROWLARR_KEY" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"name\": \"Radarr\",
+              \"implementation\": \"Radarr\",
+              \"configContract\": \"RadarrSettings\",
+              \"syncLevel\": \"addOnly\",
+              \"fields\": [
+                {\"name\": \"prowlarrUrl\", \"value\": \"$PROWLARR_URL\"},
+                {\"name\": \"baseUrl\", \"value\": \"$RADARR_URL\"},
+                {\"name\": \"apiKey\", \"value\": \"$RADARR_KEY\"},
+                {\"name\": \"syncCategories\", \"value\": [2000,2010,2020,2030,2040,2045,2050,2060,2070,2080]},
+                {\"name\": \"syncLevel\", \"value\": \"addOnly\"}
+              ],
+              \"tags\": []
+            }"
+          echo "Radarr added to Prowlarr"
+        fi
+        ''}
 
         # Add public indexers
         EXISTING_INDEXERS=$(curl -sf "$PROWLARR_URL/api/v1/indexer" -H "X-Api-Key: $PROWLARR_KEY")
@@ -1113,6 +1290,10 @@ EOF
     users.groups.privatarr-portforward = mkIf (cfg.proton.enable && cfg.proton.enablePortForwarding) { };
 
     users.users.sonarr = mkIf (cfg.sonarr.enable && cfg.deluge.enable) {
+      extraGroups = [ "deluge" ];
+    };
+
+    users.users.radarr = mkIf (cfg.radarr.enable && cfg.deluge.enable) {
       extraGroups = [ "deluge" ];
     };
 
@@ -1211,6 +1392,7 @@ EOF
           cfg.deluge.daemonPort 
         ]) ++
         (lib.optionals cfg.sonarr.enable [ cfg.sonarr.port ]) ++
+        (lib.optionals cfg.radarr.enable [ cfg.radarr.port ]) ++
         (lib.optionals cfg.overseerr.enable [ cfg.overseerr.port ]);
     };
     
@@ -1222,6 +1404,10 @@ EOF
       (lib.optionals cfg.sonarr.enable [
         "d ${cfg.sonarr.dataDir} 0755 sonarr sonarr -"
         "d ${cfg.sonarr.tvDir} 0755 sonarr sonarr -"
+      ]) ++
+      (lib.optionals cfg.radarr.enable [
+        "d ${cfg.radarr.dataDir} 0755 radarr radarr -"
+        "d ${cfg.radarr.moviesDir} 0755 radarr radarr -"
       ]) ++
       (lib.optionals cfg.overseerr.enable [
         "d ${cfg.overseerr.dataDir} 0755 overseerr overseerr -"
