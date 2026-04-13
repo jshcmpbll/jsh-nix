@@ -1176,7 +1176,17 @@ EOF
 
         ${lib.optionalString cfg.radarr.enable ''
         RADARR_URL="http://localhost:${toString cfg.radarr.port}"
-        RADARR_KEY=$(awk -F '[<>]' '/<ApiKey>/{print $3}' ${cfg.radarr.dataDir}/config.xml)
+        echo "Waiting for Radarr API..."
+        for i in {1..60}; do
+          RADARR_KEY=$(awk -F '[<>]' '/<ApiKey>/{print $3}' ${cfg.radarr.dataDir}/config.xml 2>/dev/null || true)
+          if [ -n "$RADARR_KEY" ] && curl -sf "$RADARR_URL/api/v3/system/status" -H "X-Api-Key: $RADARR_KEY" > /dev/null 2>&1; then
+            echo "Radarr API ready"
+            break
+          fi
+          sleep 2
+        done
+        # Re-fetch apps list after waiting (Sonarr may have been added already above)
+        APPS=$(curl -sf "$PROWLARR_URL/api/v1/applications" -H "X-Api-Key: $PROWLARR_KEY")
         if echo "$APPS" | jq -e '.[] | select(.name == "Radarr")' > /dev/null 2>&1; then
           echo "Radarr already configured in Prowlarr"
         else
