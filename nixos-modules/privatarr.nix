@@ -122,6 +122,18 @@ in {
         description = "Days to seed before auto-removing a torrent";
       };
 
+      cleanupLowSpaceGb = mkOption {
+        type = types.int;
+        default = 10;
+        description = "Begin removing seeding torrents when free space drops below this many GB";
+      };
+
+      cleanupTargetSpaceGb = mkOption {
+        type = types.int;
+        default = 20;
+        description = "Stop removing torrents once free space reaches this many GB";
+      };
+
       webPassword = mkOption {
         type = types.str;
         default = "deluge";
@@ -1332,6 +1344,66 @@ EOF
     
     users.groups.overseerr = mkIf cfg.overseerr.enable { };
     
+    # Disk space monitor: remove oldest seeding torrents when space is low
+    systemd.services.privatarr-disk-cleanup = mkIf cfg.deluge.enable {
+      description = "Remove oldest seeding torrents when download disk is low";
+      serviceConfig = {
+        Type = "oneshot";
+        User = "deluge";
+      };
+      path = with pkgs; [ deluge coreutils gawk ];
+      script = ''
+        set -euo pipefail
+
+        LOW_KB=${toString (cfg.deluge.cleanupLowSpaceGb * 1024 * 1024)}
+        TARGET_KB=${toString (cfg.deluge.cleanupTargetSpaceGb * 1024 * 1024)}
+
+        get_free_kb() {
+          df -k ${cfg.deluge.downloadDir} | awk 'NR==2 {print $4}'
+        }
+
+        FREE=$(get_free_kb)
+
+        if [ "$FREE" -gt "$LOW_KB" ]; then
+          echo "Disk OK: $((FREE / 1024 / 1024))GB free"
+          exit 0
+        fi
+
+        echo "Low disk: $((FREE / 1024 / 1024))GB free (threshold: ${toString cfg.deluge.cleanupLowSpaceGb}GB) - starting cleanup"
+
+        # Get hashes of seeding torrents, sorted by longest seeding time first
+        HASHES=$(deluge-console "info -s Seeding --sort-reverse seeding_time" 2>/dev/null \
+          | grep -E '^\[S\]' | grep -oE '[0-9a-f]{40}')
+
+        if [ -z "$HASHES" ]; then
+          echo "No seeding torrents available to remove"
+          exit 0
+        fi
+
+        for HASH in $HASHES; do
+          FREE=$(get_free_kb)
+          if [ "$FREE" -ge "$TARGET_KB" ]; then
+            echo "Target reached: $((FREE / 1024 / 1024))GB free"
+            break
+          fi
+          echo "Removing torrent $HASH"
+          deluge-console "rm --remove_data -c $HASH" 2>/dev/null || echo "Warning: failed to remove $HASH"
+          sleep 2
+        done
+
+        echo "Cleanup complete. Free space: $(($(get_free_kb) / 1024 / 1024))GB"
+      '';
+    };
+
+    systemd.timers.privatarr-disk-cleanup = mkIf cfg.deluge.enable {
+      description = "Periodic disk space check for privatarr downloads";
+      wantedBy = [ "timers.target" ];
+      timerConfig = {
+        OnBootSec = "5min";
+        OnUnitActiveSec = "30min";
+      };
+    };
+
     # Service integration configuration
     systemd.services.privatarr-configure = mkIf (cfg.sonarr.enable && cfg.deluge.enable) {
       description = "Configure Aargh service integrations";
