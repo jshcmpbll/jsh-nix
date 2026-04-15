@@ -104,6 +104,24 @@ in {
         description = "Maximum number of open files for Deluge";
       };
 
+      maxActiveSeedingLimit = mkOption {
+        type = types.int;
+        default = -1;
+        description = "Maximum simultaneously seeding torrents (-1 for unlimited)";
+      };
+
+      seedRatioLimit = mkOption {
+        type = types.str;
+        default = "2.0";
+        description = "Share ratio at which to auto-remove a completed torrent";
+      };
+
+      seedTimeLimitDays = mkOption {
+        type = types.int;
+        default = 7;
+        description = "Days to seed before auto-removing a torrent";
+      };
+
       webPassword = mkOption {
         type = types.str;
         default = "deluge";
@@ -693,7 +711,7 @@ in {
 
           cat > /var/lib/deluge/.config/deluge/core.conf.tmp <<EOF
 {"file": 1, "format": 1}
-{"listen_interface": "$VPN_IP", "outgoing_interface": "${cfg.proton.interfaceName}", "upnp": false, "natpmp": false, "enabled_plugins": ["Label"]}
+{"listen_interface": "$VPN_IP", "outgoing_interface": "${cfg.proton.interfaceName}", "upnp": false, "natpmp": false, "enabled_plugins": ["Label"], "stop_seed_at_ratio": true, "remove_seed_at_ratio": true, "stop_seed_ratio": ${cfg.deluge.seedRatioLimit}, "seed_time_limit": ${toString (cfg.deluge.seedTimeLimitDays * 24 * 60)}, "max_active_seeding": ${toString cfg.deluge.maxActiveSeedingLimit}, "max_active_limit": -1, "max_connections_global": -1, "max_upload_slots_global": -1, "max_half_open_connections": -1, "max_connections_per_second": -1}
 EOF
         '' else ''
           # Non-namespace mode: bind deluge explicitly to the VPN interface IP.
@@ -714,7 +732,7 @@ EOF
           echo "Binding Deluge to VPN IP: $VPN_IP"
           cat > /var/lib/deluge/.config/deluge/core.conf.tmp <<EOF
 {"file": 1, "format": 1}
-{"listen_interface": "$VPN_IP", "outgoing_interface": "${cfg.proton.interfaceName}", "upnp": false, "natpmp": false, "enabled_plugins": ["Label"]}
+{"listen_interface": "$VPN_IP", "outgoing_interface": "${cfg.proton.interfaceName}", "upnp": false, "natpmp": false, "enabled_plugins": ["Label"], "stop_seed_at_ratio": true, "remove_seed_at_ratio": true, "stop_seed_ratio": ${cfg.deluge.seedRatioLimit}, "seed_time_limit": ${toString (cfg.deluge.seedTimeLimitDays * 24 * 60)}, "max_active_seeding": ${toString cfg.deluge.maxActiveSeedingLimit}, "max_active_limit": -1, "max_connections_global": -1, "max_upload_slots_global": -1, "max_half_open_connections": -1, "max_connections_per_second": -1}
 EOF
         ''}
         mv /var/lib/deluge/.config/deluge/core.conf.tmp /var/lib/deluge/.config/deluge/core.conf
