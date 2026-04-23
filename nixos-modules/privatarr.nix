@@ -124,13 +124,13 @@ in {
 
       cleanupLowSpaceGb = mkOption {
         type = types.int;
-        default = 10;
+        default = 50;
         description = "Begin removing seeding torrents when free space drops below this many GB";
       };
 
       cleanupTargetSpaceGb = mkOption {
         type = types.int;
-        default = 20;
+        default = 75;
         description = "Stop removing torrents once free space reaches this many GB";
       };
 
@@ -226,23 +226,47 @@ in {
       };
     };
 
-    overseerr = {
+    seerr = {
       enable = mkOption {
         type = types.bool;
         default = true;
-        description = "Enable Overseerr request management";
+        description = "Enable Seerr request management";
       };
-      
+
+      package = mkOption {
+        type = types.package;
+        description = "The seerr package to use. Seerr is not in nixos-25.05 stable, so pass it from an unstable input (e.g. latest2.seerr).";
+        example = "latest2.seerr";
+      };
+
       port = mkOption {
         type = types.port;
         default = 5055;
-        description = "Port for Overseerr web interface";
+        description = "Port for Seerr web interface";
       };
-      
+
       dataDir = mkOption {
         type = types.path;
-        default = "/var/lib/overseerr";
-        description = "Directory for Overseerr data";
+        default = "/var/lib/seerr";
+        description = "Directory for Seerr data";
+      };
+
+      adminEmail = mkOption {
+        type = types.str;
+        default = "admin@local";
+        description = "Email address for the initial Seerr admin account";
+      };
+
+      adminPasswordHash = mkOption {
+        type = types.nullOr types.str;
+        default = null;
+        description = ''
+          Bcrypt hash of the initial admin password (cost 12). If set, an admin
+          user is created in the database on first deploy. Generate with:
+            node -e "const b=require('bcrypt');b.hash('yourpassword',12).then(h=>console.log(h))"
+          Leave null to skip automatic user creation.
+        '';
+        example = "\$2b\$12\$AAAAAAAAAAAAAAAAAAAAAA...";
       };
     };
   };
@@ -268,7 +292,7 @@ in {
       jq
       libnatpmp
       socat
-    ] ++ lib.optionals cfg.overseerr.enable [ pkgs.overseerr ];
+    ] ++ lib.optionals cfg.seerr.enable [ cfg.seerr.package ];
     
     # Oneshot service that owns the network namespace lifetime.
     # Keeping namespace creation separate from the VPN service means deluged
@@ -835,11 +859,20 @@ EOF
           local COOKIES
           COOKIES=$(mktemp)
 
-          # Login first to get a session cookie
+          # Login and connect to daemon
           curl -s -c "$COOKIES" -X POST http://localhost:${toString cfg.deluge.webPort}/json \
             -H "Content-Type: application/json" \
             -d "{\"method\": \"auth.login\", \"params\": [\"${cfg.deluge.webPassword}\"], \"id\": 1}" \
             > /dev/null
+          local host_id
+          host_id=$(curl -s -b "$COOKIES" -X POST http://localhost:${toString cfg.deluge.webPort}/json \
+            -H "Content-Type: application/json" \
+            -d '{"method":"web.get_hosts","params":[],"id":98}' | jq -r '.result[0][0]')
+          if [ -n "$host_id" ]; then
+            curl -s -b "$COOKIES" -X POST http://localhost:${toString cfg.deluge.webPort}/json \
+              -H "Content-Type: application/json" \
+              -d "{\"method\":\"web.connect\",\"params\":[\"$host_id\"],\"id\":99}" > /dev/null
+          fi
 
           # Now set the listen port via the authenticated session
           curl -s -b "$COOKIES" -X POST http://localhost:${toString cfg.deluge.webPort}/json \
@@ -1284,37 +1317,240 @@ EOF
       '';
     };
 
-    # Overseerr service configuration
-    systemd.services.overseerr = mkIf cfg.overseerr.enable {
-      description = "Overseerr request management service";
+    # Seerr service configuration
+    systemd.services.seerr = mkIf cfg.seerr.enable {
+      description = "Seerr request management service";
       wantedBy = [ "multi-user.target" ];
-      after = [ "network-online.target" "sonarr.service" ];
+      after = [ "network-online.target" ]
+        ++ lib.optional cfg.sonarr.enable "sonarr.service"
+        ++ lib.optional cfg.radarr.enable "radarr.service";
       wants = [ "network-online.target" ];
-      
+
       serviceConfig = {
         Type = "simple";
-        User = "overseerr";
-        Group = "overseerr";
-        ExecStart = "${pkgs.overseerr}/bin/overseerr";
+        User = "seerr";
+        Group = "seerr";
+        ExecStart = "${cfg.seerr.package}/bin/seerr";
         Restart = "on-failure";
         RestartSec = "5s";
-        
+
         # Security settings
         NoNewPrivileges = true;
         PrivateTmp = true;
         ProtectHome = true;
         ProtectSystem = "strict";
-        ReadWritePaths = [ cfg.overseerr.dataDir ];
+        ReadWritePaths = [ cfg.seerr.dataDir ];
       };
-      
+
       environment = {
-        CONFIG_DIRECTORY = cfg.overseerr.dataDir;
-        PORT = toString cfg.overseerr.port;
+        CONFIG_DIRECTORY = cfg.seerr.dataDir;
+        PORT = toString cfg.seerr.port;
       };
-      
+
       preStart = ''
-        mkdir -p ${cfg.overseerr.dataDir}
-        chown overseerr:overseerr ${cfg.overseerr.dataDir}
+        mkdir -p ${cfg.seerr.dataDir}
+
+        # Write a minimal settings.json on first run so Seerr starts with
+        # localLogin enabled and no media server required.  The -configure
+        # service will fill in the radarr/sonarr sections once those are ready.
+        if [ ! -f "${cfg.seerr.dataDir}/settings.json" ]; then
+          cat > "${cfg.seerr.dataDir}/settings.json" <<'EOF'
+{
+  "main": {
+    "apiKey": "",
+    "applicationTitle": "Seerr",
+    "applicationUrl": "",
+    "cacheImages": false,
+    "defaultPermissions": 32,
+    "localLogin": true,
+    "mediaServerLogin": false,
+    "newPlexLogin": false,
+    "mediaServerType": 4,
+    "partialRequestsEnabled": true,
+    "locale": "en"
+  },
+  "plex": {"name": "", "ip": "", "port": 32400, "useSsl": false, "libraries": []},
+  "jellyfin": {"name": "", "ip": "", "port": 8096, "useSsl": false, "urlBase": "", "libraries": [], "serverId": "", "apiKey": ""},
+  "tautulli": {},
+  "metadataSettings": {"tv": "tmdb", "anime": "tmdb"},
+  "radarr": [],
+  "sonarr": [],
+  "public": {"initialized": true},
+  "notifications": {"agents": {}}
+}
+EOF
+        fi
+
+        chown -R seerr:seerr ${cfg.seerr.dataDir}
+      '';
+    };
+
+    # Wire Seerr → Radarr + Sonarr automatically after all services are up
+    systemd.services.privatarr-seerr-configure = mkIf (cfg.seerr.enable && (cfg.radarr.enable || cfg.sonarr.enable)) {
+      description = "Configure Seerr with Radarr/Sonarr connections";
+      after = [ "seerr.service" ]
+        ++ lib.optional cfg.radarr.enable "radarr.service"
+        ++ lib.optional cfg.sonarr.enable "sonarr.service";
+      wants = [ "seerr.service" ]
+        ++ lib.optional cfg.radarr.enable "radarr.service"
+        ++ lib.optional cfg.sonarr.enable "sonarr.service";
+      wantedBy = [ "multi-user.target" ];
+
+      path = with pkgs; [ curl jq gawk systemd sqlite ];
+
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+      };
+
+      script = ''
+        set -euo pipefail
+
+        SETTINGS_FILE="${cfg.seerr.dataDir}/settings.json"
+
+        # Wait for Seerr to create its settings.json
+        echo "Waiting for Seerr settings file..."
+        for i in $(seq 1 60); do
+          [ -f "$SETTINGS_FILE" ] && break
+          sleep 2
+        done
+
+        if [ ! -f "$SETTINGS_FILE" ]; then
+          echo "Warning: Seerr settings.json not found, skipping configuration"
+          exit 0
+        fi
+
+        CURRENT=$(cat "$SETTINGS_FILE")
+        UPDATED="$CURRENT"
+
+        ${lib.optionalString cfg.radarr.enable ''
+        RADARR_COUNT=$(echo "$CURRENT" | jq '.radarr | length' 2>/dev/null || echo "0")
+        if [ "$RADARR_COUNT" = "0" ]; then
+          echo "Waiting for Radarr API key..."
+          RADARR_KEY=""
+          for i in $(seq 1 60); do
+            RADARR_KEY=$(awk -F '[<>]' '/<ApiKey>/{print $3}' ${cfg.radarr.dataDir}/config.xml 2>/dev/null || true)
+            [ -n "$RADARR_KEY" ] && break
+            sleep 2
+          done
+
+          if [ -n "$RADARR_KEY" ]; then
+            echo "Waiting for Radarr API..."
+            for i in $(seq 1 30); do
+              curl -sf "http://localhost:${toString cfg.radarr.port}/api/v3/system/status" \
+                -H "X-Api-Key: $RADARR_KEY" > /dev/null 2>&1 && break
+              sleep 2
+            done
+
+            PROFILES=$(curl -sf "http://localhost:${toString cfg.radarr.port}/api/v3/qualityprofile" \
+              -H "X-Api-Key: $RADARR_KEY" 2>/dev/null || echo "[]")
+            PROFILE_ID=$(echo "$PROFILES" | jq -r 'if length > 0 then .[0].id else 1 end')
+            PROFILE_NAME=$(echo "$PROFILES" | jq -r 'if length > 0 then .[0].name else "Any" end')
+
+            echo "Configuring Radarr in Seerr (profile: $PROFILE_NAME)..."
+            UPDATED=$(echo "$UPDATED" | jq \
+              --argjson port ${toString cfg.radarr.port} \
+              --arg key "$RADARR_KEY" \
+              --argjson pid "$PROFILE_ID" \
+              --arg pname "$PROFILE_NAME" \
+              --arg dir "${cfg.radarr.moviesDir}" \
+              '.radarr = [{
+                "id": 1, "name": "Radarr", "hostname": "localhost",
+                "port": $port, "apiKey": $key, "useSsl": false, "baseUrl": "",
+                "activeProfileId": $pid, "activeProfileName": $pname,
+                "activeDirectory": $dir, "is4k": false,
+                "minimumAvailability": "released", "isDefault": true,
+                "externalUrl": "", "syncEnabled": false, "preventSearch": false,
+                "enableAutomaticSearch": true
+              }]')
+          else
+            echo "Warning: could not read Radarr API key, skipping"
+          fi
+        else
+          echo "Radarr already configured in Seerr, skipping"
+        fi
+        ''}
+
+        ${lib.optionalString cfg.sonarr.enable ''
+        SONARR_COUNT=$(echo "$CURRENT" | jq '.sonarr | length' 2>/dev/null || echo "0")
+        if [ "$SONARR_COUNT" = "0" ]; then
+          echo "Waiting for Sonarr API key..."
+          SONARR_KEY=""
+          for i in $(seq 1 60); do
+            SONARR_KEY=$(awk -F '[<>]' '/<ApiKey>/{print $3}' ${cfg.sonarr.dataDir}/config.xml 2>/dev/null || true)
+            [ -n "$SONARR_KEY" ] && break
+            sleep 2
+          done
+
+          if [ -n "$SONARR_KEY" ]; then
+            echo "Waiting for Sonarr API..."
+            for i in $(seq 1 30); do
+              curl -sf "http://localhost:${toString cfg.sonarr.port}/api/v3/system/status" \
+                -H "X-Api-Key: $SONARR_KEY" > /dev/null 2>&1 && break
+              sleep 2
+            done
+
+            PROFILES=$(curl -sf "http://localhost:${toString cfg.sonarr.port}/api/v3/qualityprofile" \
+              -H "X-Api-Key: $SONARR_KEY" 2>/dev/null || echo "[]")
+            PROFILE_ID=$(echo "$PROFILES" | jq -r 'if length > 0 then .[0].id else 1 end')
+            PROFILE_NAME=$(echo "$PROFILES" | jq -r 'if length > 0 then .[0].name else "Any" end')
+
+            echo "Configuring Sonarr in Seerr (profile: $PROFILE_NAME)..."
+            UPDATED=$(echo "$UPDATED" | jq \
+              --argjson port ${toString cfg.sonarr.port} \
+              --arg key "$SONARR_KEY" \
+              --argjson pid "$PROFILE_ID" \
+              --arg pname "$PROFILE_NAME" \
+              --arg dir "${cfg.sonarr.tvDir}" \
+              '.sonarr = [{
+                "id": 1, "name": "Sonarr", "hostname": "localhost",
+                "port": $port, "apiKey": $key, "useSsl": false, "baseUrl": "",
+                "activeProfileId": $pid, "activeProfileName": $pname,
+                "activeDirectory": $dir, "activeAnimeProfileId": null,
+                "activeAnimeProfileName": null, "activeAnimeDirectory": null,
+                "isDefault": true, "enableSeasonFolders": true,
+                "externalUrl": "", "syncEnabled": false, "preventSearch": false,
+                "enableAutomaticSearch": true
+              }]')
+          else
+            echo "Warning: could not read Sonarr API key, skipping"
+          fi
+        else
+          echo "Sonarr already configured in Seerr, skipping"
+        fi
+        ''}
+
+        if [ "$UPDATED" != "$CURRENT" ]; then
+          echo "$UPDATED" > "$SETTINGS_FILE.tmp"
+          mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"
+          chown seerr:seerr "$SETTINGS_FILE"
+          echo "Seerr settings updated, restarting to apply..."
+          systemctl restart seerr || echo "Warning: seerr restart failed — check 'journalctl -eu seerr'"
+        else
+          echo "No Seerr configuration changes needed"
+        fi
+
+        ${lib.optionalString (cfg.seerr.adminPasswordHash != null) ''
+        DB_FILE="${cfg.seerr.dataDir}/db/db.sqlite3"
+        # Wait for Seerr to create the database
+        for i in $(seq 1 30); do
+          [ -f "$DB_FILE" ] && break
+          sleep 2
+        done
+        if [ -f "$DB_FILE" ]; then
+          USER_COUNT=$(sqlite3 "$DB_FILE" "SELECT COUNT(*) FROM user;" 2>/dev/null || echo "0")
+          if [ "$USER_COUNT" = "0" ]; then
+            echo "Seeding initial admin user (${cfg.seerr.adminEmail})..."
+            sqlite3 "$DB_FILE" "INSERT INTO user (id, email, username, permissions, avatar, password, userType, createdAt, updatedAt) VALUES (1, '${cfg.seerr.adminEmail}', 'admin', 2, 'https://www.gravatar.com/avatar/?default=mm&size=200', '${cfg.seerr.adminPasswordHash}', 3, datetime('now'), datetime('now'));"
+            chown seerr:seerr "$DB_FILE"
+            echo "Admin user created"
+          else
+            echo "Seerr already has users, skipping admin seed"
+          fi
+        else
+          echo "Warning: Seerr database not found, skipping admin seed"
+        fi
+        ''}
       '';
     };
     
@@ -1336,60 +1572,138 @@ EOF
     };
 
     # Create users for services
-    users.users.overseerr = mkIf cfg.overseerr.enable {
+    users.users.seerr = mkIf cfg.seerr.enable {
       isSystemUser = true;
-      group = "overseerr";
-      home = cfg.overseerr.dataDir;
+      group = "seerr";
+      home = cfg.seerr.dataDir;
     };
+
+    users.groups.seerr = mkIf cfg.seerr.enable { };
     
-    users.groups.overseerr = mkIf cfg.overseerr.enable { };
-    
-    # Disk space monitor: remove oldest seeding torrents when space is low
+    # Disk space monitor: two-phase cleanup
+    # Phase 1 (always): delete orphaned files — items in the download dir with no
+    #   matching active torrent.  These accumulate when *arr removes a torrent from
+    #   Deluge without deleting the data, or when remove_data fails.
+    # Phase 2 (low-disk only): remove oldest-seeding torrents via the web API.
+    #   Uses curl/jq instead of deluge-console because the console's -s/--state
+    #   filter crashes with an AttributeError in Deluge 2.2.0.
     systemd.services.privatarr-disk-cleanup = mkIf cfg.deluge.enable {
-      description = "Remove oldest seeding torrents when download disk is low";
+      description = "Remove orphaned downloads and oldest seeding torrents when disk is low";
       serviceConfig = {
         Type = "oneshot";
         User = "deluge";
       };
-      path = with pkgs; [ deluge coreutils gawk ];
+      path = with pkgs; [ curl jq coreutils gawk findutils ];
       script = ''
         set -euo pipefail
 
         LOW_KB=${toString (cfg.deluge.cleanupLowSpaceGb * 1024 * 1024)}
         TARGET_KB=${toString (cfg.deluge.cleanupTargetSpaceGb * 1024 * 1024)}
+        DOWNLOAD_DIR="${cfg.deluge.downloadDir}"
+        BASE="http://localhost:${toString cfg.deluge.webPort}/json"
 
         get_free_kb() {
-          df -k ${cfg.deluge.downloadDir} | awk 'NR==2 {print $4}'
+          df -k "$DOWNLOAD_DIR" | awk 'NR==2 {print $4}'
         }
 
-        FREE=$(get_free_kb)
+        COOKIES=$(mktemp)
+        trap "rm -f $COOKIES" EXIT
 
+        deluge_up() {
+          curl -sf http://localhost:${toString cfg.deluge.webPort} > /dev/null 2>&1
+        }
+
+        deluge_login() {
+          curl -sf -c "$COOKIES" -X POST "$BASE" \
+            -H "Content-Type: application/json" \
+            -d '{"method":"auth.login","params":["${cfg.deluge.webPassword}"],"id":1}' > /dev/null
+        }
+
+        deluge_api() {
+          curl -sf -b "$COOKIES" -X POST "$BASE" \
+            -H "Content-Type: application/json" \
+            -d "$1"
+        }
+
+        deluge_connect() {
+          local host_id
+          host_id=$(deluge_api '{"method":"web.get_hosts","params":[],"id":98}' | jq -r '.result[0][0]')
+          if [ -n "$host_id" ]; then
+            deluge_api "{\"method\":\"web.connect\",\"params\":[\"$host_id\"],\"id\":99}" > /dev/null
+          fi
+        }
+
+        # Phase 1: remove orphaned files (no active torrent tracks them)
+        if deluge_up; then
+          deluge_login
+          deluge_connect
+          TRACKED=$(deluge_api '{"method":"core.get_torrents_status","params":[{},["name"]],"id":2}' | \
+            jq -r '.result | to_entries[] | .value.name')
+          echo "Scanning for orphaned files in $DOWNLOAD_DIR..."
+          while IFS= read -r -d "" ITEM; do
+            BASENAME=$(basename "$ITEM")
+            if ! echo "$TRACKED" | grep -qxF "$BASENAME"; then
+              SIZE_GB=$(du -sk "$ITEM" 2>/dev/null | awk '{printf "%.1f", $1/1024/1024}')
+              echo "Removing orphaned: $BASENAME (''${SIZE_GB}GB)"
+              rm -rf "$ITEM"
+            fi
+          done < <(find "$DOWNLOAD_DIR" -maxdepth 1 -mindepth 1 -print0 2>/dev/null || true)
+        else
+          echo "Deluge not reachable, skipping orphan cleanup"
+        fi
+
+        FREE=$(get_free_kb)
         if [ "$FREE" -gt "$LOW_KB" ]; then
           echo "Disk OK: $((FREE / 1024 / 1024))GB free"
           exit 0
         fi
 
-        echo "Low disk: $((FREE / 1024 / 1024))GB free (threshold: ${toString cfg.deluge.cleanupLowSpaceGb}GB) - starting cleanup"
+        echo "Low disk: $((FREE / 1024 / 1024))GB free (threshold: ${toString cfg.deluge.cleanupLowSpaceGb}GB) - removing seeding torrents"
 
-        # Get hashes of seeding torrents, sorted by longest seeding time first
-        HASHES=$(deluge-console "info -s Seeding --sort-reverse seeding_time" 2>/dev/null \
-          | grep -E '^\[S\]' | grep -oE '[0-9a-f]{40}')
+        # Phase 2: remove seeding torrents oldest-first via web API
+        if deluge_up; then
+          deluge_login
+          deluge_connect
+          STATUS=$(deluge_api '{"method":"core.get_torrents_status","params":[{},["name","state","seeding_time"]],"id":3}')
+          HASHES=$(echo "$STATUS" | jq -r '
+            .result | to_entries[]
+            | select(.value.state == "Seeding")
+            | [(.value.seeding_time | tostring), .key]
+            | join("\t")
+          ' | sort -n | awk -F'\t' '{print $2}')
 
-        if [ -z "$HASHES" ]; then
-          echo "No seeding torrents available to remove"
-          exit 0
-        fi
-
-        for HASH in $HASHES; do
-          FREE=$(get_free_kb)
-          if [ "$FREE" -ge "$TARGET_KB" ]; then
-            echo "Target reached: $((FREE / 1024 / 1024))GB free"
-            break
+          if [ -z "$HASHES" ]; then
+            echo "No seeding torrents to remove"
+          else
+            for HASH in $HASHES; do
+              FREE=$(get_free_kb)
+              if [ "$FREE" -ge "$TARGET_KB" ]; then
+                echo "Target reached: $((FREE / 1024 / 1024))GB free"
+                break
+              fi
+              NAME=$(echo "$STATUS" | jq -r --arg h "$HASH" '.result[$h].name')
+              echo "Removing seeding torrent: $NAME"
+              deluge_api "{\"method\":\"core.remove_torrent\",\"params\":[\"$HASH\",true],\"id\":4}" > /dev/null || \
+                echo "Warning: failed to remove $HASH"
+              sleep 2
+            done
           fi
-          echo "Removing torrent $HASH"
-          deluge-console "rm --remove_data -c $HASH" 2>/dev/null || echo "Warning: failed to remove $HASH"
-          sleep 2
-        done
+        else
+          # Fallback: Deluge down — delete largest items directly
+          echo "Deluge not reachable, falling back to direct file deletion"
+          while [ "$(get_free_kb)" -lt "$TARGET_KB" ]; do
+            LARGEST=$(find "$DOWNLOAD_DIR" -maxdepth 1 -mindepth 1 -print0 \
+              | xargs -0 du -sk 2>/dev/null \
+              | sort -rn \
+              | awk 'NR==1{print substr($0, index($0,$2))}')
+            if [ -z "$LARGEST" ]; then
+              echo "Nothing left to delete in $DOWNLOAD_DIR"
+              break
+            fi
+            echo "Removing (fallback): $LARGEST"
+            rm -rf "$LARGEST"
+          done
+        fi
 
         echo "Cleanup complete. Free space: $(($(get_free_kb) / 1024 / 1024))GB"
       '';
@@ -1401,6 +1715,102 @@ EOF
       timerConfig = {
         OnBootSec = "5min";
         OnUnitActiveSec = "30min";
+      };
+    };
+
+    # Deluge only auto-stops/removes torrents when the *per-torrent* stop_at_ratio
+    # and remove_at_ratio flags are True.  Torrents added by Sonarr/Radarr (or
+    # loaded from state before these settings were applied) have both flags False,
+    # so the global core.conf limits are silently ignored for them.
+    # This service fixes that by stamping the correct flags onto every torrent
+    # via the web API and then explicitly removing any that already exceeded the limit.
+    systemd.services.privatarr-ratio-enforcer = mkIf cfg.deluge.enable {
+      description = "Enforce per-torrent ratio limits in Deluge";
+      after = [ "deluge-web.service" ];
+      wants = [ "deluge-web.service" ];
+      serviceConfig = {
+        Type = "oneshot";
+        User = "deluge";
+      };
+      path = with pkgs; [ curl jq ];
+      script = ''
+        set -euo pipefail
+
+        COOKIES=$(mktemp)
+        trap "rm -f $COOKIES" EXIT
+        BASE="http://localhost:${toString cfg.deluge.webPort}/json"
+
+        login() {
+          curl -sf -c "$COOKIES" -X POST "$BASE" \
+            -H "Content-Type: application/json" \
+            -d '{"method":"auth.login","params":["${cfg.deluge.webPassword}"],"id":1}' > /dev/null
+        }
+
+        api() {
+          curl -sf -b "$COOKIES" -X POST "$BASE" \
+            -H "Content-Type: application/json" \
+            -d "$1"
+        }
+
+        connect() {
+          local host_id
+          host_id=$(api '{"method":"web.get_hosts","params":[],"id":98}' | jq -r '.result[0][0]')
+          if [ -n "$host_id" ]; then
+            api "{\"method\":\"web.connect\",\"params\":[\"$host_id\"],\"id\":99}" > /dev/null
+          fi
+        }
+
+        # Wait for Deluge web to be ready
+        for i in $(seq 1 30); do
+          if curl -sf http://localhost:${toString cfg.deluge.webPort} > /dev/null 2>&1; then break; fi
+          sleep 2
+        done
+
+        login
+        connect
+
+        STATUS=$(api '{"method":"core.get_torrents_status","params":[{},["name","state","ratio","stop_at_ratio","remove_at_ratio","stop_ratio"]],"id":2}')
+
+        # 1. Fix any torrent missing the per-torrent flags
+        HASHES_TO_FIX=$(echo "$STATUS" | jq -r \
+          '.result | to_entries[]
+           | select(.value.stop_at_ratio == false or .value.remove_at_ratio == false)
+           | .key')
+
+        if [ -n "$HASHES_TO_FIX" ]; then
+          COUNT=$(echo "$HASHES_TO_FIX" | wc -l)
+          echo "Setting stop_at_ratio+remove_at_ratio=true on $COUNT torrents..."
+          HASH_ARRAY=$(echo "$HASHES_TO_FIX" | jq -R . | jq -sc .)
+          api "{\"method\":\"core.set_torrent_options\",\"params\":[$HASH_ARRAY,{\"stop_at_ratio\":true,\"remove_at_ratio\":true,\"stop_ratio\":${cfg.deluge.seedRatioLimit}}],\"id\":3}" > /dev/null
+          echo "Done."
+        else
+          echo "All torrents already have correct per-torrent ratio flags."
+        fi
+
+        # 2. Explicitly remove torrents already at or above the limit
+        #    (Deluge may not retroactively trigger remove_at_ratio on existing ones)
+        HASHES_TO_REMOVE=$(echo "$STATUS" | jq -r \
+          --argjson limit ${cfg.deluge.seedRatioLimit} \
+          '.result | to_entries[]
+           | select(.value.ratio >= $limit)
+           | .key')
+
+        for HASH in $HASHES_TO_REMOVE; do
+          NAME=$(echo "$STATUS" | jq -r --arg h "$HASH" '.result[$h].name')
+          RATIO=$(echo "$STATUS" | jq -r --arg h "$HASH" '.result[$h].ratio')
+          echo "Removing $NAME (ratio $RATIO >= ${cfg.deluge.seedRatioLimit})"
+          api "{\"method\":\"core.remove_torrent\",\"params\":[\"$HASH\",true],\"id\":4}" | \
+            jq -r '"  result: \(.result)"' || echo "  Warning: failed to remove $HASH"
+        done
+      '';
+    };
+
+    systemd.timers.privatarr-ratio-enforcer = mkIf cfg.deluge.enable {
+      description = "Periodic per-torrent ratio enforcement for privatarr";
+      wantedBy = [ "timers.target" ];
+      timerConfig = {
+        OnBootSec = "3min";
+        OnUnitActiveSec = "15min";
       };
     };
 
@@ -1491,7 +1901,7 @@ EOF
         ]) ++
         (lib.optionals cfg.sonarr.enable [ cfg.sonarr.port ]) ++
         (lib.optionals cfg.radarr.enable [ cfg.radarr.port ]) ++
-        (lib.optionals cfg.overseerr.enable [ cfg.overseerr.port ]);
+        (lib.optionals cfg.seerr.enable [ cfg.seerr.port ]);
     };
     
     # Create directories
@@ -1507,8 +1917,8 @@ EOF
         "d ${cfg.radarr.dataDir} 0755 radarr radarr -"
         "d ${cfg.radarr.moviesDir} 0755 radarr radarr -"
       ]) ++
-      (lib.optionals cfg.overseerr.enable [
-        "d ${cfg.overseerr.dataDir} 0755 overseerr overseerr -"
+      (lib.optionals cfg.seerr.enable [
+        "d ${cfg.seerr.dataDir} 0755 seerr seerr -"
       ]);
   };
 }

@@ -14,12 +14,12 @@
     defaultSopsFile = ../../secrets/mm.yaml;
     age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
     secrets = {
-      immich_backup_key_id = {};
-      immich_backup_application_key = {};
-      immich_protondrive_username = {};
-      immich_protondrive_password = {};
-      immich_protondrive_mailbox_password = {};
-      immich_protondrive_otp_secret_key = {};
+      immich_backup_key_id             = { owner = "immich"; };
+      immich_backup_application_key    = { owner = "immich"; };
+      immich_protondrive_username      = { owner = "immich"; };
+      immich_protondrive_password      = { owner = "immich"; };
+      immich_protondrive_mailbox_password = { owner = "immich"; };
+      immich_protondrive_otp_secret_key   = { owner = "immich"; };
       rathole_default_token = {};
       grafana_cloud_password = {};
     };
@@ -214,7 +214,7 @@
     plex = {
       enable = true;
       user = "jsh";
-      package = latest.plex;
+      package = latest2.plex;
     };
     tailscale.enable = true;
     immich = {
