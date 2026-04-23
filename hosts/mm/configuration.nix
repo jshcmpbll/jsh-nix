@@ -214,7 +214,7 @@
     plex = {
       enable = true;
       user = "jsh";
-      package = latest2.plex;
+      package = latest3.plex;
     };
     tailscale.enable = true;
     immich = {
