@@ -22,7 +22,13 @@
       immich_protondrive_otp_secret_key   = { owner = "immich"; };
       rathole_default_token = {};
       grafana_cloud_password = {};
+      minio_access_key = {};
+      minio_secret_key = {};
     };
+    templates."minio-root-creds.env".content = ''
+      MINIO_ROOT_USER=${config.sops.placeholder.minio_access_key}
+      MINIO_ROOT_PASSWORD=${config.sops.placeholder.minio_secret_key}
+    '';
     templates."rathole-client-creds.toml".content = ''
       [client]
       default_token = "${config.sops.placeholder.rathole_default_token}"
@@ -270,6 +276,7 @@
       enable = true;
       region = "us-west-dineral";
       dataDir = ["/var/lib/minio/data"];
+      rootCredentialsFile = config.sops.templates."minio-root-creds.env".path;
     };
     ollama = {
       enable = true;
