@@ -1,4 +1,4 @@
-{ lib, config, pkgs, latest, latest2, scan, stdenv,  ... }:
+{ lib, config, pkgs, latest, latest2, latest3, scan, stdenv,  ... }:
 let
   myFirefox = pkgs.wrapFirefox
     (latest.pkgs.firefox-unwrapped.override (old: {
@@ -290,7 +290,7 @@ in
     aria2
     pdftk
     kdePackages.kcalc
-    latest.beeper
+    latest3.beeper
     freetube
     nodejs
     sipcalc
@@ -304,7 +304,7 @@ in
     samba4Full
     asciinema
     bruno 
-    latest.kiro
+    latest3.kiro
     (latest2.vscode-with-extensions.override {
       vscodeExtensions = with latest2.vscode-extensions; [
         dbaeumer.vscode-eslint
@@ -320,6 +320,7 @@ in
     ghostty
     latest.claude-code
     simplescreenrecorder
+    python3
     #LPA
   ];
 }
