@@ -1,4 +1,4 @@
-{ lib, config, pkgs, ... }:
+{ lib, config, pkgs, latest3, ... }:
 
 {
   imports =
@@ -46,7 +46,11 @@
       moviesDir = "/mnt/mm-movies";
     };
     prowlarr.enable = true;
-    overseerr.enable = false;
+    seerr = {
+      enable = true;
+      package = latest3.seerr;
+      adminPasswordHash = "$2b$12$g54tmn6KkhbbwQ7R8rcc1OH6/vCh549J2Blavh/ucO3ULT34omeBq";
+    };
   };
 
   boot.loader = {
