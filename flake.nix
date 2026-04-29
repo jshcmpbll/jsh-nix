@@ -3,15 +3,21 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/master";
     nixpkgs-unstable2.url = "github:nixos/nixpkgs/master";
+    nixpkgs-unstable3.url = "github:nixos/nixpkgs/master";
     nixos-hardware.url = "github:nixos/nixos-hardware";
     nixpkgs-scan.url = "github:nixos/nixpkgs/bf3c55095633ed6d504b10e3612e30a9a72fcb6e";
     disko.url = "github:nix-community/disko";
     disko.inputs.nixpkgs.follows = "nixpkgs";
     sops-nix.url = "github:Mic92/sops-nix";
     sops-nix.inputs.nixpkgs.follows = "nixpkgs";
+    hermes-agent.url = "github:NousResearch/hermes-agent";
+    kiro-gateway.url = "github:jwadow/kiro-gateway";
+    kiro-gateway.flake = false;
+    firecrawl.url = "github:mendableai/firecrawl";
+    firecrawl.flake = false;
   };
 
-  outputs = inputs @ { self, disko, nixpkgs, nixos-hardware, nixpkgs-unstable, nixpkgs-unstable2, nixpkgs-scan, sops-nix }:
+  outputs = inputs @ { self, disko, nixpkgs, nixos-hardware, nixpkgs-unstable, nixpkgs-unstable2, nixpkgs-unstable3, nixpkgs-scan, sops-nix, hermes-agent, kiro-gateway, firecrawl }:
     let
       system = "x86_64-linux";
       pkgs = import nixpkgs { inherit system; };
@@ -31,9 +37,18 @@
             allowBroken = true;
           };
         };
+        latest3 = import nixpkgs-unstable3 {
+          system = "x86_64-linux";
+          config = {
+            allowUnfree = true;
+            allowBroken = true;
+          };
+        };
         scan = import nixpkgs-scan {
           system = "x86_64-linux";
         };
+        kiro-gateway-src = inputs.kiro-gateway;
+        firecrawl-src = inputs.firecrawl;
       };
 
       mkDisk = { name, device }: {
@@ -70,6 +85,8 @@
         jsh-server = nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
           modules = [
+            hermes-agent.nixosModules.default
+            inputs.self.nixosModules.default
             ./hosts/server/configuration.nix
           ];
           specialArgs = sA;

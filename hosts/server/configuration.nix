@@ -1,4 +1,4 @@
-{ config, lib, pkgs, modulePaths, options, latest, ... }:
+{ config, lib, pkgs, modulePaths, options, latest2, kiro-gateway-src, ... }:
 {
   imports =
     let
@@ -51,6 +51,9 @@
 
     hostName = "jsh-server";
     hostId = "a6bbe9e1";
+    hosts = {
+      #"127.0.0.1" = [ "" ];
+    };
     #useDHCP = true;
     useNetworkd = true;
     nameservers = [ "1.1.1.1" "1.0.0.1" ];
@@ -94,6 +97,31 @@
       #deviceSection = ''
       #  Option "VirtualHeads" "1"
       #'';
+    };
+
+    ai-stack = {
+      enable = true;
+      ollama = {
+        acceleration = "cuda";
+        package = latest2.ollama-cuda.overrideAttrs (finalAttrs: _: {
+          version = "0.15.5";
+          src = pkgs.fetchFromGitHub {
+            owner = "ollama";
+            repo = "ollama";
+            tag = "v${finalAttrs.version}";
+            hash = "sha256-VJrAUHX+BVQXsH34BDI4YqVXEqD14ERnKhSpMByAdrQ=";
+          };
+          vendorHash = "sha256-r7bSHOYAB5f3fRz7lKLejx6thPx0dR4UXoXu0XD7kVM=";
+        });
+      };
+      hermes = {
+        extraProviders.kiro = {
+          baseUrl = "http://127.0.0.1:${toString config.services.kiro-gateway.port}/v1";
+          model = "claude-sonnet-4.6";
+        };
+        environmentFiles = [ "/persist/hermes-secrets.env" ];
+      };
+      openWebUI.openFirewall = true;
     };
 
     acpid = {
@@ -203,37 +231,23 @@
         };
       };
     };
-    plex = {
+  };
+
+  virtualisation.oci-containers.backend = "docker";
+
+  services.kiro-gateway = {
+    enable = true;
+    src = kiro-gateway-src;
+  };
+
+  services.cron = {
       enable = true;
-      user = "jsh";
-    };
-    ollama = {
-      enable = true;
-      acceleration = "cuda";
-      package = latest.ollama;
-    };
-    open-webui = {
-      enable = true;
-      package = pkgs.open-webui;
-      environment = {
-        ANONYMIZED_TELEMETRY = "False";
-        DO_NOT_TRACK = "True";
-        SCARF_NO_ANALYTICS = "True";
-        WEBUI_AUTH = "False";
-        OLLAMA_API_BASE_URL = "http://127.0.0.1:11434";
-      };
-      host = "0.0.0.0";
-      openFirewall = true;
-    };
-    cron = {
-      enable = true;
+
       systemCronJobs = [
         # Add "export NIX_PATH='nixpkgs=flake:nixpkgs:/nix/var/nix/profiles/per-user/root/channels" for access to allow access to nix
         #"cron-date     user     script | 2>&1 tee logfile_$EPOCHSECONDS.log"
       ];
     };
-  };
-  systemd.services.plex.serviceConfig.ProtectHome = lib.mkForce false;
   systemd.services.wakeonlan = {
     description = "Reenable wake on lan every boot";
     after = [ "network.target" ];
@@ -261,8 +275,10 @@
       enable = false;
       support32Bit = true;
       package = pkgs.pulseaudioFull;
-      #extraModules = [ pkgs.
-      extraConfig = "load-module module-switch-on-connect auth-anonymous=1";
+      extraConfig = ''
+        load-module module-switch-on-connect auth-anonymous=1
+        load-module module-raop-discover
+      '';
     };
   };
 
