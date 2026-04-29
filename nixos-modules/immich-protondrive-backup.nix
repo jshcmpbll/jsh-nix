@@ -112,7 +112,7 @@ in
     
     extraRcloneArgs = mkOption {
       type = str;
-      default = "--progress --verbose";
+      default = "--verbose";
       description = "Additional arguments to pass to rclone sync";
       example = "--progress --verbose --transfers 4";
     };
@@ -121,6 +121,10 @@ in
   config = mkIf cfg.enable {
     # Validate required options
     assertions = [
+      {
+        assertion = cfg.username != "" || cfg.usernameFile != null;
+        message = "immich-protondrive-backup: set username or usernameFile";
+      }
       {
         assertion = cfg.password != "" || cfg.passwordFile != null;
         message = "immich-protondrive-backup: set password or passwordFile";
@@ -135,9 +139,6 @@ in
       }
     ];
     
-    # Ensure rclone is available
-    environment.systemPackages = [ latest2.pkgs.rclone ];
-
     # Create rclone config directory and file
     systemd.tmpfiles.rules = [
       "d /var/cache/immich-protondrive-backup 0700 ${cfg.user} ${cfg.user} -"
@@ -223,7 +224,7 @@ in
       };
       
       script = ''
-        ${latest2.pkgs.rclone}/bin/rclone sync \
+        ${latest2.pkgs.rclone}/bin/rclone copy \
           ${cfg.syncLocation} \
           ${cfg.remoteName}:${cfg.syncDestination} \
           ${cfg.extraRcloneArgs}
